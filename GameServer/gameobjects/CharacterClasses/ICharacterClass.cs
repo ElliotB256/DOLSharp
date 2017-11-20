@@ -135,8 +135,6 @@ namespace DOL.GS
 		void CommandNpcRelease();
 		void OnPetReleased();
 		bool StartAttack(GameObject attackTarget);
-		ShadeEffect CreateShadeEffect();
-		void Shade(bool state);
 		bool RemoveFromWorld();
 		void Die(GameObject killer);
 		void Notify(DOLEvent e, object sender, EventArgs args);
