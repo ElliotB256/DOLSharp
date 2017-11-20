@@ -352,7 +352,6 @@
     <Compile Include="database\converters\Version005.cs" />
     <Compile Include="database\updaters\DatabaseUpdateAttribute.cs" />
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
-    <Compile Include="effects\DummyEffect.cs" />
     <Compile Include="events\gameobjects\ExecuteCommandEventArgs.cs" />
     <Compile Include="events\gameobjects\InterruptedEventArgs.cs" />
     <Compile Include="events\gameobjects\NextCraftingTierReachedEventArgs.cs" />
@@ -381,7 +380,7 @@
     <Compile Include="gameutils\GamePlayerUtils.cs" />
     <Compile Include="gameutils\LootGeneratorAtlanteanGlass.cs" />
     <Compile Include="gameutils\LootGeneratorAurulite.cs" />
-	<Compile Include="gameutils\LootGeneratorChest.cs" />
+    <Compile Include="gameutils\LootGeneratorChest.cs" />
     <Compile Include="gameutils\LootGeneratorDragonscales.cs" />
     <Compile Include="gameutils\LosCheckMgr.cs" />
     <Compile Include="gameutils\MarketSearch.cs" />
@@ -462,15 +461,6 @@
     <Compile Include="craft\WoodWorking.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="effects\BerserkEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\BodyguardEffect.cs" />
-    <Compile Include="effects\CamouflageEffect.cs" />
-    <Compile Include="effects\EngageEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\Necromancer\FacilitatePainworkingEffect.cs" />
     <Compile Include="effects\GameEffectList.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -483,54 +473,17 @@
     <Compile Include="effects\GameSpellEffect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="effects\GuardEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\GuildBannerEffect.cs" />
     <Compile Include="effects\IConcentrationEffect.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="effects\IGameEffect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="effects\InterceptEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\Necromancer\MezzRootImmunityEffect.cs" />
-    <Compile Include="effects\Necromancer\NecromancerShadeEffect.cs" />
-    <Compile Include="effects\Necromancer\TauntEffect.cs" />
-    <Compile Include="effects\ProtectEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="effects\PulsingSpellEffect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="effects\QuickCastEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\RapidFireEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\ShadeEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\Spells\FocusShellEffect.cs" />
-    <Compile Include="effects\SprintEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\StagEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="effects\StaticEffect.cs" />
-    <Compile Include="effects\StealthEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="effects\SureShotEffect.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="effects\TimedEffect.cs" />
-    <Compile Include="effects\TripleWieldEffect.cs" />
-    <Compile Include="effects\UniPortalEffect.cs" />
     <Compile Include="events\database\AccountEventArgs.cs">
       <SubType>Code</SubType>
     </Compile>
