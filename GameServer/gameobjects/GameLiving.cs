@@ -788,51 +788,6 @@ namespace DOL.GS
 		{
 			get { return (m_attackAction != null && m_attackAction.IsAlive) ? m_attackAction.TimeUntilElapsed : 0; }
 		}
-		/// <summary>
-		/// Decides which style living will use in this moment
-		/// </summary>
-		/// <returns>Style to use or null if none</returns>
-		protected virtual Style GetStyleToUse()
-		{
-			InventoryItem weapon;
-			if (NextCombatStyle == null) return null;
-			if (NextCombatStyle.WeaponTypeRequirement == (int)eObjectType.Shield)
-				weapon = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			else weapon = AttackWeapon;
-
-			if (StyleProcessor.CanUseStyle(this, NextCombatStyle, weapon))
-				return NextCombatStyle;
-
-			if (NextCombatBackupStyle == null) return NextCombatStyle;
-
-			return NextCombatBackupStyle;
-		}
-
-		/// <summary>
-		/// Holds the Style that this living should use next
-		/// </summary>
-		protected Style m_nextCombatStyle;
-		/// <summary>
-		/// Holds the backup style for the style that the living should use next
-		/// </summary>
-		protected Style m_nextCombatBackupStyle;
-		
-		/// <summary>
-		/// Gets or Sets the next combat style to use
-		/// </summary>
-		public Style NextCombatStyle
-		{
-			get { return m_nextCombatStyle; }
-			set { m_nextCombatStyle = value; }
-		}
-		/// <summary>
-		/// Gets or Sets the next combat backup style to use
-		/// </summary>
-		public Style NextCombatBackupStyle
-		{
-			get { return m_nextCombatBackupStyle; }
-			set { m_nextCombatBackupStyle = value; }
-		}
 
 		/// <summary>
 		/// Gets the current attackspeed of this living in milliseconds
@@ -1807,12 +1762,6 @@ namespace DOL.GS
 				}
 			}
 
-			//Add styled damage if style hits and remove endurance if missed
-			if (StyleProcessor.ExecuteStyle(this, ad, weapon))
-			{
-				ad.AttackResult = GameLiving.eAttackResult.HitStyle;
-			}
-
 			if ((ad.AttackResult == eAttackResult.HitUnstyled || ad.AttackResult == eAttackResult.HitStyle))
 			{
 				ad.CriticalDamage = GetMeleeCriticalDamage(ad, weapon);
@@ -2264,13 +2213,6 @@ namespace DOL.GS
 					return;
 				}
 
-				// Don't attack if gameliving is engaging
-				if (owner.IsEngaging)
-				{
-					Interval = owner.AttackSpeed(owner.AttackWeapon); // while gameliving is engageing it doesn't attack.
-					return;
-				}
-
 				// Store all datas which must not change during the attack
 				// double effectiveness = 1.0;
 				double effectiveness = owner.Effectiveness;
@@ -2369,11 +2311,6 @@ namespace DOL.GS
 						return; //Don't start the attack if the last one fumbled
 					}
 
-					combatStyle = owner.GetStyleToUse();
-					if (combatStyle != null && combatStyle.WeaponTypeRequirement == (int)eObjectType.Shield)
-					{
-						attackWeapon = leftWeapon;
-					}
 					interruptDuration = owner.AttackSpeed(attackWeapon);
 
 					// Damage is doubled on sitting players

@@ -5229,40 +5229,6 @@ namespace DOL.GS
 		public const int CRITICAL_SHOT_ENDURANCE = 10;
 
 		/// <summary>
-		/// Holds the cancel style flag
-		/// </summary>
-		protected bool m_cancelStyle;
-
-		/// <summary>
-		/// Gets or Sets the cancel style flag
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public virtual bool CancelStyle
-		{
-			get { return DBCharacter != null ? DBCharacter.CancelStyle : false; }
-			set { if (DBCharacter != null) DBCharacter.CancelStyle = value; }
-		}
-		/// <summary>
-		/// Decides which style living will use in this moment
-		/// </summary>
-		/// <returns>Style to use or null if none</returns>
-		protected override Style GetStyleToUse()
-		{
-			InventoryItem weapon;
-			if (NextCombatStyle == null) return null;
-			if (NextCombatStyle.WeaponTypeRequirement == (int)eObjectType.Shield)
-				weapon = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			else weapon = AttackWeapon;
-
-			if (StyleProcessor.CanUseStyle(this, NextCombatStyle, weapon))
-				return NextCombatStyle;
-
-			if (NextCombatBackupStyle == null) return NextCombatStyle;
-
-			return NextCombatBackupStyle;
-		}
-
-		/// <summary>
 		/// Gets/Sets safety flag
 		/// (delegate to PlayerCharacter)
 		/// </summary>
@@ -5391,11 +5357,7 @@ namespace DOL.GS
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CannotWithoutWeapon"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
 				return;
 			}
-			if (AttackWeapon.Object_Type == (int)eObjectType.Instrument)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CannotMelee"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
+
 
 				if (attackTarget == null)
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatNoTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
@@ -5412,39 +5374,9 @@ namespace DOL.GS
 
 			base.StartAttack(attackTarget);
 
-			if (IsCasting && !m_runningSpellHandler.Spell.Uninterruptible)
-			{
-				StopCurrentSpellcast();
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.SpellCancelled"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-			}
-
-			//Clear styles
-			NextCombatStyle = null;
-			NextCombatBackupStyle = null;
-
 			if (ActiveWeaponSlot != eActiveWeaponSlot.Distance)
 			{
 				Out.SendAttackMode(AttackState);
-			}
-			else
-			{
-				TempProperties.setProperty(RANGE_ATTACK_HOLD_START, 0L);
-
-				string typeMsg = "shot";
-				if (AttackWeapon.Object_Type == (int)eObjectType.Thrown)
-					typeMsg = "throw";
-
-				string targetMsg = "";
-				if (attackTarget != null)
-				{
-					if (this.IsWithinRadius(attackTarget, AttackRange))
-						targetMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.TargetInRange");
-					else
-						targetMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.TargetOutOfRange");
-				}
-
-				int speed = AttackSpeed(AttackWeapon) / 100;
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.YouPrepare", typeMsg, speed / 10, speed % 10, targetMsg), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
 			}
 		}
 
@@ -5454,8 +5386,6 @@ namespace DOL.GS
 		/// <param name="forced">Is this a forced stop or is the client suggesting we stop?</param>
 		public override void StopAttack(bool forced)
 		{
-			NextCombatStyle = null;
-			NextCombatBackupStyle = null;
 			base.StopAttack(forced);
 			if (IsAlive)
 			{
@@ -5888,10 +5818,6 @@ namespace DOL.GS
 
 			AttackData ad = base.MakeAttack(target, weapon, style, effectiveness * Effectiveness, interruptDuration, dualWield);
 
-			//Clear the styles for the next round!
-			NextCombatStyle = null;
-			NextCombatBackupStyle = null;
-
 			switch (ad.AttackResult)
 			{
 				case eAttackResult.Blocked:
@@ -5911,16 +5837,6 @@ namespace DOL.GS
 					break;
 			}
 			return ad;
-		}
-
-
-		/// <summary>
-		/// Try and execute a weapon style
-		/// </summary>
-		/// <param name="style"></param>
-		public virtual void ExecuteWeaponStyle(Style style)
-		{
-			StyleProcessor.TryToUseStyle(this, style);
 		}
 
 		/// <summary>

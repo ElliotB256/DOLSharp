@@ -336,22 +336,6 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Pick a random style for now.
-		/// </summary>
-		/// <returns></returns>
-		protected override Style GetStyleToUse()
-		{
-			if (Styles != null && Styles.Count > 0 && Util.Chance(Properties.GAMENPC_CHANCES_TO_STYLE + Styles.Count))
-			{
-				Style style = (Style)Styles[Util.Random(Styles.Count - 1)];
-				if (StyleProcessor.CanUseStyle(this, style, AttackWeapon))
-					return style;
-			}
-
-			return base.GetStyleToUse();
-		}
-
-		/// <summary>
 		/// Get weapon skill for the pet (for formula see Spydor's Web,
 		/// http://daoc.nisrv.com/modules.php?name=Weapon_Skill_Calc).
 		/// </summary>

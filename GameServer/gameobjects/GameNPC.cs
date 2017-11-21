@@ -3438,54 +3438,6 @@ namespace DOL.GS
                 }// switch (s.OpeningRequirementType)
             }// foreach
         }// SortStyles()
-
-		/// <summary>
-		/// Picks a style, prioritizing reactives and chains over positionals and anytimes
-		/// </summary>
-		/// <returns>Selected style</returns>
-		protected override Style GetStyleToUse()
-		{
-            if (m_styles == null || m_styles.Count < 1)
-                return null;
-
-            bool bUseStyles = Util.Chance(Properties.GAMENPC_CHANCES_TO_STYLE);
-
-            // Use defensive styles
-            if (bUseStyles)
-                foreach (Style s in m_stylesDefensive)
-                {
-                    if (StyleProcessor.CanUseStyle(this, s, AttackWeapon))
-                        return s;
-                }
-
-            // Use chain styles whenever possible
-            // Skips the bUseStyles check as chains will be almost impossible otherwise
-            foreach (Style s in m_stylesChain)
-            {
-                if (StyleProcessor.CanUseStyle(this, s, AttackWeapon))
-                    return s;
-            }
-
-            if (bUseStyles && m_stylesAnyPos.Count > 0 )
-            {
-                Style s;
-
-                for (int i = 0; i < 3; i++) // Give up after three tries
-                {
-                    s = (Style)m_stylesAnyPos[Util.Random(m_stylesAnyPos.Count - 1)];
-
-                    if (s.OpeningRequirementType == Style.eOpening.Offensive)
-                        return s;  // Anytime style, return it
-                    else
-                        if (StyleProcessor.CanUseStyle(this, s, AttackWeapon))
-                            return s; // We can use this positional, return it
-                        // else pick another style
-                }// for
-            }
-
-            // return base.GetStyleToUse(); // Wastes cycles if NPC doesn't have styles anyway.
-            return null;
-        } // GetStyleToUse()
 		
 	/// <summary>
 	/// Adds messages to ArrayList which are sent when object is targeted
