@@ -216,11 +216,6 @@ namespace DOL.GS.PacketHandler
 			m_gameClient.GameObjectUpdateArray[new Tuple<ushort, ushort>(playerToCreate.CurrentRegionID, (ushort)playerToCreate.ObjectID)] = GameTimer.GetTickCount();
 			
 			SendObjectGuildID(playerToCreate, playerToCreate.Guild); //used for nearest friendly/enemy object buttons and name colors on PvP server
-
-			if (playerToCreate.GuildBanner != null)
-			{
-				SendRvRGuildBanner(playerToCreate, true);
-			}
 		}
 
 		public override void CheckLengthHybridSkillsPacket(ref GSTCPPacketOut pak, ref int maxSkills, ref int first)

@@ -83,25 +83,6 @@ namespace DOL.GS.Commands
 
             switch (args[1])
             {
-                #region articredit
-
-                case "articredit":
-                    {
-                        if (args.Length != 3)
-                        {
-                            DisplaySyntax(client);
-                            return;
-                        }
-
-                        var player = client.Player.TargetObject as GamePlayer;
-                        if (player == null)
-                            player = client.Player;
-
-                        ArtifactMgr.GrantArtifactCredit(player, args[2]);
-                        break;
-                    }
-
-                #endregion
 
                 #region name
 
@@ -355,155 +336,6 @@ namespace DOL.GS.Commands
 					break;
 
                 #endregion Clear / Respec Champion
-
-				#region Master Levels
-
-				case "startml":
-
-					try
-					{
-						var player = client.Player.TargetObject as GamePlayer;
-						if (player == null)
-							player = client.Player;
-
-						if (player.MLGranted == false)
-						{
-							player.MLGranted = true;
-							player.SaveIntoDatabase();
-							client.Out.SendMessage(player.Name + " is now ready to start Master Level training!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has started your Master Level training!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						}
-						else
-						{
-							client.Out.SendMessage(player.Name + " has already started Master Level training!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						}
-					}
-					catch (Exception)
-					{
-						DisplaySyntax(client);
-						return;
-					}
-					break;
-
-				case "setml":
-
-					try
-					{
-						var player = client.Player.TargetObject as GamePlayer;
-						if (player == null)
-							player = client.Player;
-
-						byte level = Convert.ToByte(args[2]);
-
-						if (level > GamePlayer.ML_MAX_LEVEL) level = GamePlayer.ML_MAX_LEVEL;
-
-						player.MLLevel = level;
-						player.MLExperience = 0;
-						player.SaveIntoDatabase();
-						player.Out.SendUpdatePlayer();
-						player.Out.SendMasterLevelWindow((byte)player.MLLevel);
-						client.Out.SendMessage(player.Name + " Master Level is set to " + level + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has set your Master Level to " + level + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-					}
-					catch (Exception)
-					{
-						DisplaySyntax(client);
-						return;
-					}
-					break;
-
-				case "setmlline":
-
-					try
-					{
-						var player = client.Player.TargetObject as GamePlayer;
-						if (player == null)
-							player = client.Player;
-
-						byte line = Convert.ToByte(args[2]);
-
-						if (line > 1) line = 1;
-
-						player.MLLine = line;
-						player.SaveIntoDatabase();
-						player.RefreshSpecDependantSkills(true);
-						player.Out.SendUpdatePlayerSkills();
-						player.Out.SendUpdatePlayer();
-						player.Out.SendMasterLevelWindow((byte)player.MLLevel);
-						client.Out.SendMessage(player.Name + " Master Line is set to " + line + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has set your Master Line to " + line + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-					}
-					catch (Exception)
-					{
-						DisplaySyntax(client);
-						return;
-					}
-					break;
-
-				case "setmlstep":
-
-					try
-					{
-						var player = client.Player.TargetObject as GamePlayer;
-						if (player == null)
-							player = client.Player;
-
-						if (player.MLLevel == GamePlayer.ML_MAX_LEVEL)
-						{
-							client.Out.SendMessage(player.Name + " has already finished all Master Levels!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							return;
-						}
-
-						byte level = Convert.ToByte(args[2]);
-						if (level > GamePlayer.ML_MAX_LEVEL)
-						{
-							client.Out.SendMessage("Valid levels are 0 - " + GamePlayer.ML_MAX_LEVEL + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							return;
-						}
-
-						// Possible steps per level varies, max appears to be 11
-						byte step = Convert.ToByte(args[3]);
-
-						bool setFinished = true;
-						if (args.Length > 4)
-						{
-							setFinished = Convert.ToBoolean(args[4]);
-						}
-
-						if (setFinished && player.HasFinishedMLStep(player.MLLevel + 1, step))
-						{
-							client.Out.SendMessage(player.Name + " has already finished step " + step + " for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						}
-						else if (setFinished == false && player.HasFinishedMLStep(player.MLLevel + 1, step) == false)
-						{
-							client.Out.SendMessage(player.Name + " has not yet finished step " + step + " for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						}
-						else
-						{
-							player.SetFinishedMLStep(player.MLLevel + 1, step, setFinished);
-							if (setFinished)
-							{
-								client.Out.SendMessage(player.Name + " has now finished step " + step + " for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-								player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has set step " + step + " completed for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							}
-							else
-							{
-								client.Out.SendMessage(player.Name + " has no longer finished step " + step + " for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-								player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has set step " + step + " as unfinished for Master Level " + (player.MLLevel + 1) + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							}
-							player.SaveIntoDatabase();
-							player.Out.SendMasterLevelWindow(level);
-							player.Out.SendUpdatePlayer();
-						}
-					}
-					catch (Exception)
-					{
-						DisplaySyntax(client);
-						return;
-					}
-					break;
-
-				#endregion Master Levels
 
                 #region realm
 
@@ -860,23 +692,8 @@ namespace DOL.GS.Commands
 
 							long amount = long.Parse(args[2]);
 
-							player.MLExperience += amount;
-							client.Out.SendMessage("You gave " + player.Name + " " + amount + " ML experience succesfully!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-							player.Out.SendMessage(client.Player.Name + "(PrivLevel: " + client.Account.PrivLevel + ") has given you " + amount + " ML experience!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-
-							if (player.MLExperience > player.GetMLExperienceForLevel(player.MLLevel + 1))
-							{
-								player.MLExperience = player.GetMLExperienceForLevel(player.MLLevel + 1);
-							}
-
-							if (player.MLExperience < 0)
-							{
-								player.MLExperience = 0;
-							}
-
 							player.SaveIntoDatabase();
 							player.Out.SendUpdatePlayer();
-							player.Out.SendMasterLevelWindow((byte)player.MLLevel);
 						}
 						catch (Exception)
 						{
@@ -2375,14 +2192,6 @@ namespace DOL.GS.Commands
 			else
 			{
 				text.Add("  - Champion :  Not Started");
-			}
-			if (player.MLGranted)
-			{
-				text.Add("  - Master Levels :  ML " + player.MLLevel + ", " + player.MLExperience + " mlxp , MLLine " + player.MLLine);
-			}
-			else
-			{
-				text.Add("  - Master Levels :  Not Started");
 			}
 			text.Add("  - Craftingskill : " + player.CraftingPrimarySkill + "");
 			text.Add("  - Money : " + Money.GetString(player.GetCurrentMoney()) + "");

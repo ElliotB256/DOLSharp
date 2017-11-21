@@ -110,12 +110,6 @@ namespace DOL.GS
 							// GameInventoryItem and utilizes the new Delve system.  No need to set ClassType for all artifacts when
 							// this code works fine as is.
 
-							if (ArtifactMgr.IsArtifact(item))
-							{
-								m_items.Add(itemSlot, new InventoryArtifact(item));
-							}
-							else
-							{
 								GameInventoryItem playerItem = GameInventoryItem.Create(item);
 
 								if (playerItem.CheckValid(m_player))
@@ -132,7 +126,6 @@ namespace DOL.GS
 									invalidItem.AllowAdd = false;
 									m_items.Add(itemSlot, invalidItem);
 								}
-							}
 
 							if (Log.IsWarnEnabled)
 							{

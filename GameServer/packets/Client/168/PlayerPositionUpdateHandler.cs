@@ -717,16 +717,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 				if ((client.Player.InHouse || player.InHouse) && player.CurrentHouse != client.Player.CurrentHouse)
 					continue;
 
-				if (client.Player.MinotaurRelic != null)
-				{
-					MinotaurRelic relic = client.Player.MinotaurRelic;
-					if (!relic.Playerlist.Contains(player) && player != client.Player)
-					{
-						relic.Playerlist.Add(player);
-						player.Out.SendMinotaurRelicWindow(client.Player, client.Player.MinotaurRelic.Effect, true);
-					}
-				}
-
 				if (!client.Player.IsStealthed || player.CanDetect(client.Player))
 				{
 					// Update Player Cache

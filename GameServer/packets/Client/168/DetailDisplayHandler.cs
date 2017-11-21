@@ -163,26 +163,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 						#region Old Delve
 
-						if (invItem is InventoryArtifact)
-						{
-							List<String> delve = new List<String>();
-							(invItem as InventoryArtifact).Delve(delve, client.Player);
-
-							foreach (string line in delve)
-								objectInfo.Add(line);
-
-							break;
-						}
-
-						//**********************************
-						//show crafter name
-						//**********************************
-						if (invItem.IsCrafted)
-						{
-							objectInfo.Add(LanguageMgr.GetTranslation(client.Account.Language, "DetailDisplayHandler.HandlePacket.CrafterName", invItem.Creator));
-							objectInfo.Add(" ");
-						}
-						else if (invItem.Description != null && invItem.Description != "")
+                        if (invItem.Description != null && invItem.Description != "")
 						{
 							objectInfo.Add(invItem.Description);
 							objectInfo.Add(" ");

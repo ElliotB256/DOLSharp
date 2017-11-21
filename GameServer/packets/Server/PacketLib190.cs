@@ -186,32 +186,16 @@ namespace DOL.GS.PacketHandler
 				return;
 
 			// If required ML=0 then send current player ML data
-			byte mlToSend = (byte)(ml == 0 ? (m_gameClient.Player.MLLevel == 0 ? 1 : m_gameClient.Player.MLLevel) : ml);
-
-			if (mlToSend > GamePlayer.ML_MAX_LEVEL)
-				mlToSend = GamePlayer.ML_MAX_LEVEL;
+			byte mlToSend = (byte)(0);
 
 			double mlXPPercent = 0;
 			double mlStepPercent = 0;
-
-			if (m_gameClient.Player.MLLevel < 10)
-			{
-				mlXPPercent = 100.0 * (double)m_gameClient.Player.MLExperience / (double)m_gameClient.Player.GetMLExperienceForLevel((int)(m_gameClient.Player.MLLevel + 1));
-				if (m_gameClient.Player.GetStepCountForML((byte)(m_gameClient.Player.MLLevel + 1)) > 0)
-				{
-					mlStepPercent = 100.0 * (double)m_gameClient.Player.GetCountMLStepsCompleted((byte)(m_gameClient.Player.MLLevel + 1)) / (double)m_gameClient.Player.GetStepCountForML((byte)(m_gameClient.Player.MLLevel + 1));
-				}
-			}
-			else
-			{
-				mlXPPercent = 100.0; // ML10 has no MLXP, so always 100%
-			}
 
 			using (GSTCPPacketOut pak = new GSTCPPacketOut((byte)eServerPackets.MasterLevelWindow))
 			{
 				pak.WriteByte((byte)mlXPPercent); // MLXP (blue bar)
 				pak.WriteByte((byte)Math.Min(mlStepPercent, 100)); // Step percent (red bar)
-				pak.WriteByte((byte)(m_gameClient.Player.MLLevel + 1)); // ML level + 1
+				pak.WriteByte((byte)(1)); // ML level + 1
 				pak.WriteByte(0);
 				pak.WriteShort((ushort)0); // exp1 ? new in 1.90
 				pak.WriteShort((ushort)0); // exp2 ? new in 1.90
@@ -220,7 +204,7 @@ namespace DOL.GS.PacketHandler
 				// ML level completion is displayed client side for Step 11
 				for (int i = 1; i < 11; i++)
 				{
-					string description = m_gameClient.Player.GetMLStepDescription(mlToSend, i);
+					string description = "";
 					pak.WritePascalString(description);
 				}
 	

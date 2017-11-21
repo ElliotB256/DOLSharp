@@ -190,7 +190,6 @@
     <Compile Include="commands\gmcommands\keepguard.cs" />
     <Compile Include="commands\gmcommands\kick.cs" />
     <Compile Include="commands\gmcommands\merchant.cs" />
-    <Compile Include="commands\gmcommands\Minorelic.cs" />
     <Compile Include="commands\gmcommands\mob.cs" />
     <Compile Include="commands\gmcommands\morph.cs" />
     <Compile Include="commands\gmcommands\mountgm.cs" />
@@ -241,7 +240,6 @@
     <Compile Include="commands\playercommands\disband.cs" />
     <Compile Include="commands\playercommands\discard.cs" />
     <Compile Include="commands\playercommands\dismount.cs" />
-    <Compile Include="commands\playercommands\dropmr.cs" />
     <Compile Include="commands\playercommands\duel.cs" />
     <Compile Include="commands\playercommands\email.cs" />
     <Compile Include="commands\playercommands\emote.cs" />
@@ -345,7 +343,6 @@
     <Compile Include="gameobjects\CharacterClasses\CharacterClassAttribute.cs" />
     <Compile Include="gameobjects\CharacterClasses\ICharacterClass.cs" />
     <Compile Include="gameobjects\CharacterClasses\CharacterClassBase.cs" />
-    <Compile Include="gameobjects\CustomNPC\BuffMerchant.cs" />
     <Compile Include="gameobjects\GameInventoryObject.cs" />
     <Compile Include="gameobjects\GameMythirian.cs" />
     <Compile Include="gameobjects\GameNPChelper.cs" />
@@ -377,8 +374,6 @@
     <Compile Include="gameutils\Specializations\LiveCareerSpecialization.cs" />
     <Compile Include="gameutils\Specializations\LiveChampionsLineSpec.cs" />
     <Compile Include="gameutils\Specializations\LiveChampionsSpecialization.cs" />
-    <Compile Include="gameutils\Specializations\LiveMasterLevelsSpecialization.cs" />
-    <Compile Include="gameutils\Specializations\LiveRealmAbilitiesSpecialization.cs" />
     <Compile Include="gameutils\Specializations\LiveSpellHybridSpecialization.cs" />
     <Compile Include="gameutils\Specializations\LiveSpellLineSpecialization.cs" />
     <Compile Include="gameutils\Specializations\LiveWeaponSpecialization.cs" />
@@ -388,9 +383,7 @@
     <Compile Include="keeps\IKeepManager.cs" />
     <Compile Include="keeps\Relics\GameInventoryRelic.cs" />
     <Compile Include="gameobjects\CustomNPC\RoyalTreasuryClerk.cs" />
-    <Compile Include="gameobjects\GuildBannerItem.cs" />
     <Compile Include="gameobjects\GameVault.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\SimpleTeleporter.cs" />
     <Compile Include="gameobjects\GameTrainingDummy.cs" />
     <Compile Include="gameobjects\craft master\BasicCraftingMaster.cs" />
     <Compile Include="craft\ClothWorking.cs">
@@ -681,21 +674,12 @@
     <Compile Include="gameobjects\CustomNPC\NameRegistrar.cs" />
     <Compile Include="gameobjects\CustomNPC\Recharger.cs" />
     <Compile Include="gameobjects\CustomNPC\TaskMaster.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\AlbionSITeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\AlbionTeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\HiberniaSITeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\HiberniaTeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\MidgardSITeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\MidgardTeleporter.cs" />
-    <Compile Include="gameobjects\CustomNPC\Teleporters\ThroneRoomTeleporter.cs" />
     <Compile Include="gameobjects\CustomNPC\VaultKeeper.cs" />
     <Compile Include="gameobjects\GamePet.cs" />
     <Compile Include="gameobjects\GameTeleporter.cs" />
     <Compile Include="gameobjects\WorldInventoryItem.cs" />
     <Compile Include="gameutils\AppealMgr.cs" />
-    <Compile Include="gameutils\Atlantis\InventoryArtifact.cs" />
     <Compile Include="gameobjects\CustomNPC\GameBoatStableMaster.cs" />
-    <Compile Include="gameobjects\CustomNPC\GameKingThroneNpc.cs" />
     <Compile Include="gameobjects\GameBoat.cs" />
     <Compile Include="gameobjects\GameTaxiBoat.cs" />
     <Compile Include="gameobjects\CustomNPC\CraftNPC.cs">
@@ -780,7 +764,6 @@
     <Compile Include="gameutils\Alliance.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="gameutils\Atlantis\ArtifactMgr.cs" />
     <Compile Include="gameutils\AttackData.cs" />
     <Compile Include="gameutils\AuditMgr.cs" />
     <Compile Include="gameutils\BattleGroup.cs" />
@@ -797,10 +780,8 @@
     <Compile Include="gameobjects\GameInventoryItem.cs" />
     <Compile Include="gameutils\LootGeneratorMobTemplate.cs" />
     <Compile Include="gameutils\GameNPCInventory.cs" />
-    <Compile Include="gameutils\GuildBanner.cs" />
     <Compile Include="gameutils\GuildEvents.cs" />
     <Compile Include="gameutils\IPlayerStatistics.cs" />
-    <Compile Include="gameutils\LootGeneratorScroll.cs" />
     <Compile Include="gameutils\MailMgr.cs" />
     <Compile Include="gameutils\NewsMgr.cs" />
     <Compile Include="gameutils\PlayerStatistics.cs" />
@@ -850,10 +831,6 @@
     <Compile Include="managers\worldmanager\RegionWeather.cs" />
     <Compile Include="managers\worldmanager\WeatherManager.cs" />
     <Compile Include="managers\worldmanager\WorldManager.cs" />
-    <Compile Include="minotaurrelics\MinotaurRelic.cs" />
-    <Compile Include="minotaurrelics\MinotaurRelicManager.cs" />
-    <Compile Include="minotaurrelics\Protectors\ArrektosProtector.cs" />
-    <Compile Include="minotaurrelics\Protectors\BaseProtector.cs" />
     <Compile Include="packets\Client\168\BadNameCheckRequestHandler.cs" />
     <Compile Include="packets\Client\168\BuyHookPointHandler.cs" />
     <Compile Include="packets\Client\168\CharacterDeleteRequestHandler.cs" />
@@ -1004,7 +981,6 @@
     <Compile Include="packets\Utils\MiniDelveWriter.cs" />
     <Compile Include="playertitles\titles\level\ChampionTitle.cs" />
     <Compile Include="playertitles\titles\level\Level20Title.cs" />
-    <Compile Include="playertitles\titles\level\MasterlevelTitle.cs" />
     <Compile Include="playertitles\titles\rank\CraftTitle.cs" />
     <Compile Include="propertycalc\ArcaneSyphonCalculator.cs" />
     <Compile Include="propertycalc\ConversionPercentCalculator.cs" />

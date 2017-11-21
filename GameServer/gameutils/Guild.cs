@@ -979,34 +979,7 @@ namespace DOL.GS
 		private string bannerStatus;
 		public string GuildBannerStatus(GamePlayer player)
 		{
-			bannerStatus = "None";
-
-			if (player.Guild != null)
-			{
-				if (player.Guild.GuildBanner)
-				{
-					foreach (GamePlayer plr in player.Guild.GetListOfOnlineMembers())
-					{
-						if (plr.GuildBanner != null)
-						{
-							if (plr.GuildBanner.BannerItem.Status == GuildBannerItem.eStatus.Active)
-							{
-								bannerStatus = "Summoned";
-							}
-							else
-							{
-								bannerStatus = "Dropped";
-							}
-						}
-					}
-					if (bannerStatus == "None")
-					{
-						bannerStatus = "Not Summoned";
-					}
-					return bannerStatus;
-				}
-			}
-			return bannerStatus;
+			return "None";
 		}
 
 		public void UpdateMember(GamePlayer player)

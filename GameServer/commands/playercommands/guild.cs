@@ -799,39 +799,6 @@ namespace DOL.GS.Commands
 								client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerNoGroup"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 								return;
 							}
-							foreach (GamePlayer guildPlayer in client.Player.Guild.GetListOfOnlineMembers())
-							{
-								if (guildPlayer.GuildBanner != null)
-								{
-									client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerGuildSummoned"), eChatType.CT_Guild, eChatLoc.CL_SystemWindow);
-									return;
-								}
-							}
-
-							if (client.Player.Group != null)
-							{
-								foreach (GamePlayer groupPlayer in client.Player.Group.GetPlayersInTheGroup())
-								{
-									if (groupPlayer.GuildBanner != null)
-									{
-										client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerGroupSummoned"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-										return;
-									}
-								}
-							}
-
-							if (client.Player.CurrentRegion.IsRvR)
-							{
-								GuildBanner banner = new GuildBanner(client.Player);
-								banner.Start();
-								client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerSummoned"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								client.Player.Guild.SendMessageToGuildMembers(string.Format("{0} has summoned the guild banner!", client.Player.Name), eChatType.CT_Guild, eChatLoc.CL_SystemWindow);
-								client.Player.Guild.UpdateGuildWindow();
-							}
-							else
-							{
-								client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerNotRvR"), eChatType.CT_Guild, eChatLoc.CL_SystemWindow);
-							}
 							break;
 						}
 						#endregion
@@ -1006,20 +973,6 @@ namespace DOL.GS.Commands
 							{
 								client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.InCombat"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 								return;
-							}
-							foreach (GamePlayer player in client.Player.Guild.GetListOfOnlineMembers())
-							{
-								if (client.Player.Name == player.Name && player.GuildBanner != null && player.GuildBanner.BannerItem.Status == GuildBannerItem.eStatus.Active)
-								{
-									client.Player.GuildBanner.Stop();
-									client.Player.GuildBanner = null;
-									client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "Scripts.Player.Guild.BannerUnsummoned"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-									client.Player.Guild.SendMessageToGuildMembers(string.Format("{0} has put away the guild banner!", client.Player.Name), eChatType.CT_Guild, eChatLoc.CL_SystemWindow);
-									client.Player.Guild.UpdateGuildWindow();
-									break;
-								}
-
-								client.Out.SendMessage("You aren't carrying a banner!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 							}
 							break;
 						}

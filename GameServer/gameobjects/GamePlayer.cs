@@ -5273,99 +5273,6 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Sets/gets the living's cloak hood state
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public override bool IsCloakHoodUp
-		{
-			get { return DBCharacter != null ? DBCharacter.IsCloakHoodUp : base.IsCloakHoodUp; }
-			set
-			{
-				//base.IsCloakHoodUp = value; // only needed if some special code will be added in base-property in future
-				DBCharacter.IsCloakHoodUp = value;
-
-				Out.SendInventoryItemsUpdate(null);
-				UpdateEquipmentAppearance();
-
-				if (value)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakHoodUp.NowWear"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakHoodUp.NoLongerWear"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Sets/gets the living's cloak visible state
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public override bool IsCloakInvisible
-		{
-			get
-			{
-				return DBCharacter != null ? DBCharacter.IsCloakInvisible : base.IsCloakInvisible;
-			}
-			set
-			{
-				DBCharacter.IsCloakInvisible = value;
-
-				Out.SendInventoryItemsUpdate(null);
-				UpdateEquipmentAppearance();
-
-				if (value)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakInvisible.Invisible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakInvisible.Visible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Sets/gets the living's helm visible state
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public override bool IsHelmInvisible
-		{
-			get
-			{
-				return DBCharacter != null ? DBCharacter.IsHelmInvisible : base.IsHelmInvisible;
-			}
-			set
-			{
-				DBCharacter.IsHelmInvisible = value;
-
-				Out.SendInventoryItemsUpdate(null);
-				UpdateEquipmentAppearance();
-
-				if (value)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsHelmInvisible.Invisible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsHelmInvisible.Visible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the players SpellQueue option
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public virtual bool SpellQueue
-		{
-			get { return DBCharacter != null ? DBCharacter.SpellQueue : false; }
-			set { if (DBCharacter != null) DBCharacter.SpellQueue = value; }
-		}
-
-
-		/// <summary>
 		/// Switches the active weapon to another one
 		/// </summary>
 		/// <param name="slot">the new eActiveWeaponSlot</param>
@@ -5380,29 +5287,6 @@ namespace DOL.GS
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchWeapon.SpellCancelled"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
 				StopCurrentSpellcast();
 			}
-
-			switch (slot)
-			{
-				case eActiveWeaponSlot.Standard:
-					// remove endurance remove handler
-					if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-						GameEventMgr.RemoveHandler(this, GameLivingEvent.AttackFinished, new DOLEventHandler(RangeAttackHandler));
-					break;
-
-				case eActiveWeaponSlot.TwoHanded:
-					// remove endurance remove handler
-					if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-						GameEventMgr.RemoveHandler(this, GameLivingEvent.AttackFinished, new DOLEventHandler(RangeAttackHandler));
-					break;
-
-				case eActiveWeaponSlot.Distance:
-					// add endurance remove handler
-					if (ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-						GameEventMgr.AddHandler(this, GameLivingEvent.AttackFinished, new DOLEventHandler(RangeAttackHandler));
-					break;
-			}
-
-
 
 			InventoryItem[] oldActiveSlots = new InventoryItem[4];
 			InventoryItem[] newActiveSlots = new InventoryItem[4];
@@ -5458,37 +5342,6 @@ namespace DOL.GS
 				UpdateEquipmentAppearance();
 				//Send new weapon stats
 				Out.SendUpdateWeaponAndArmorStats();
-			}
-		}
-
-		/// <summary>
-		/// Removes ammo and endurance on range attack
-		/// </summary>
-		/// <param name="e"></param>
-		/// <param name="sender"></param>
-		/// <param name="arguments"></param>
-		protected virtual void RangeAttackHandler(DOLEvent e, object sender, EventArgs arguments)
-		{
-			AttackFinishedEventArgs args = arguments as AttackFinishedEventArgs;
-			if (args == null) return;
-
-			switch (args.AttackData.AttackResult)
-			{
-				case eAttackResult.HitUnstyled:
-				case eAttackResult.Missed:
-				case eAttackResult.Blocked:
-				case eAttackResult.Parried:
-				case eAttackResult.Evaded:
-				case eAttackResult.HitStyle:
-				case eAttackResult.Fumbled:
-					// remove an arrow and endurance
-					InventoryItem ammo = RangeAttackAmmo;
-					Inventory.RemoveCountFromStack(ammo, 1);
-
-					if (RangedAttackType == eRangedAttackType.Critical)
-						Endurance -= CRITICAL_SHOT_ENDURANCE;
-					else Endurance -= RANGE_ATTACK_ENDURANCE;
-					break;
 			}
 		}
 
@@ -7419,14 +7272,24 @@ namespace DOL.GS
 			Duel.Stop();
 			Duel = null;
 		}
-		#endregion
+        #endregion
 
-		#region Spell cast
+        #region Spell cast
 
-		/// <summary>
-		/// The time someone can not cast
-		/// </summary>
-		protected long m_disabledCastingTimeout = 0;
+        /// <summary>
+        /// Gets or sets the players SpellQueue option
+        /// (delegate to PlayerCharacter)
+        /// </summary>
+        public virtual bool SpellQueue
+        {
+            get { return DBCharacter != null ? DBCharacter.SpellQueue : false; }
+            set { if (DBCharacter != null) DBCharacter.SpellQueue = value; }
+        }
+
+        /// <summary>
+        /// The time someone can not cast
+        /// </summary>
+        protected long m_disabledCastingTimeout = 0;
 		/// <summary>
 		/// Time when casting is allowed again (after interrupt from enemy attack)
 		/// </summary>
@@ -8192,10 +8055,8 @@ namespace DOL.GS
 					}
 
 					// Artifacts don't require charges.
-
-					if ((type < 2 && useItem.SpellID > 0 && useItem.Charges < 1 && useItem.MaxCharges > -1 && !(useItem is InventoryArtifact)) ||
-					    (type == 2 && useItem.SpellID1 > 0 && useItem.Charges1 < 1 && useItem.MaxCharges1 > -1 && !(useItem is InventoryArtifact)) ||
-					    (useItem.PoisonSpellID > 0 && useItem.PoisonCharges < 1))
+					if ((type < 2 && useItem.SpellID > 0 && useItem.Charges < 1 && useItem.MaxCharges > -1) ||
+					    (type == 2 && useItem.SpellID1 > 0 && useItem.Charges1 < 1 && useItem.MaxCharges1 > -1))
 					{
 						Out.SendMessage("The " + useItem.Name + " is out of charges.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 						return;
@@ -10413,14 +10274,96 @@ namespace DOL.GS
 		{
 			Out.SendStatusUpdate();
 		}
-		#endregion
+        #endregion
 
-		#region Equipment/Encumberance
+        #region Equipment/Encumberance
 
-		/// <summary>
-		/// Gets the total possible Encumberance
-		/// </summary>
-		public virtual int MaxEncumberance
+        /// <summary>
+        /// Sets/gets the living's cloak hood state
+        /// (delegate to PlayerCharacter)
+        /// </summary>
+        public override bool IsCloakHoodUp
+        {
+            get { return DBCharacter != null ? DBCharacter.IsCloakHoodUp : base.IsCloakHoodUp; }
+            set
+            {
+                //base.IsCloakHoodUp = value; // only needed if some special code will be added in base-property in future
+                DBCharacter.IsCloakHoodUp = value;
+
+                Out.SendInventoryItemsUpdate(null);
+                UpdateEquipmentAppearance();
+
+                if (value)
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakHoodUp.NowWear"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+                else
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakHoodUp.NoLongerWear"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets/gets the living's cloak visible state
+        /// (delegate to PlayerCharacter)
+        /// </summary>
+        public override bool IsCloakInvisible
+        {
+            get
+            {
+                return DBCharacter != null ? DBCharacter.IsCloakInvisible : base.IsCloakInvisible;
+            }
+            set
+            {
+                DBCharacter.IsCloakInvisible = value;
+
+                Out.SendInventoryItemsUpdate(null);
+                UpdateEquipmentAppearance();
+
+                if (value)
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakInvisible.Invisible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+                else
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsCloakInvisible.Visible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets/gets the living's helm visible state
+        /// (delegate to PlayerCharacter)
+        /// </summary>
+        public override bool IsHelmInvisible
+        {
+            get
+            {
+                return DBCharacter != null ? DBCharacter.IsHelmInvisible : base.IsHelmInvisible;
+            }
+            set
+            {
+                DBCharacter.IsHelmInvisible = value;
+
+                Out.SendInventoryItemsUpdate(null);
+                UpdateEquipmentAppearance();
+
+                if (value)
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsHelmInvisible.Invisible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+                else
+                {
+                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.IsHelmInvisible.Visible"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the total possible Encumberance
+        /// </summary>
+        public virtual int MaxEncumberance
 		{
 			get
 			{
@@ -14110,52 +14053,6 @@ namespace DOL.GS
 		}
 		#endregion
 
-		#region GuildBanner
-		protected GuildBanner m_guildBanner = null;
-
-		/// <summary>
-		/// Gets/Sets the visibility of the carryable RvrGuildBanner. Wont work if the player has no guild.
-		/// </summary>
-		public GuildBanner GuildBanner
-		{
-			get { return m_guildBanner; }
-			set
-			{
-				//cant send guildbanner for players without guild.
-				if (Guild == null)
-					return;
-
-				m_guildBanner = value;
-
-				if (value != null)
-				{
-					foreach (GamePlayer playerToUpdate in GetPlayersInRadius(WorldMgr.OBJ_UPDATE_DISTANCE))
-					{
-						if (playerToUpdate == null) continue;
-
-						if (playerToUpdate != null && playerToUpdate.Client.IsPlaying)
-						{
-							playerToUpdate.Out.SendRvRGuildBanner(this, true);
-						}
-					}
-				}
-				else
-				{
-					foreach (GamePlayer playerToUpdate in GetPlayersInRadius(WorldMgr.OBJ_UPDATE_DISTANCE))
-					{
-						if (playerToUpdate == null) continue;
-
-						if (playerToUpdate != null && playerToUpdate.Client.IsPlaying)
-						{
-							playerToUpdate.Out.SendRvRGuildBanner(this, false);
-						}
-					}
-				}
-			}
-		}
-
-		#endregion
-
 		#region Champion Levels
 		/// <summary>
 		/// The maximum champion level a player can reach
@@ -14401,269 +14298,6 @@ namespace DOL.GS
 			Out.SendUpdatePlayer();
 			Out.SendUpdatePoints();
 			UpdatePlayerStatus();
-		}
-
-		#endregion
-
-		#region Master levels
-
-		/// <summary>
-		/// The maximum ML level a player can reach
-		/// </summary>
-		public const int ML_MAX_LEVEL = 10;
-
-		/// <summary>
-		/// Amount of MLXP required for ML validation. MLXP reset at every ML.
-		/// </summary>
-		private static readonly long[] MLXPLevel =
-		{
-			0, //xp tp level 0
-			32000, //xp to level 1
-			32000, // xp to level 2
-			32000, // xp to level 3
-			32000, // xp to level 4
-			32000, // xp to level 5
-			32000, // xp to level 6
-			32000, // xp to level 7
-			32000, // xp to level 8
-			32000, // xp to level 9
-			32000, // xp to level 10
-		};
-
-		/// <summary>
-		/// Get the amount of XP needed for a ML
-		/// </summary>
-		/// <param name="ml"></param>
-		/// <returns></returns>
-		public virtual long GetXPForML(byte ml)
-		{
-			if (ml > MLXPLevel.Length - 1)
-				return 0;
-
-			return MLXPLevel[ml];
-		}
-
-		/// <summary>
-		/// How many steps for each Master Level
-		/// </summary>
-		private static readonly byte[] MLStepsForLevel =
-		{
-			10, // ML0 == ML1
-			10, // ML1
-			11,
-			11,
-			11,
-			11,
-			11,
-			11,
-			11,
-			11,
-			5, // ML10
-		};
-
-		/// <summary>
-		/// Get the number of steps required for a ML
-		/// </summary>
-		/// <param name="ml"></param>
-		/// <returns></returns>
-		public virtual byte GetStepCountForML(byte ml)
-		{
-			if (ml > MLStepsForLevel.Length - 1)
-				return 0;
-
-			return MLStepsForLevel[ml];
-		}
-
-		/// <summary>
-		/// True if player has started Master Levels
-		/// </summary>
-		public virtual bool MLGranted
-		{
-			get { return DBCharacter != null ? DBCharacter.MLGranted : false; }
-			set { if (DBCharacter != null) DBCharacter.MLGranted = value; }
-		}
-
-		/// <summary>
-		/// What ML line has this character chosen
-		/// </summary>
-		public virtual byte MLLine
-		{
-			get { return DBCharacter != null ? DBCharacter.ML : (byte)0; }
-			set { if (DBCharacter != null) DBCharacter.ML = value; }
-		}
-
-		/// <summary>
-		/// Gets and sets the last ML the player has completed.
-		/// MLLevel is advanced once all steps are completed.
-		/// </summary>
-		public virtual int MLLevel
-		{
-			get { return DBCharacter != null ? DBCharacter.MLLevel : 0; }
-			set { if (DBCharacter != null) DBCharacter.MLLevel = value; }
-		}
-
-		/// <summary>
-		/// Gets and sets ML Experience for the current ML level
-		/// </summary>
-		public virtual long MLExperience
-		{
-			get { return DBCharacter != null ? DBCharacter.MLExperience : 0; }
-			set { if (DBCharacter != null) DBCharacter.MLExperience = value; }
-		}
-		
-		/// <summary>
-		/// Get the number of steps completed for a ML
-		/// </summary>
-		/// <param name="ml"></param>
-		/// <returns></returns>
-		public virtual byte GetCountMLStepsCompleted(byte ml)
-		{
-			byte count = 0;
-			int steps = GetStepCountForML(ml);
-
-			for (byte i = 1; i <= steps; i++)
-			{
-				if (HasFinishedMLStep(ml, i))
-				{
-					count++;
-				}
-			}
-
-			return count;
-		}
-
-		/// <summary>
-		/// Check ML step completition.
-		/// Arbiter checks this to see if player is eligible to advance to the next Master Level.
-		/// </summary>
-		public virtual bool HasFinishedMLStep(int mlLevel, int step)
-		{
-			// No steps registered so false
-			if (m_mlSteps == null) return false;
-
-			// Current ML Level >= required ML, so true
-			if (MLLevel >= mlLevel) return true;
-
-			// Check current registered steps
-			foreach (DBCharacterXMasterLevel mlStep in m_mlSteps)
-			{
-				// Found so return value
-				if (mlStep.MLLevel == mlLevel && mlStep.MLStep == step)
-					return mlStep.StepCompleted;
-			}
-
-			// Not found so false
-			return false;
-		}
-
-		/// <summary>
-		/// Sets an ML step to finished or clears it
-		/// </summary>
-		/// <param name="mlLevel"></param>
-		/// <param name="step"></param>
-		/// <param name="setFinished">(optional) false will remove the finished entry for this step</param>
-		public virtual void SetFinishedMLStep(int mlLevel, int step, bool setFinished = true)
-		{
-			// Check current registered steps in case of previous GM rollback command
-			if (m_mlSteps != null)
-			{
-				foreach (DBCharacterXMasterLevel mlStep in m_mlSteps)
-				{
-					if (mlStep.MLLevel == mlLevel && mlStep.MLStep == step)
-					{
-						mlStep.StepCompleted = setFinished;
-						return;
-					}
-				}
-			}
-
-			if (setFinished)
-			{
-				// Register new step
-				DBCharacterXMasterLevel newStep = new DBCharacterXMasterLevel();
-				newStep.Character_ID = QuestPlayerID;
-				newStep.MLLevel = mlLevel;
-				newStep.MLStep = step;
-				newStep.StepCompleted = true;
-				newStep.ValidationDate = DateTime.Now;
-				m_mlSteps.Add(newStep);
-
-				// Add it in DB
-				try
-				{
-					GameServer.Database.AddObject(newStep);
-				}
-				catch (Exception e)
-				{
-					if (log.IsErrorEnabled)
-						log.Error("Error adding player " + Name + " ml step!", e);
-				}
-
-				// Refresh Window
-				Out.SendMasterLevelWindow((byte)mlLevel);
-			}
-		}
-
-		/// <summary>
-		/// Returns the xp that are needed for the specified level
-		/// </summary>
-		public virtual long GetMLExperienceForLevel(int level)
-		{
-			if (level >= ML_MAX_LEVEL)
-				return MLXPLevel[GamePlayer.ML_MAX_LEVEL - 1]; // exp for level 9, needed to get exp after 9
-			if (level <= 0)
-				return MLXPLevel[0];
-			return MLXPLevel[level];
-		}
-
-		/// <summary>
-		/// Get the Masterlevel window text for a ML and Step
-		/// </summary>
-		/// <param name="ml"></param>
-		/// <param name="step"></param>
-		/// <returns></returns>
-		public virtual string GetMLStepDescription(byte ml, int step)
-		{
-			string description = " ";
-
-			if (HasFinishedMLStep(ml, step))
-				description = LanguageMgr.GetTranslation(Client.Account.Language, String.Format("SendMasterLevelWindow.Complete.ML{0}.Step{1}", ml, step));
-			else
-				description = LanguageMgr.GetTranslation(Client.Account.Language, String.Format("SendMasterLevelWindow.Uncomplete.ML{0}.Step{1}", ml, step));
-
-			return description;
-		}
-
-		#endregion
-
-		#region Minotaur Relics
-		protected MinotaurRelic m_minoRelic = null;
-
-		/// <summary>
-		/// sets or sets the Minotaur Relic of this Player
-		/// </summary>
-		public MinotaurRelic MinotaurRelic
-		{
-			get { return m_minoRelic; }
-			set { m_minoRelic = value; }
-		}
-		#endregion
-
-		#region Artifacts
-
-		/// <summary>
-		/// Checks if the player's class has at least one version of the artifact specified available to them.
-		/// </summary>
-		/// <param name="artifactID"></param>
-		/// <returns>True when at least one version exists, false when no versions are available.</returns>
-		public bool CanReceiveArtifact(string artifactID)
-		{
-			Dictionary<String, ItemTemplate> possibleVersions = ArtifactMgr.GetArtifactVersions(artifactID, (eCharacterClass)CharacterClass.ID, Realm);
-
-			if (possibleVersions.Count == 0)
-				return false;
-
-			return true;
 		}
 
 		#endregion

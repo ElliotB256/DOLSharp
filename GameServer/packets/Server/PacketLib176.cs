@@ -477,9 +477,6 @@ namespace DOL.GS.PacketHandler
 		public override void SendPlayerCreate(GamePlayer playerToCreate)
 		{
 			base.SendPlayerCreate(playerToCreate);
-			
-			if (playerToCreate.GuildBanner != null)
-				playerToCreate.Out.SendRvRGuildBanner(playerToCreate, true);
 		}
 
 	}

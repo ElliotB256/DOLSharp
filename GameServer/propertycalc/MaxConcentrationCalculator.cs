@@ -57,10 +57,6 @@ namespace DOL.GS.PropertyCalc
 					conc = 0;
 				}
 
-                if (player.GetSpellLine("Perfecter") != null
-				   && player.MLLevel >= 4)
-                    conc += (20 * conc / 100);
-
 				return conc;
 			} 
 			else 

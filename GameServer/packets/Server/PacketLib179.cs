@@ -74,7 +74,7 @@ namespace DOL.GS.PacketHandler
 				pak.WritePascalString(player.GuildName); // Guild name
 				pak.WriteByte((byte)(HouseMgr.GetHouseNumberByPlayer(player) & 0xFF)); // personal house low byte
 				pak.WritePascalString(player.LastName); // Last name
-				pak.WriteByte((byte)(player.MLLevel+1)); // ML Level (+1)
+				pak.WriteByte((byte)(1)); // ML Level (+1)
 				pak.WritePascalString(player.RaceName); // Race name
 				pak.WriteByte(0x0);
 				
