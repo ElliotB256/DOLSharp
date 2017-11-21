@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using DOL.GS.Commands;
-using DOL.GS.RealmAbilities;
 using log4net;
 
 namespace DOL.GS.PacketHandler.Client.v168

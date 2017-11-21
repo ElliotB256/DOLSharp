@@ -78,21 +78,6 @@ namespace DOL.GS.Spells
 			return (int)duration;
 		}
 		
-		/// <summary>
-		/// Calculates chance of spell getting resisted
-		/// </summary>
-		/// <param name="target">the target of the spell</param>
-		/// <returns>chance that spell will be resisted for specific target</returns>		
-        public override int CalculateSpellResistChance(GameLiving target)
-        {
-        	int basechance =  base.CalculateSpellResistChance(target);       	
- 			GameSpellEffect rampage = SpellHandler.FindEffectOnTarget(target, "Rampage");
-            if (rampage != null)
-            {
-            	basechance += (int)rampage.Spell.Value;
-            }
-            return Math.Min(100, basechance);
-        }
 		// constructor
 		public SingleStatDebuff(GameLiving caster, Spell spell, SpellLine line) : base(caster, spell, line) {}
 	}

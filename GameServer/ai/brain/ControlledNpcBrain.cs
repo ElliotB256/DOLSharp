@@ -25,7 +25,6 @@ using DOL.GS;
 using DOL.GS.Spells;
 using DOL.GS.Effects;
 using DOL.GS.PacketHandler;
-using DOL.GS.RealmAbilities;
 using DOL.GS.SkillHandler;
 using log4net;
 
@@ -448,41 +447,8 @@ namespace DOL.AI.Brain
 		/// </summary>
 		public override void CheckAbilities()
 		{
-			////load up abilities
-			if (Body.Abilities != null && Body.Abilities.Count > 0)
-			{
-				foreach (Ability ab in Body.Abilities.Values)
-				{
-					switch (ab.KeyName)
-					{
-						case GS.Abilities.Intercept:
-							{
-								GamePlayer player = Owner as GamePlayer;
-								//the pet should intercept even if a player is till intercepting for the owner
-								new InterceptEffect().Start(Body, player);
-								break;
-							}
-						case GS.Abilities.Guard:
-							{
-								GamePlayer player = Owner as GamePlayer;
-								new GuardEffect().Start(Body, player);
-								break;
-							}
-						case Abilities.ChargeAbility:
-							{
-								if ( !Body.IsWithinRadius( Body.TargetObject, 500 ) )
-								{
-									ChargeAbility charge = Body.GetAbility<ChargeAbility>();
-									if (charge != null && Body.GetSkillDisabledDuration(charge) <= 0)
-									{
-										charge.Execute(Body);
-									}
-								}
-								break;
-							}
-					}
-				}
-			}
+            ////load up abilities
+            log.Warn("ControlledNPC - CheckAbilities not implemented.");
 		}
 		
 		public override bool CheckSpells(eCheckSpellType type)
@@ -847,14 +813,6 @@ namespace DOL.AI.Brain
 					{
 						removable.Add(living);
 					}
-					else
-					{
-						GameSpellEffect root = SpellHandler.FindEffectOnTarget(living, "SpeedDecrease");
-						if (root != null && root.Spell.Value == 99)
-						{
-							removable.Add(living);
-						}
-					}
 				}
 
 				foreach (GameLiving living in removable)
@@ -908,35 +866,6 @@ namespace DOL.AI.Brain
 					{
 						Body.LastAttackTickPvE = Body.CurrentRegion.Time;
 						Owner.LastAttackedByEnemyTickPvE = Body.CurrentRegion.Time;
-					}
-
-					List<GameSpellEffect> effects = new List<GameSpellEffect>();
-
-					lock (Body.EffectList)
-					{
-						foreach (IGameEffect effect in Body.EffectList)
-						{
-							if (effect is GameSpellEffect && (effect as GameSpellEffect).SpellHandler is SpeedEnhancementSpellHandler)
-							{
-								effects.Add(effect as GameSpellEffect);
-							}
-						}
-					}
-
-					lock (Owner.EffectList)
-					{
-						foreach (IGameEffect effect in Owner.EffectList)
-						{
-							if (effect is GameSpellEffect && (effect as GameSpellEffect).SpellHandler is SpeedEnhancementSpellHandler)
-							{
-								effects.Add(effect as GameSpellEffect);
-							}
-						}
-					}
-
-					foreach (GameSpellEffect effect in effects)
-					{
-						effect.Cancel(false);
 					}
 
 					if (!CheckSpells(eCheckSpellType.Offensive))

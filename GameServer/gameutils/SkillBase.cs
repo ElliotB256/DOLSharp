@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading;
 
 using DOL.Database;
-using DOL.GS.RealmAbilities;
 using DOL.GS.Styles;
 using DOL.Language;
 using log4net;
@@ -2264,39 +2263,6 @@ namespace DOL.GS
 			{
 				m_syncLockUpdates.ExitWriteLock();
 			}
-		}
-
-		/// <summary>
-		/// returns level 1 instantiated realm abilities, only for readonly use!
-		/// </summary>
-		/// <param name="classID"></param>
-		/// <returns></returns>
-		public static List<RealmAbility> GetClassRealmAbilities(int classID)
-		{
-			List<DBAbility> ras = new List<DBAbility>();
-			m_syncLockUpdates.EnterReadLock();
-			try
-			{
-				if (m_classRealmAbilities.ContainsKey(classID))
-				{
-					foreach (string str in m_classRealmAbilities[classID])
-					{
-						try
-						{
-							ras.Add(m_abilityIndex[str]);
-						}
-						catch
-						{
-						}
-					}
-				}
-			}
-			finally
-			{
-				m_syncLockUpdates.ExitReadLock();
-			}
-						
-			return ras.Select(e => GetNewAbilityInstance(e)).Where(ab => ab is RealmAbility).Cast<RealmAbility>().OrderByDescending(el => el.MaxLevel).ThenBy(el => el.KeyName).ToList();
 		}
 
 		/// <summary>

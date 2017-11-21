@@ -32,7 +32,6 @@ using DOL.GS.Housing;
 using DOL.GS.Keeps;
 using DOL.GS.PlayerTitles;
 using DOL.GS.Quests;
-using DOL.GS.RealmAbilities;
 using DOL.GS.Spells;
 using DOL.GS.Styles;
 

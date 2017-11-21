@@ -255,17 +255,6 @@ namespace DOL.AI.Brain
                 if (Body.IsReturningToSpawnPoint)
                     Body.CancelWalkToSpawn();
 
-                if (!attackData.IsMeleeAttack)
-                {
-                    ISpellHandler spellhandler = attackData.SpellHandler;
-
-                    if (spellhandler != null && spellhandler is TauntSpellHandler)
-                    {
-                        OnTaunted(attackData);
-                        return;
-                    }
-                }
-
                 Aggression.Raise(attackData.Attacker, attackData.Damage);
 
                 // TODO: Process attack data and change the amount of aggro
@@ -318,25 +307,6 @@ namespace DOL.AI.Brain
         }
 
         private const int TauntAggressionAmount = 1000;
-
-        /// <summary>
-        /// The NPC has been taunted (spell).
-        /// </summary>
-        /// <param name="attackData"></param>
-        protected virtual void OnTaunted(AttackData attackData)
-        {
-            GameLiving attacker = attackData.Attacker;
-
-            if (attackData.Target == Body)
-            {
-                Aggression.Raise(attackData.Attacker, attackData.IsSpellResisted
-                    ? 0 : TauntAggressionAmount);
-            }
-            else
-            {
-                OnLivingAttacked(attackData.Target, attacker);
-            }
-        }
 
         #endregion
 

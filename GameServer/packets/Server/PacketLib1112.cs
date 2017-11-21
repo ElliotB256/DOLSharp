@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using DOL.Database;
-using DOL.GS.RealmAbilities;
 using DOL.GS.Styles;
 
 using log4net;

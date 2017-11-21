@@ -20,7 +20,6 @@ using System;
 using DOL.AI.Brain;
 using DOL.GS.PacketHandler;
 using DOL.GS.Effects;
-using DOL.GS.RealmAbilities;
 using DOL.GS.Spells;
 
 namespace DOL.GS.PropertyCalc
@@ -90,21 +89,10 @@ namespace DOL.GS.PropertyCalc
 				}
 				if (player.IsStealthed)
 				{
-					MasteryOfStealthAbility mos = player.GetAbility<MasteryOfStealthAbility>();
-					GameSpellEffect bloodrage = SpellHandler.FindEffectOnTarget(player, "BloodRage");
-					VanishEffect vanish = player.EffectList.GetOfType<VanishEffect>();
-
 					double stealthSpec = player.GetModifiedSpecLevel(Specs.Stealth);
 					if (stealthSpec > player.Level)
 						stealthSpec = player.Level;
 					speed *= 0.3 + (stealthSpec + 10) * 0.3 / (player.Level + 10);
-					if (vanish != null)
-						speed *= vanish.SpeedBonus;
-					if (mos != null)
-						speed *= 1 + MasteryOfStealthAbility.GetSpeedBonusForLevel(mos.Level);
-					if (bloodrage != null)
-						speed *= 1 + (bloodrage.Spell.Value * 0.01); // 25 * 0.01 = 0.25 (a.k 25%) value should be 25.
-					
 				}
 
 				if (GameRelic.IsPlayerCarryingRelic(player))
@@ -162,19 +150,6 @@ namespace DOL.GS.PropertyCalc
 			}
 
 			speed = living.MaxSpeedBase * speed + 0.5; // 0.5 is to fix the rounding error when converting to int so root results in speed 2 (191*0.01=1.91+0.5=2.41)
-
-			GameSpellEffect iConvokerEffect = SpellHandler.FindEffectOnTarget(living, "SpeedWrap");
-			if (iConvokerEffect != null && living.EffectList.GetOfType<ChargeEffect>() == null)
-			{
-				if (living.EffectList.GetOfType<SprintEffect>() != null && speed > 248)
-				{
-					return 248;
-				}
-				else if (speed > 191)
-				{
-					return 191;
-				}
-			}
 
 			if (speed < 0)
 				return 0;

@@ -40,11 +40,6 @@ namespace DOL.GS.PropertyCalc
 		public override int CalcValue(GameLiving living, eProperty property) 
 		{
 			int debuff = living.DebuffCategory[(int)property];
-			if(debuff > 0)
-			{
-				GameSpellEffect nsreduction = SpellHandler.FindEffectOnTarget(living, "NearsightReduction");
-				if(nsreduction!=null) debuff *= (int)(1.00 - nsreduction.Spell.Value * 0.01);
-			}
 			int buff = CalcValueFromBuffs(living, property);
 		    int item = CalcValueFromItems(living, property);
 		    return Math.Max(0, 100 + (buff + item) - debuff);

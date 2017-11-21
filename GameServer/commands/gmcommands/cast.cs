@@ -89,9 +89,6 @@ namespace DOL.GS.Commands
 					{
 						DisplayMessage(client, LanguageMgr.GetTranslation(client.Account.Language, "GMCommands.Cast.EffectExecuted", id.ToString()));
 
-						DummyEffect effect = new DummyEffect((ushort)id);
-						effect.Start(client.Player);
-
 						foreach (GamePlayer player in client.Player.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
 							player.Out.SendSpellEffectAnimation(client.Player, target, (ushort)id, 0, false, 1);
 

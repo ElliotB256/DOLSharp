@@ -5088,15 +5088,6 @@ namespace DOL.GS
 				TargetObject = target;
 
 				GameLiving living = TargetObject as GameLiving;
-
-				if (living != null && living.EffectList.GetOfType<NecromancerShadeEffect>() != null)
-				{
-					if (living is GamePlayer && (living as GamePlayer).ControlledBrain != null)
-					{
-						TargetObject = (living as GamePlayer).ControlledBrain.Body;
-					}
-				}
-
 				base.CastSpell(spell, line);
 				TargetObject = lasttarget;
 			}

@@ -24,7 +24,6 @@ using System.Linq;
 
 using log4net;
 
-using DOL.GS.Quests.Atlantis;
 using DOL.Database;
 
 namespace DOL.GS.Quests

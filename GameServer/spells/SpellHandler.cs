@@ -26,7 +26,6 @@ using DOL.Database;
 using DOL.Events;
 using DOL.GS.Effects;
 using DOL.GS.PacketHandler;
-using DOL.GS.RealmAbilities;
 using DOL.GS.SkillHandler;
 using DOL.Language;
 
@@ -671,38 +670,6 @@ namespace DOL.GS.Spells
 					if (!quiet) MessageToCaster("You can't cast in a siegeram!.", eChatType.CT_System);
 					return false;
 				}
-				GameSpellEffect naturesWomb = FindEffectOnTarget(Caster, typeof(NaturesWombEffect));
-				if (naturesWomb != null)
-				{
-					//[StephenxPimentel]
-					//Get Correct Message for 1.108 update.
-					MessageToCaster("You are silenced and cannot cast a spell right now.", eChatType.CT_SpellResisted);
-					return false;
-				}
-			}
-
-			GameSpellEffect Phaseshift = FindEffectOnTarget(Caster, "Phaseshift");
-			if (Phaseshift != null && (Spell.InstrumentRequirement == 0 || Spell.SpellType == "Mesmerize"))
-			{
-				if (!quiet) MessageToCaster("You're phaseshifted and can't cast a spell", eChatType.CT_System);
-				return false;
-			}
-
-			// Apply Mentalist RA5L
-			if (Spell.Range>0)
-			{
-				SelectiveBlindnessEffect SelectiveBlindness = Caster.EffectList.GetOfType<SelectiveBlindnessEffect>();
-				if (SelectiveBlindness != null)
-				{
-					GameLiving EffectOwner = SelectiveBlindness.EffectSource;
-					if(EffectOwner==selectedTarget)
-					{
-						if (m_caster is GamePlayer && !quiet)
-							((GamePlayer)m_caster).Out.SendMessage(string.Format("{0} is invisible to you!", selectedTarget.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-
-						return false;
-					}
-				}
 			}
 
 			if (selectedTarget!=null && selectedTarget.HasAbility("DamageImmunity") && Spell.SpellType == "DirectDamage" && Spell.Radius == 0)
@@ -737,8 +704,7 @@ namespace DOL.GS.Spells
 				}
 			}
 
-			if (!m_spell.Uninterruptible && m_spell.CastTime > 0 && m_caster is GamePlayer &&
-				m_caster.EffectList.GetOfType<QuickCastEffect>() == null && m_caster.EffectList.GetOfType<MasteryofConcentrationEffect>() == null)
+			if (!m_spell.Uninterruptible && m_spell.CastTime > 0 && m_caster is GamePlayer)
 			{
 				if (Caster.InterruptAction > 0 && Caster.InterruptAction + Caster.SpellInterruptRecastTime > Caster.CurrentRegion.Time)
 				{
@@ -752,37 +718,13 @@ namespace DOL.GS.Spells
 				int left = m_caster.GetSkillDisabledDuration(m_spell);
 				if (left > 0)
 				{
-					if (m_caster is NecromancerPet && ((m_caster as NecromancerPet).Owner as GamePlayer).Client.Account.PrivLevel > (int)ePrivLevel.Player)
-					{
-						// Ignore Recast Timer
-					}
-					else
-					{
 						if (!quiet) MessageToCaster("You must wait " + (left / 1000 + 1).ToString() + " seconds to use this spell!", eChatType.CT_System);
 						return false;
-					}
 				}
 			}
 
 			String targetType = m_spell.Target.ToLower();
 
-			//[Ganrod] Nidel: Can cast pet spell on all Pet/Turret/Minion (our pet)
-			if (targetType.Equals("pet"))
-			{
-				if (selectedTarget == null || !Caster.IsControlledNPC(selectedTarget as GameNPC))
-				{
-					if (Caster.ControlledBrain != null && Caster.ControlledBrain.Body != null)
-					{
-						selectedTarget = Caster.ControlledBrain.Body;
-					}
-					else
-					{
-						if (!quiet) MessageToCaster("You must cast this spell on a creature you are controlling.",
-						                            eChatType.CT_System);
-						return false;
-					}
-				}
-			}
 			if (targetType == "area")
 			{
 				if (!m_caster.IsWithinRadius(m_caster.GroundTarget, CalculateSpellRange()))
@@ -2588,17 +2530,6 @@ namespace DOL.GS.Spells
 		/// <param name="effectiveness">factor from 0..1 (0%-100%)</param>
 		public virtual void ApplyEffectOnTarget(GameLiving target, double effectiveness)
 		{
-            if (target is GamePlayer)
-			{
-				GameSpellEffect effect1;
-				effect1 = SpellHandler.FindEffectOnTarget(target, "Phaseshift");
-				if ((effect1 != null && (Spell.SpellType != "SpreadHeal" || Spell.SpellType != "Heal" || Spell.SpellType != "SpeedEnhancement")))
-				{
-					MessageToCaster(target.Name + " is Phaseshifted and can't be effected by this Spell!", eChatType.CT_SpellResisted);
-					return;
-				}
-			}
-
 			if ((target is Keeps.GameKeepDoor || target is Keeps.GameKeepComponent))
 			{
 				bool isAllowed = false;
@@ -3671,23 +3602,12 @@ namespace DOL.GS.Spells
 				}
 			}
 
-			GameSpellEffect effect = FindEffectOnTarget(m_caster, "HereticPiercingMagic");
-			if (effect != null)
-			{
-				spellLevel += (int)effect.Spell.Value;
-			}
-
 			if (playerCaster != null && (m_spellLine.KeyName == GlobalSpellsLines.Combat_Styles_Effect || m_spellLine.KeyName.StartsWith(GlobalSpellsLines.Champion_Lines_StartWith)))
 			{
 				spellLevel = Math.Min(playerCaster.MaxLevel, target.Level);
 			}
 
 			int bonustohit = m_caster.GetModified(eProperty.ToHitBonus);
-
-			//Piercing Magic affects to-hit bonus too
-			GameSpellEffect resPierce = SpellHandler.FindEffectOnTarget(m_caster, "PenetrateResists");
-			if (resPierce != null)
-				bonustohit += (int)resPierce.Spell.Value;
 
 			/*
 			http://www.camelotherald.com/news/news_article.php?storyid=704
@@ -3713,16 +3633,6 @@ namespace DOL.GS.Spells
 			{
 				hitchance -= (int)(m_caster.GetConLevel(target) * ServerProperties.Properties.PVE_SPELL_CONHITPERCENT);
 				hitchance += Math.Max(0, target.Attackers.Count - 1) * ServerProperties.Properties.MISSRATE_REDUCTION_PER_ATTACKERS;
-			}
-
-			// [Freya] Nidel: Harpy Cloak : They have less chance of landing melee attacks, and spells have a greater chance of affecting them.
-			if((target is GamePlayer))
-			{
-				GameSpellEffect harpyCloak = FindEffectOnTarget(target, "HarpyFeatherCloak");
-				if(harpyCloak != null)
-				{
-					hitchance += (int) ((hitchance*harpyCloak.Spell.Value)*0.01);
-				}
 			}
 
 			return hitchance;
@@ -3807,13 +3717,6 @@ namespace DOL.GS.Spells
 					finalDamage = (int)((double)finalDamage * ServerProperties.Properties.PVP_SPELL_DAMAGE);
 				else if (target is GameNPC)
 					finalDamage = (int)((double)finalDamage * ServerProperties.Properties.PVE_SPELL_DAMAGE);
-			}
-
-			// Well the PenetrateResistBuff is NOT ResistPierce
-			GameSpellEffect penPierce = SpellHandler.FindEffectOnTarget(m_caster, "PenetrateResists");
-			if (penPierce != null)
-			{
-				finalDamage = (int)(finalDamage * (1.0 + penPierce.Spell.Value / 100.0));
 			}
 
 			int cdamage = 0;

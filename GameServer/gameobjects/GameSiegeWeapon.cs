@@ -414,14 +414,6 @@ namespace DOL.GS
                 return (int)( ActionDelay[(int)action] * 0.001 * this.GetDistanceTo( TargetObject ) );
 			
 			int delay = ActionDelay[(int)action];
-			//TODO: better to use a property here - discuss to implement one? dunnow if siegespeed is used at another place.
-			if (Owner != null && Owner.EffectList.CountOfType<BannerOfBesiegingEffect>() > 0)
-			{
-				BannerOfBesiegingEffect eff = Owner.EffectList.GetOfType<BannerOfBesiegingEffect>();
-				if (eff != null)
-					delay = (int)(delay * (1 - 0.06 * eff.Effectiveness));
-
-			}
 			return delay;
 		}
 

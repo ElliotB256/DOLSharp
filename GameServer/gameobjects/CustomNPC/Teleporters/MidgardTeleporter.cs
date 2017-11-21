@@ -25,7 +25,6 @@ using System.Collections;
 using DOL.GS.Spells;
 using log4net;
 using System.Reflection;
-using DOL.GS.Quests.Catacombs.Obelisks;
 
 namespace DOL.GS
 {

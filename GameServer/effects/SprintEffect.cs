@@ -20,7 +20,6 @@ using System;
 using System.Collections;
 using DOL.Language;
 
-using DOL.GS.RealmAbilities;
 
 namespace DOL.GS.Effects
 {

@@ -267,9 +267,6 @@ namespace DOL.AI.Brain
 				if (!GameServer.ServerRules.IsAllowedToAttack(Body, player, true)) continue;
 				// Don't aggro on immune players.
 
-				if (player.EffectList.GetOfType<NecromancerShadeEffect>() != null)
-					continue;
-
 				int aggrolevel = 0;
 
 				if (Body.Faction != null)
@@ -483,47 +480,6 @@ namespace DOL.AI.Brain
 						}
 					}
 				}
-
-				//ProtectEffect protect = (ProtectEffect) player.EffectList.GetOfType(typeof(ProtectEffect));
-				foreach (ProtectEffect protect in player.EffectList.GetAllOfType<ProtectEffect>())
-				{
-					// if no aggro left => break
-					if (aggroamount <= 0) break;
-
-					//if (protect==null) continue;
-					if (protect.ProtectTarget != living) continue;
-					if (protect.ProtectSource.IsStunned) continue;
-					if (protect.ProtectSource.IsMezzed) continue;
-					if (protect.ProtectSource.IsSitting) continue;
-					if (protect.ProtectSource.ObjectState != GameObject.eObjectState.Active) continue;
-					if (!protect.ProtectSource.IsAlive) continue;
-					if (!protect.ProtectSource.InCombat) continue;
-
-					if (!living.IsWithinRadius(protect.ProtectSource, ProtectAbilityHandler.PROTECT_DISTANCE))
-						continue;
-					// P I: prevents 10% of aggro amount
-					// P II: prevents 20% of aggro amount
-					// P III: prevents 30% of aggro amount
-					// guessed percentages, should never be higher than or equal to 50%
-					int abilityLevel = protect.ProtectSource.GetAbilityLevel(Abilities.Protect);
-					int protectAmount = (int)((abilityLevel * 0.10) * aggroamount);
-
-					if (protectAmount > 0)
-					{
-						aggroamount -= protectAmount;
-						protect.ProtectSource.Out.SendMessage(LanguageMgr.GetTranslation(protect.ProtectSource.Client.Account.Language, "AI.Brain.StandardMobBrain.YouProtDist", player.GetName(0, false),
-						                                                                 Body.GetName(0, false, protect.ProtectSource.Client.Account.Language, Body)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-						//player.Out.SendMessage("You are protected by " + protect.ProtectSource.GetName(0, false) + " from " + Body.GetName(0, false) + ".", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-
-						lock ((m_aggroTable as ICollection).SyncRoot)
-						{
-							if (m_aggroTable.ContainsKey(protect.ProtectSource))
-								m_aggroTable[protect.ProtectSource] += protectAmount;
-							else
-								m_aggroTable[protect.ProtectSource] = protectAmount;
-						}
-					}
-				}
 			}
 
 			lock ((m_aggroTable as ICollection).SyncRoot)
@@ -652,10 +608,6 @@ namespace DOL.AI.Brain
 						removable.Add(living);
 						continue;
 					}
-
-					// Don't bother about necro shade, can't attack it anyway.
-					if (living.EffectList.GetOfType<NecromancerShadeEffect>() != null)
-						continue;
 					
 					long amount = aggros.Current.Value;
 

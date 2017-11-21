@@ -42,20 +42,6 @@ namespace DOL.GS.Effects
 		}
 
 		/// <summary>
-		/// Stop the effect on target
-		/// </summary>
-		public override void Stop()
-		{
-			if (m_player.HasAbility(Abilities.Camouflage))
-			{
-				IGameEffect camouflage = m_player.EffectList.GetOfType<CamouflageEffect>();
-				if (camouflage!=null)
-					camouflage.Cancel(false);
-			}
-			m_player.EffectList.Remove(this);
-		}
-
-		/// <summary>
 		/// Called when effect must be canceled
 		/// </summary>
 		public override void Cancel(bool playerCancel)

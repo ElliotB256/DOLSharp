@@ -35,7 +35,6 @@ using DOL.GS.PacketHandler.Client.v168;
 using DOL.GS.PlayerTitles;
 using DOL.GS.PropertyCalc;
 using DOL.GS.Quests;
-using DOL.GS.RealmAbilities;
 using DOL.GS.ServerProperties;
 using DOL.GS.SkillHandler;
 using DOL.GS.Spells;
@@ -766,12 +765,6 @@ namespace DOL.GS
 		{
 			if (log.IsInfoEnabled)
 				log.InfoFormat("Player {0}({1}) went linkdead!", Name, Client.Account.Name);
-
-			// LD Necros need to be "Unshaded"
-			if (Client.Player.CharacterClass.Player.IsShade)
-			{
-				Client.Player.CharacterClass.Player.Shade(false);
-			}
 
 			// Dead link-dead players release on live servers
 			if (!IsAlive)
@@ -2428,20 +2421,13 @@ namespace DOL.GS
 				int regen = GetModified(eProperty.EnduranceRegenerationRate);  //default is 1
 				int endchant = GetModified(eProperty.FatigueConsumption);      //Pull chant/buff value
 
-				int longwind = 5;
 				if (sprinting && IsMoving)
 				{
-					//TODO : cache LongWind level when char is loaded and on train ability
-					LongWindAbility ra = GetAbility<LongWindAbility>();
-					if (ra != null)
-						longwind = 5 - (ra.GetAmountForLevel(CalculateSkillLevel(ra)) * 5 / 100);
-
-					regen -= longwind;
 					
 					if (endchant > 1) regen = (int)Math.Ceiling(regen * endchant * 0.01);
-					if (Endurance + regen > MaxEndurance - longwind)
+					if (Endurance + regen > MaxEndurance)
 					{
-						regen -= (Endurance + regen) - (MaxEndurance - longwind);
+						regen -= (Endurance + regen) - (MaxEndurance );
 					}
 				}
 
@@ -2687,43 +2673,12 @@ namespace DOL.GS
 		{
 			if (fallDamagePercent > 0)
 			{
-				int safeFallLevel = GetAbilityLevel(Abilities.SafeFall);
-				int mythSafeFall = GetModified(eProperty.MythicalSafeFall);
-
-				if (mythSafeFall > 0 & mythSafeFall < fallDamagePercent)
-				{
-					Client.Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "PlayerPositionUpdateHandler.MythSafeFall"),
-					                       eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-					fallDamagePercent = mythSafeFall;
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "PlayerPositionUpdateHandler.FallPercent", fallDamagePercent),
 					                eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-				}
-				if (safeFallLevel > 0 & mythSafeFall == 0)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "PlayerPositionUpdateHandler.SafeFall"),
-					                eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-				}
-				if (mythSafeFall == 0)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "PlayerPositionUpdateHandler.FallPercent", fallDamagePercent),
-					                eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-				}
+				
 
 				Endurance -= MaxEndurance * fallDamagePercent / 100;
 				double damage = (0.01 * fallDamagePercent * (MaxHealth - 1));
-
-				// [Freya] Nidel: CloudSong falling damage reduction
-				GameSpellEffect cloudSongFall = SpellHandler.FindEffectOnTarget(this, "CloudsongFall");
-				if (cloudSongFall != null)
-				{
-					damage -= (damage * cloudSongFall.Spell.Value) * 0.01;
-				}
-
-				//Mattress: SafeFall property for Mythirians, the value of the MythicalSafeFall property represents the percent damage taken in a fall.
-				if (mythSafeFall != 0 && damage > mythSafeFall)
-				{
-					damage = ((MaxHealth - 1) * (mythSafeFall * 0.01));
-				}
 
 				TakeDamage(null, eDamageType.Falling, (int)damage, 0);
 
@@ -2819,11 +2774,6 @@ namespace DOL.GS
 		#endregion
 
 		#region Spells/Skills/Abilities/Effects
-
-		/// <summary>
-		/// Holds the player choosen list of Realm Abilities.
-		/// </summary>
-		protected readonly ReaderWriterList<RealmAbility> m_realmAbilities = new ReaderWriterList<RealmAbility>();
 		
 		/// <summary>
 		/// Holds the player specializable skills and style lines
@@ -3183,19 +3133,6 @@ namespace DOL.GS
 			return specPoints;
 		}
 
-		public virtual bool RespecRealm()
-		{
-			bool any = m_realmAbilities.Count > 0;
-			
-			foreach (Ability ab in m_realmAbilities)
-				RemoveAbility(ab.KeyName);
-			
-			m_realmAbilities.Clear();
-			
-			RespecAmountRealmSkill--;
-			return any;
-		}
-
 		protected virtual bool RespecAllLines()
 		{
 			bool ok = false;
@@ -3326,31 +3263,6 @@ namespace DOL.GS
 			base.AddAbility(ability, sendUpdates);
 		}
 
-		/// <summary>
-		/// Adds a Realm Ability to the player
-		/// </summary>
-		/// <param name="ability"></param>
-		/// <param name="sendUpdates"></param>
-		public virtual void AddRealmAbility(RealmAbility ability, bool sendUpdates)
-		{
-			if (ability == null)
-				return;
-			
-			m_realmAbilities.FreezeWhile(list => {
-			                             	int index = list.FindIndex(ab => ab.KeyName == ability.KeyName);
-			                             	if (index > -1)
-			                             	{
-			                             		list[index].Level = ability.Level;
-			                             	}
-			                             	else
-			                             	{
-			                             		list.Add(ability);
-			                             	}
-			                             });
-			
-			RefreshSpecDependantSkills(true);
-		}
-
 		#endregion Abilities
 
 		public virtual void RemoveAllAbilities()
@@ -3458,15 +3370,6 @@ namespace DOL.GS
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Retrieve this player Realm Abilities.
-		/// </summary>
-		/// <returns></returns>
-		public virtual List<RealmAbility> GetRealmAbilities()
-		{
-			return m_realmAbilities.ToList();
 		}
 		
 		/// <summary>
@@ -4095,16 +3998,6 @@ namespace DOL.GS
 		public virtual int SkillSpecialtyPoints
 		{
 			get { return VerifySpecPoints(); }
-		}
-
-		/// <summary>
-		/// Gets/sets player realm specialty points
-		/// </summary>
-		public virtual int RealmSpecialtyPoints
-		{
-			get { return GameServer.ServerRules.GetPlayerRealmPointsTotal(this) 
-					- GetRealmAbilities().Where(ab => !(ab is RR5RealmAbility))
-					.Sum(ab => Enumerable.Range(0, ab.Level).Sum(i => ab.CostForUpgrade(i))); }
 		}
 
 		/// <summary>
@@ -5594,8 +5487,6 @@ namespace DOL.GS
 
 					if (RangedAttackType == eRangedAttackType.Critical)
 						Endurance -= CRITICAL_SHOT_ENDURANCE;
-					else if (RangedAttackType == eRangedAttackType.RapidFire && GetAbilityLevel(Abilities.RapidFire) == 1)
-						Endurance -= 2 * RANGE_ATTACK_ENDURANCE;
 					else Endurance -= RANGE_ATTACK_ENDURANCE;
 					break;
 			}
@@ -5766,19 +5657,6 @@ namespace DOL.GS
                     }
 			}
 
-			if (CharacterClass is PlayerClass.ClassVampiir)
-			{
-				GameSpellEffect removeEffect = SpellHandler.FindEffectOnTarget(this, "VampiirSpeedEnhancement");
-				if (removeEffect != null)
-					removeEffect.Cancel(false);
-			}
-			else
-			{
-				// Bard RR5 ability must drop when the player starts a melee attack
-				IGameEffect DreamweaverRR5 = EffectList.GetOfType<DreamweaverEffect>();
-				if (DreamweaverRR5 != null)
-					DreamweaverRR5.Cancel(false);
-			}
 			base.StartAttack(attackTarget);
 
 			if (IsCasting && !m_runningSpellHandler.Spell.Uninterruptible)
@@ -6609,13 +6487,6 @@ namespace DOL.GS
 						break;
 					}
 			}
-			// vampiir
-			if (CharacterClass is PlayerClass.ClassVampiir)
-			{
-				GameSpellEffect removeEffect = SpellHandler.FindEffectOnTarget(this, "VampiirSpeedEnhancement");
-				if (removeEffect != null)
-					removeEffect.Cancel(false);
-			}
 
 			if (IsCrafting)
 			{
@@ -7162,17 +7033,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public override bool CanCastInCombat(Spell spell)
 		{
-			if (CharacterClass is PlayerClass.ClassVampiir ||
-			    CharacterClass is PlayerClass.ClassMaulerAlb ||
-			    CharacterClass is PlayerClass.ClassMaulerMid ||
-			    CharacterClass is PlayerClass.ClassMaulerHib ||
-			    (CharacterClass is PlayerClass.ClassWarden && spell.SpellType == "HealOverTime") ||
-			    (CharacterClass is PlayerClass.ClassFriar && spell.SpellType == "HealOverTime"))
-			{
-				return true;
-			}
-
-			return false;
+			return true;
 		}
 
 		/// <summary>
@@ -7915,22 +7776,7 @@ namespace DOL.GS
 				Spell nextSpell = m_nextSpell;
 				SpellLine nextSpellLine = m_nextSpellLine;
 				GameLiving nextSpellTarget = m_nextSpellTarget;
-				// warlock
-				if (nextSpell != null)
-				{
-					if (nextSpell.IsSecondary)
-					{
-						GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, "Powerless");
-						if (effect == null)
-							effect = SpellHandler.FindEffectOnTarget(this, "Range");
-						if (effect == null)
-							effect = SpellHandler.FindEffectOnTarget(this, "Uninterruptable");
-
-						if (effect != null)
-							effect.Cancel(false);
-					}
-
-				}
+				
 				m_runningSpellHandler = null;
 				m_nextSpell = null;			// avoid restarting nextspell by reentrance from spellhandler
 				m_nextSpellLine = null;
@@ -7949,305 +7795,88 @@ namespace DOL.GS
 			}
 		}
 
-		public override void CastSpell(Spell spell, SpellLine line)
-		{
-			if (IsCrafting)
-			{
+        public override void CastSpell(Spell spell, SpellLine line)
+        {
+            if (IsCrafting)
+            {
                 Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterruptedCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				CraftTimer.Stop();
-				CraftTimer = null;
-				Out.SendCloseTimerWindow();
-			}
+                CraftTimer.Stop();
+                CraftTimer = null;
+                Out.SendCloseTimerWindow();
+            }
 
-			if (spell.SpellType == "StyleHandler" || spell.SpellType == "MLStyleHandler")
-			{
-				Style style = SkillBase.GetStyleByID((int)spell.Value, CharacterClass.ID);
-				//Andraste - Vico : try to use classID=0 (easy way to implement CL Styles)
-				if (style == null) style = SkillBase.GetStyleByID((int)spell.Value, 0);
-				if (style != null)
-				{
-					StyleProcessor.TryToUseStyle(this, style);
-				}
-				else { Out.SendMessage("That style is not implemented!", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow); }
-			}
-			else if (spell.SpellType == "BodyguardHandler")
-			{
-				Ability ab = SkillBase.GetAbility("Bodyguard");
-				IAbilityActionHandler handler = SkillBase.GetAbilityActionHandler(ab.KeyName);
-				if (handler != null)
-				{
-					handler.Execute(ab, this);
-					return;
-				}
-			}
-			else
-			{
-				if (IsStunned)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastStunned"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-					return;
-				}
-				if (IsMezzed)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastMezzed"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-					return;
-				}
+            if (IsStunned)
+            {
+                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastStunned"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                return;
+            }
+            if (IsMezzed)
+            {
+                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastMezzed"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                return;
+            }
 
-				if (IsSilenced)
-				{
+            if (IsSilenced)
+            {
+                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastFumblingWords"), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
+                return;
+            }
+
+            double fumbleChance = GetModified(eProperty.SpellFumbleChance);
+            fumbleChance *= 0.01;
+            if (fumbleChance > 0)
+            {
+                if (Util.ChanceDouble(fumbleChance))
+                {
                     Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastFumblingWords"), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-					return;
-				}
+                    return;
+                }
+            }
 
-				double fumbleChance = GetModified(eProperty.SpellFumbleChance);
-				fumbleChance *= 0.01;
-				if (fumbleChance > 0)
-				{
-					if (Util.ChanceDouble(fumbleChance))
-					{
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastFumblingWords"), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-						return;
-					}
-				}
+            lock (m_spellQueueAccessMonitor)
+            {
+                if (m_runningSpellHandler != null)
+                {
+                    if (spell.CastTime > 0 && !(m_runningSpellHandler is ChamberSpellHandler) && spell.SpellType != "Chamber")
+                    {
+                        if (SpellQueue)
+                        {
+                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyCastFollow"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                            m_nextSpell = spell;
+                            m_nextSpellLine = line;
+                            m_nextSpellTarget = TargetObject as GameLiving;
+                        }
+                        else Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyCastNoQueue"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                        return;
+                    }
+                }
+            }
 
-				lock (m_spellQueueAccessMonitor)
-				{
-					if (m_runningSpellHandler != null)
-					{
-						if (m_runningSpellHandler.CanQueue == false)
-						{
-							m_runningSpellHandler.CasterMoves();
-							return;
-						}
+            ISpellHandler spellhandler = ScriptMgr.CreateSpellHandler(this, spell, line);
+            if (spellhandler != null)
+            {
+                if (spell.CastTime > 0)
+                {
+                    if (m_runningSpellHandler == null)
+                    {
+                        m_runningSpellHandler = spellhandler;
+                        m_runningSpellHandler.CastingCompleteEvent += new CastingCompleteCallback(OnAfterSpellCastSequence);
+                        spellhandler.CastSpell();
+                    }
+                }
+                else
+                {
+                    spellhandler.CastSpell();
+                }
+            }
+            else
+            {
+                Out.SendMessage(spell.Name + " not implemented yet (" + spell.SpellType + ")", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                return;
+            }
 
-						if (spell.CastTime > 0 && !(m_runningSpellHandler is ChamberSpellHandler) && spell.SpellType != "Chamber")
-						{
-							if (m_runningSpellHandler.Spell.InstrumentRequirement != 0)
-							{
-								Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyPlaySong"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-								return;
-							}
-							if (SpellQueue)
-							{
-								if (spell.SpellType.ToLower() == "archery")
-								{
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.FollowSpell", spell.Name), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-								}
-								else
-								{
-									Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyCastFollow"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-								}
-
-								m_nextSpell = spell;
-								m_nextSpellLine = line;
-								m_nextSpellTarget = TargetObject as GameLiving;
-							}
-							else Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyCastNoQueue"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-							return;
-						}
-						else if (m_runningSpellHandler is PrimerSpellHandler)
-						{
-							if (!spell.IsSecondary)
-							{
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.OnlyASecondarySpell"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-							}
-							else
-							{
-								if (SpellQueue && !(m_runningSpellHandler is ChamberSpellHandler))
-								{
-									Spell cloneSpell = null;
-									if (m_runningSpellHandler is PowerlessSpellHandler)
-									{
-										cloneSpell = spell.Copy();
-										cloneSpell.CostPower = false;
-										m_nextSpell = cloneSpell;
-										m_nextSpellLine = line;
-									}
-									else if (m_runningSpellHandler is RangeSpellHandler)
-									{
-										cloneSpell = spell.Copy();
-										cloneSpell.CostPower = false;
-										cloneSpell.OverrideRange = m_runningSpellHandler.Spell.Range;
-										m_nextSpell = cloneSpell;
-										m_nextSpellLine = line;
-									}
-									else if (m_runningSpellHandler is UninterruptableSpellHandler)
-									{
-										cloneSpell = spell.Copy();
-										cloneSpell.CostPower = false;
-										m_nextSpell = cloneSpell;
-										m_nextSpellLine = line;
-									}
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.PrepareSecondarySpell"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-								}
-								return;
-							}
-						}
-						else if (m_runningSpellHandler is ChamberSpellHandler)
-						{
-							ChamberSpellHandler chamber = (ChamberSpellHandler)m_runningSpellHandler;
-							if (IsMoving || IsStrafing)
-							{
-								m_runningSpellHandler = null;
-								return;
-							}
-							if (spell.IsPrimary)
-							{
-								if (spell.SpellType == "Bolt" && !chamber.Spell.AllowBolt)
-								{
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.SpellNotInChamber"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-									return;
-								}
-								if (chamber.PrimarySpell == null)
-								{
-									Spell cloneSpell = spell.Copy();
-									cloneSpell.InChamber = true;
-									cloneSpell.CostPower = false;
-									chamber.PrimarySpell = cloneSpell;
-									chamber.PrimarySpellLine = line;
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.SpellInChamber", spell.Name, ((ChamberSpellHandler)m_runningSpellHandler).Spell.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.SelectSecondSpell", ((ChamberSpellHandler)m_runningSpellHandler).Spell.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								}
-								else
-								{
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.SpellNotInChamber"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-								}
-							}
-							else if (spell.IsSecondary)
-							{
-								if (chamber.PrimarySpell != null)
-								{
-									if (chamber.SecondarySpell == null)
-									{
-										Spell cloneSpell = spell.Copy();
-										cloneSpell.CostPower = false;
-										cloneSpell.InChamber = true;
-										cloneSpell.OverrideRange = chamber.PrimarySpell.Range;
-										chamber.SecondarySpell = cloneSpell;
-										chamber.SecondarySpellLine = line;
-
-                                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.SpellInChamber", spell.Name, ((ChamberSpellHandler)m_runningSpellHandler).Spell.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-									}
-									else
-									{
-                                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.AlreadyChosenSpells"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-									}
-								}
-								else
-								{
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.PrimarySpellFirst"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-								}
-							}
-
-						}
-						else if (!(m_runningSpellHandler is ChamberSpellHandler) && spell.SpellType == "Chamber")
-						{
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.NotAFollowSpell"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-							return;
-						}
-					}
-				}
-				ISpellHandler spellhandler = ScriptMgr.CreateSpellHandler(this, spell, line);
-				if (spellhandler != null)
-				{
-					if (spell.CastTime > 0)
-					{
-						GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, "Chamber", spell.Name);
-
-						if (effect != null && spell.Name == effect.Spell.Name)
-						{
-							spellhandler.CastSpell();
-						}
-						else
-						{
-							if (spellhandler is ChamberSpellHandler && m_runningSpellHandler == null)
-							{
-								((ChamberSpellHandler)spellhandler).EffectSlot = ChamberSpellHandler.GetEffectSlot(spellhandler.Spell.Name);
-								m_runningSpellHandler = spellhandler;
-								m_runningSpellHandler.CastingCompleteEvent += new CastingCompleteCallback(OnAfterSpellCastSequence);
-								spellhandler.CastSpell();
-							}
-							else if (m_runningSpellHandler == null)
-							{
-								m_runningSpellHandler = spellhandler;
-								m_runningSpellHandler.CastingCompleteEvent += new CastingCompleteCallback(OnAfterSpellCastSequence);
-								spellhandler.CastSpell();
-							}
-						}
-					}
-					else
-					{
-						if (spell.IsSecondary)
-						{
-							GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, "Powerless");
-							if (effect == null)
-								effect = SpellHandler.FindEffectOnTarget(this, "Range");
-							if (effect == null)
-								effect = SpellHandler.FindEffectOnTarget(this, "Uninterruptable");
-
-							if (m_runningSpellHandler == null && effect == null)
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantSpellDirectly"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-							else if (m_runningSpellHandler != null)
-							{
-								if (m_runningSpellHandler.Spell.IsPrimary)
-								{
-									lock (m_spellQueueAccessMonitor)
-									{
-										if (SpellQueue && !(m_runningSpellHandler is ChamberSpellHandler))
-										{
-                                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.PrepareSecondarySpell"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-											m_nextSpell = spell;
-											spell.OverrideRange = m_runningSpellHandler.Spell.Range;
-											m_nextSpellLine = line;
-										}
-									}
-								}
-								else if (!(m_runningSpellHandler is ChamberSpellHandler))
-                                    Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantSpellDirectly"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-
-							}
-							else if (effect != null)
-							{
-								Spell cloneSpell = null;
-								if (effect.SpellHandler is PowerlessSpellHandler)
-								{
-									cloneSpell = spell.Copy();
-									cloneSpell.CostPower = false;
-									spellhandler = ScriptMgr.CreateSpellHandler(this, cloneSpell, line);
-									spellhandler.CastSpell();
-									effect.Cancel(false);
-								}
-								else if (effect.SpellHandler is RangeSpellHandler)
-								{
-									cloneSpell = spell.Copy();
-									cloneSpell.CostPower = false;
-									cloneSpell.OverrideRange = effect.Spell.Range;
-									spellhandler = ScriptMgr.CreateSpellHandler(this, cloneSpell, line);
-									spellhandler.CastSpell();
-									effect.Cancel(false);
-								}
-								else if (effect.SpellHandler is UninterruptableSpellHandler)
-								{
-									cloneSpell = spell.Copy();
-									cloneSpell.CostPower = false;
-									spellhandler = ScriptMgr.CreateSpellHandler(this, cloneSpell, line);
-									spellhandler.CastSpell();
-									effect.Cancel(false);
-								}
-							}
-						}
-						else
-							spellhandler.CastSpell();
-					}
-				}
-				else
-				{
-					Out.SendMessage(spell.Name + " not implemented yet (" + spell.SpellType + ")", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					return;
-				}
-			}
-			return;
-		}
+            return;
+        }
 
 		public override void CastSpell(ISpellCastingAbilityHandler ab)
 		{
@@ -8723,13 +8352,7 @@ namespace DOL.GS
 									if (plr == null) continue;
 									plr.Out.SendEmoteAnimation(this, eEmote.Horse_whistle);
 								}
-								// vampiir ~
-								GameSpellEffect effects = SpellHandler.FindEffectOnTarget(this, "VampiirSpeedEnhancement");
-								GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, "SpeedEnhancement");
-								if (effects != null)
-									effects.Cancel(false);
-								if (effect != null)
-									effect.Cancel(false);
+
 								Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.WhistleMount"), eChatType.CT_Emote, eChatLoc.CL_SystemWindow);
 								m_whistleMountTimer = new RegionTimer(this);
 								m_whistleMountTimer.Callback = new RegionTimerCallback(WhistleMountTimerCallback);
@@ -11074,20 +10697,6 @@ namespace DOL.GS
 			get
 			{
 				double enc = (double)Strength;
-				RAPropertyEnhancer ab = GetAbility<LifterAbility>();
-				if (ab != null)
-					enc *= 1 + ((double)ab.Amount / 100);
-
-				// Apply Sojourner ability
-				if (this.GetSpellLine("Sojourner") != null)
-				{
-					enc *= 1.25;
-				}
-
-				// Apply Walord effect
-				GameSpellEffect iBaneLordEffect = SpellHandler.FindEffectOnTarget(this, "Oppression");
-				if (iBaneLordEffect != null)
-					enc *= 1.00 - (iBaneLordEffect.Spell.Value * 0.01);
 
 				// Apply Mythirian Bonus
 				if (GetModified(eProperty.MythicalDiscumbering) > 0)
@@ -12930,19 +12539,6 @@ namespace DOL.GS
 				if (ObjectState == eObjectState.Active)
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Stealth.NoLongerHidden"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 
-				CamouflageEffect cam = EffectList.GetOfType<CamouflageEffect>();
-				if (cam != null)
-				{
-					cam.Stop();
-				}
-				//Andraste
-				try
-				{
-					GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, "BlanketOfCamouflage");
-					if (effect != null) effect.Cancel(false);
-				}
-				catch (Exception) { }
-
 				Out.SendPlayerModelTypeChange(this, 2);
 				if (m_stealthEffect != null) m_stealthEffect.Stop();
 				m_stealthEffect = null;
@@ -13107,8 +12703,6 @@ namespace DOL.GS
 				return false;
 			if (!IsAlive)
 				return false;
-			if (enemy.EffectList.GetOfType<VanishEffect>() != null)
-				return false;
 			if (this.Client.Account.PrivLevel > 1)
 				return true;
 			if (enemy.Client.Account.PrivLevel > 1)
@@ -13129,64 +12723,8 @@ namespace DOL.GS
 			int levelDiff = this.Level - EnemyStealthLevel;
 			if (levelDiff < 0) levelDiff = 0;
 
-			int range;
-			bool enemyHasCamouflage = enemy.EffectList.GetOfType<CamouflageEffect>() != null;
-			if (HasAbility(Abilities.DetectHidden) && !enemy.HasAbility(Abilities.DetectHidden) && !enemyHasCamouflage)
-			{
-				// we have detect hidden and enemy don't = higher range
-				range = levelDiff * 50 + 250; // Detect Hidden advantage
-			}
-			else
-			{
-				range = levelDiff * 20 + 125; // Normal detection range
-			}
-
-			// Mastery of Stealth Bonus
-			RAPropertyEnhancer mos = GetAbility<MasteryOfStealthAbility>();
-			if (mos != null && !enemyHasCamouflage)
-				if (!HasAbility(Abilities.DetectHidden) || !enemy.HasAbility(Abilities.DetectHidden))
-					range += mos.GetAmountForLevel(CalculateSkillLevel(mos));
-			
+			int range = levelDiff * 20 + 125; // Normal detection range			
 			range += BaseBuffBonusCategory[(int)eProperty.Skill_Stealth];
-
-			//Buff (Stealth Detection)
-			//Increases the target's ability to detect stealthed players and monsters.
-			GameSpellEffect iVampiirEffect = SpellHandler.FindEffectOnTarget((GameLiving)this, "VampiirStealthDetection");
-			if (iVampiirEffect != null)
-				range += (int)iVampiirEffect.Spell.Value;
-			
-			//Infill Only - Greater Chance to Detect Stealthed Enemies for 1 minute
-			//after executing a klling blow on a realm opponent.
-			GameSpellEffect HeightenedAwareness = SpellHandler.FindEffectOnTarget((GameLiving)this, "HeightenedAwareness");
-			if (HeightenedAwareness != null)
-				range += (int)HeightenedAwareness.Spell.Value;
-
-			//Nightshade Only - Greater chance of remaining hidden while stealthed for 1 minute
-			//after executing a killing blow on a realm opponent.
-			GameSpellEffect SubtleKills = SpellHandler.FindEffectOnTarget((GameLiving)enemy, "SubtleKills");
-			if (SubtleKills != null)
-			{
-				range -= (int)SubtleKills.Spell.Value;
-				if (range < 0) range = 0;
-			}
-
-			// Apply Blanket of camouflage effect
-			GameSpellEffect iSpymasterEffect1 = SpellHandler.FindEffectOnTarget((GameLiving)enemy, "BlanketOfCamouflage");
-			if (iSpymasterEffect1 != null)
-			{
-				range -= (int)iSpymasterEffect1.Spell.Value;
-				if (range < 0) range = 0;
-			}
-
-			// Apply Lookout effect
-			GameSpellEffect iSpymasterEffect2 = SpellHandler.FindEffectOnTarget((GameLiving)this, "Loockout");
-			if (iSpymasterEffect2 != null)
-				range += (int)iSpymasterEffect2.Spell.Value;
-
-			// Apply Prescience node effect
-			GameSpellEffect iConvokerEffect = SpellHandler.FindEffectOnTarget((GameLiving)enemy, "Prescience");
-			if (iConvokerEffect != null)
-				range += (int)iConvokerEffect.Spell.Value;
 
 			//Hard cap is 1900
 			if (range > 1900)
@@ -14212,105 +13750,6 @@ namespace DOL.GS
 
 			Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CommandNpcAttack.Denfensive", npc.Body.GetName(0, false)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			npc.SetAggressionState(eAggressionState.Defensive);
-		}
-		#endregion
-
-		#region Shade
-
-		protected ShadeEffect m_ShadeEffect = null;
-
-		/// <summary>
-		/// The shade effect of this player
-		/// </summary>
-		public ShadeEffect ShadeEffect
-		{
-			get { return m_ShadeEffect; }
-			set { m_ShadeEffect = value; }
-		}
-
-		/// <summary>
-		/// Gets flag indication whether player is in shade mode
-		/// </summary>
-		public bool IsShade
-		{
-			get
-			{
-				bool shadeModel = Model == ShadeModel;
-				return m_ShadeEffect != null ? true : shadeModel;
-			}
-		}
-
-		/// <summary>
-		/// Create a shade effect for this player.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual ShadeEffect CreateShadeEffect()
-		{
-			return CharacterClass.CreateShadeEffect();
-		}
-
-		/// <summary>
-		/// The model ID used on character creation.
-		/// </summary>
-		public ushort CreationModel
-		{
-			get
-			{
-				return (ushort)m_client.Account.Characters[m_client.ActiveCharIndex].CreationModel;
-			}
-		}
-
-		/// <summary>
-		/// The model ID used for shade morphs.
-		/// </summary>
-		public ushort ShadeModel
-		{
-			get
-			{
-				// Aredhel: Bit fishy, necro in caster from could use
-				// Traitor's Dagger... FIXME!
-
-				if (CharacterClass.ID == (int)eCharacterClass.Necromancer)
-					return 822;
-				
-				switch (Race)
-				{
-						// Albion Models.
-						case (int)eRace.Inconnu: return (ushort)(DBCharacter.Gender + 1351);
-						case (int)eRace.Briton: return (ushort)(DBCharacter.Gender + 1353);
-						case (int)eRace.Avalonian: return (ushort)(DBCharacter.Gender + 1359);
-						case (int)eRace.Highlander: return (ushort)(DBCharacter.Gender + 1355);
-						case (int)eRace.Saracen: return (ushort)(DBCharacter.Gender + 1357);
-						case (int)eRace.HalfOgre: return (ushort)(DBCharacter.Gender + 1361);
-
-						// Midgard Models.
-						case (int)eRace.Troll: return (ushort)(DBCharacter.Gender + 1363);
-						case (int)eRace.Dwarf: return (ushort)(DBCharacter.Gender + 1369);
-						case (int)eRace.Norseman: return (ushort)(DBCharacter.Gender + 1365);
-						case (int)eRace.Kobold: return (ushort)(DBCharacter.Gender + 1367);
-						case (int)eRace.Valkyn: return (ushort)(DBCharacter.Gender + 1371);
-						case (int)eRace.Frostalf: return (ushort)(DBCharacter.Gender + 1373);
-
-						// Hibernia Models.
-						case (int)eRace.Firbolg: return (ushort)(DBCharacter.Gender + 1375);
-						case (int)eRace.Celt: return (ushort)(DBCharacter.Gender + 1377);
-						case (int)eRace.Lurikeen: return (ushort)(DBCharacter.Gender + 1379);
-						case (int)eRace.Elf: return (ushort)(DBCharacter.Gender + 1381);
-						case (int)eRace.Sylvan: return (ushort)(DBCharacter.Gender + 1383);
-						case (int)eRace.Shar: return (ushort)(DBCharacter.Gender + 1385);
-						
-						default: return Model;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Changes shade state of the player.
-		/// </summary>
-		/// <param name="state">The new state.</param>
-		public virtual void Shade(bool state)
-		{
-			CharacterClass.Shade(state);
 		}
 		#endregion
 
@@ -15703,126 +15142,6 @@ namespace DOL.GS
 			return this.GetBonusesInfo();
 		}
 		#endregion
-
-		#region Combat Calc (unused ?)
-		public virtual double GetEvadeChance()
-		{
-			double evadeChance = 0;
-
-			GameSpellEffect evade = SpellHandler.FindEffectOnTarget(this, "EvadeBuff");
-			if (evade == null)
-				evade = SpellHandler.FindEffectOnTarget(this, "SavageEvadeBuff");
-
-			if (HasAbility(Abilities.Advanced_Evade) || EffectList.GetOfType<CombatAwarenessEffect>() != null || EffectList.GetOfType<RuneOfUtterAgilityEffect>() != null)
-				evadeChance = GetModified(eProperty.EvadeChance);
-			else if (evade != null || HasAbility(Abilities.Evade))
-			{
-				int res = GetModified(eProperty.EvadeChance);
-				if (res > 0)
-					evadeChance = res;
-			}
-			
-			if (evadeChance > 0)
-			{
-				evadeChance *= 0.001;
-				if (evadeChance < 0.01)
-					evadeChance = 0.01;
-				if (evadeChance > 0.5)
-					evadeChance = 0.5;
-			}
-			return Math.Round(evadeChance*10000)/100;
-		}
-		
-		public virtual double GetBlockChance()
-		{
-			double blockChance = 0;
-			InventoryItem lefthand = null;
-			if (HasAbility(Abilities.Shield))
-			{
-				lefthand = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-				if (lefthand != null && (AttackWeapon == null || AttackWeapon.Item_Type == Slot.RIGHTHAND || AttackWeapon.Item_Type == Slot.LEFTHAND))
-				{
-					if (lefthand.Object_Type == (int)eObjectType.Shield)
-						blockChance = GetModified(eProperty.BlockChance) * lefthand.Quality * 0.01;
-				}
-			}
-			if (blockChance > 0)
-			{
-				blockChance *= 0.001;
-				if (blockChance > 0.99) blockChance = 0.99;
-				if (blockChance < 0.01) blockChance = 0.01;
-
-				int shieldSize = 0;
-				if (lefthand != null)
-					shieldSize = lefthand.Type_Damage;
-			}
-
-			return Math.Round(blockChance*10000)/100;
-		}
-		
-		public virtual double GetParryChance()
-		{
-			double parryChance = 0;
-			
-			GameSpellEffect parry = SpellHandler.FindEffectOnTarget(this, "ParryBuff");
-			if (parry == null)
-				parry = SpellHandler.FindEffectOnTarget(this, "SavageParryBuff");
-			
-			if ((HasSpecialization(Specs.Parry) || parry != null) && (AttackWeapon != null))
-				parryChance = GetModified(eProperty.ParryChance);
-			else if (EffectList.GetOfType<BladeBarrierEffect>() != null)
-				parryChance = GetModified(eProperty.ParryChance);
-
-			if (parryChance > 0)
-			{
-				parryChance *= 0.001;
-				if (parryChance < 0.01) parryChance = 0.01;
-				if (parryChance > 0.99) parryChance = 0.99;
-			}
-			
-			return Math.Round(parryChance*10000)/100;
-		}
-		#endregion
-
-		#region Bodyguard
-		/// <summary>
-		/// True, if the player has been standing still for at least 3 seconds,
-		/// else false.
-		/// </summary>
-		private bool IsStandingStill
-		{
-			get
-			{
-				if (IsMoving)
-					return false;
-
-				long lastMovementTick = TempProperties.getProperty<long>("PLAYERPOSITION_LASTMOVEMENTTICK");
-				return (CurrentRegion.Time - lastMovementTick > 3000);
-			}
-		}
-
-		/// <summary>
-		/// This player's bodyguard (ML ability) or null, if there is none.
-		/// </summary>
-		public GamePlayer Bodyguard
-		{
-			get
-			{
-				var bodyguardEffects = EffectList.GetAllOfType<BodyguardEffect>();
-
-				BodyguardEffect bodyguardEffect = bodyguardEffects.FirstOrDefault();
-				if (bodyguardEffect == null || bodyguardEffect.GuardTarget != this)
-					return null;
-
-				GamePlayer guard = bodyguardEffect.GuardSource;
-				GamePlayer guardee = this;
-
-				return (guard.IsAlive && guard.IsWithinRadius(guardee, BodyguardAbilityHandler.BODYGUARD_DISTANCE) &&
-				        !guard.IsCasting && guardee.IsStandingStill)
-					? guard
-					: null;
-			}
-		}
-		#endregion
+        
 	}
 }
