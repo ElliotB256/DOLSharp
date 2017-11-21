@@ -66,58 +66,6 @@ namespace DOL.GS.PacketHandler
 	            sortList.Add(3, null);
 	            sortList.Add(4, null);
 	            sortList.Add(5, null);
-	            lock (player.EffectList)
-	            {
-	                foreach (IGameEffect fx in player.EffectList)
-	                {
-	                    if (fx is GameSpellEffect)
-	                    {
-	                        GameSpellEffect effect = (GameSpellEffect)fx;
-	                        if (effect.SpellHandler.Spell != null && (effect.SpellHandler.Spell.SpellType == "Chamber"))
-	                        {
-	                            ChamberSpellHandler chamber = (ChamberSpellHandler)effect.SpellHandler;
-	                            sortList[chamber.EffectSlot] = effect;
-	                        }
-	                    }
-	                }
-	                foreach (GameSpellEffect effect in sortList.Values)
-	                {
-	                    if (effect == null)
-	                    {
-	                        pak.WriteByte((byte)0);
-	                    }
-	                    else
-	                    {
-	                        ChamberSpellHandler chamber = (ChamberSpellHandler)effect.SpellHandler;
-	                        if (chamber.PrimarySpell != null && chamber.SecondarySpell == null)
-	                        {
-	                            pak.WriteByte((byte)3);
-	                        }
-	                        else if (chamber.PrimarySpell != null && chamber.SecondarySpell != null)
-	                        {
-	                            if (chamber.SecondarySpell.SpellType == "Lifedrain")
-	                                pak.WriteByte(0x11);
-	                            else if (chamber.SecondarySpell.SpellType.IndexOf("SpeedDecrease") != -1)
-	                                pak.WriteByte(0x33);
-	                            else if (chamber.SecondarySpell.SpellType == "PowerRegenBuff")
-	                                pak.WriteByte(0x77);
-	                            else if (chamber.SecondarySpell.SpellType == "DirectDamage")
-	                                pak.WriteByte(0x66);
-	                            else if (chamber.SecondarySpell.SpellType == "SpreadHeal")
-	                                pak.WriteByte(0x55);
-	                            else if (chamber.SecondarySpell.SpellType == "Nearsight")
-	                                pak.WriteByte(0x44);
-	                            else if (chamber.SecondarySpell.SpellType == "DamageOverTime")
-	                                pak.WriteByte(0x22);
-	                        }
-	                    }
-	                }
-	            }
-	            //pak.WriteByte(0x11);
-	            //pak.WriteByte(0x22);
-	            //pak.WriteByte(0x33);
-	            //pak.WriteByte(0x44);
-	            //pak.WriteByte(0x55);
 	            pak.WriteInt(0);
 	
 	            foreach (GamePlayer plr in player.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))

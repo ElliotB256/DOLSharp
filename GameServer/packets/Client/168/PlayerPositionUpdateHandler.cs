@@ -585,8 +585,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				/* Are we on the ground? */
 				if ((flyingflag >> 15) != 0)
 				{
-					int safeFallLevel = client.Player.GetAbilityLevel(Abilities.SafeFall);
-					int fallSpeed = (flyingflag & 0xFFF) - 100 * safeFallLevel; // 0x7FF fall speed and 0x800 bit = fall speed overcaped
+					int fallSpeed = (flyingflag & 0xFFF); // 0x7FF fall speed and 0x800 bit = fall speed overcaped
 					int fallMinSpeed = 400;
 					int fallDivide = 6;
 					if (client.Version >= GameClient.eClientVersion.Version188)

@@ -40,9 +40,6 @@ namespace DOL.GS.PropertyCalc
 				-living.ItemBonus[(int)property]
 				- living.AbilityBonus[(int)property];
 
-			if (living.HasAbility(Abilities.Stoicism))
-				percent -= 25;
-
 			return Math.Max(1, percent);
 		}
 	}

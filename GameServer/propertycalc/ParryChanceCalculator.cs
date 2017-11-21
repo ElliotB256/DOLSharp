@@ -55,22 +55,7 @@ namespace DOL.GS.PropertyCalc
                 }
 				return parrySpec + buff;
 			}
-			NecromancerPet pet = living as NecromancerPet;
-			if (pet != null)
-			{
-				IControlledBrain brain = pet.Brain as IControlledBrain;
-				if (brain != null)
-				{
-					int buff = pet.BaseBuffBonusCategory[(int)property] * 10
-					+ pet.SpecBuffBonusCategory[(int)property] * 10
-					- pet.DebuffCategory[(int)property] * 10
-					+ pet.BuffBonusCategory4[(int)property] * 10
-					+ pet.AbilityBonus[(int)property] * 10
-					+ (pet.GetModified(eProperty.Dexterity) * 2 - 100) / 4
-					+ pet.ParryChance * 10;
-					return buff;
-				}
-			}			
+			
 			GameNPC npc = living as GameNPC;
 			if (npc != null)
 			{

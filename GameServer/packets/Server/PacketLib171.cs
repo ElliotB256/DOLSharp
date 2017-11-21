@@ -152,15 +152,6 @@ namespace DOL.GS.PacketHandler
 			if (m_gameClient.Player == null || npc.IsVisibleTo(m_gameClient.Player) == false)
 				return;
 
-			//Added by Suncheck - Mines are not shown to enemy players
-			if (npc is GameMine)
-			{
-				if (GameServer.ServerRules.IsAllowedToAttack((npc as GameMine).Owner, m_gameClient.Player, true))
-				{
-					return;
-				}
-			}
-
 			if (npc is GameMovingObject)
 			{
 				SendMovingObjectCreate(npc as GameMovingObject);

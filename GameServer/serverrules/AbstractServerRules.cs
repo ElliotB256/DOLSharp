@@ -407,15 +407,6 @@ namespace DOL.GS.ServerRules
 			if (defender is GameKeepGuard && attacker is GameNPC && attacker.Realm == 0)
 				return false;
 
-			//Checking for shadowed necromancer, can't be attacked.
-			if (defender.ControlledBrain != null)
-				if (defender.ControlledBrain.Body != null)
-					if (defender.ControlledBrain.Body is NecromancerPet)
-					{
-						if (quiet == false) MessageToLiving(attacker, "You can't attack a shadowed necromancer!");
-						return false;
-					}
-
 			return true;
 		}
 
@@ -1110,12 +1101,6 @@ namespace DOL.GS.ServerRules
 				{
 					GameLiving living = de.Key as GameLiving;
 					GamePlayer player = living as GamePlayer;
-
-					if (living is NecromancerPet)
-					{
-						NecromancerPet necroPet = living as NecromancerPet;
-						player = ((necroPet.Brain as IControlledBrain).Owner) as GamePlayer;
-					}
 
 					//Check stipulations
 					if (living == null || living.ObjectState != GameObject.eObjectState.Active || !living.IsWithinRadius(killedNPC, WorldMgr.MAX_EXPFORKILL_DISTANCE))
