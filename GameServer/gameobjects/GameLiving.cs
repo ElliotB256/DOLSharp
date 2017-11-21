@@ -1633,15 +1633,6 @@ namespace DOL.GS
 				return ad;
 			}
 
-			// DamageImmunity Ability
-			if ((GameLiving)target != null && ((GameLiving)target).HasAbility(Abilities.DamageImmunity))
-			{
-				//if (ad.Attacker is GamePlayer) ((GamePlayer)ad.Attacker).Out.SendMessage(string.Format("{0} can't be attacked!", ad.Target.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-				ad.AttackResult = eAttackResult.NoValidTarget;
-				return ad;
-			}
-
-
 			//Calculate our attack result and attack damage
 			ad.AttackResult = ad.Target.CalculateEnemyAttackResult(ad, weapon);
 
@@ -1672,27 +1663,6 @@ namespace DOL.GS
 					weaponTypeToUse = new InventoryItem();
 					weaponTypeToUse.Object_Type = weapon.Object_Type;
 					weaponTypeToUse.SlotPosition = weapon.SlotPosition;
-
-					if ((this is GamePlayer) && Realm == eRealm.Albion)
-					{
-						// Albion dual spec penalty, which sets minimum damage to the base damage spec
-
-						if (GameServer.ServerRules.IsObjectTypesEqual((eObjectType)weapon.Object_Type, eObjectType.TwoHandedWeapon) || GameServer.ServerRules.IsObjectTypesEqual((eObjectType)weapon.Object_Type, eObjectType.PolearmWeapon))
-						{
-							if (weapon.Type_Damage == (int)eDamageType.Crush)
-							{
-								weaponTypeToUse.Object_Type = (int)eObjectType.CrushingWeapon;
-							}
-							else if (weapon.Type_Damage == (int)eDamageType.Slash)
-							{
-								weaponTypeToUse.Object_Type = (int)eObjectType.SlashingWeapon;
-							}
-							else
-							{
-								weaponTypeToUse.Object_Type = (int)eObjectType.ThrustWeapon;
-							}
-						}
-					}
 				}
 
 				int lowerboundary = (WeaponSpecLevel(weaponTypeToUse) - 1) * 50 / (ad.Target.EffectiveLevel + 1) + 75;
@@ -1731,34 +1701,10 @@ namespace DOL.GS
 
 				ad.UncappedDamage = ad.Damage;
 
-				//Eden - Conversion Bonus (Crocodile Ring)  - tolakram - critical damage is always 0 here, needs to be moved
-				if (ad.Target is GamePlayer && ad.Target.GetModified(eProperty.Conversion) > 0)
-				{
-					int manaconversion = (int)Math.Round(((double)ad.Damage + (double)ad.CriticalDamage) * (double)ad.Target.GetModified(eProperty.Conversion) / 100);
-					//int enduconversion=(int)Math.Round((double)manaconversion*(double)ad.Target.MaxEndurance/(double)ad.Target.MaxMana);
-					int enduconversion = (int)Math.Round(((double)ad.Damage + (double)ad.CriticalDamage) * (double)ad.Target.GetModified(eProperty.Conversion) / 100);
-					if (ad.Target.Mana + manaconversion > ad.Target.MaxMana) manaconversion = ad.Target.MaxMana - ad.Target.Mana;
-					if (ad.Target.Endurance + enduconversion > ad.Target.MaxEndurance) enduconversion = ad.Target.MaxEndurance - ad.Target.Endurance;
-					if (manaconversion < 1) manaconversion = 0;
-					if (enduconversion < 1) enduconversion = 0;
-					if (manaconversion >= 1) (ad.Target as GamePlayer).Out.SendMessage(string.Format(LanguageMgr.GetTranslation((ad.Target as GamePlayer).Client.Account.Language, "GameLiving.AttackData.GainPowerPoints"), manaconversion), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-					if (enduconversion >= 1) (ad.Target as GamePlayer).Out.SendMessage(string.Format(LanguageMgr.GetTranslation((ad.Target as GamePlayer).Client.Account.Language, "GameLiving.AttackData.GainEndurancePoints"), enduconversion), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-					ad.Target.Endurance += enduconversion; if (ad.Target.Endurance > ad.Target.MaxEndurance) ad.Target.Endurance = ad.Target.MaxEndurance;
-					ad.Target.Mana += manaconversion; if (ad.Target.Mana > ad.Target.MaxMana) ad.Target.Mana = ad.Target.MaxMana;
-				}
-
 				// Tolakram - let's go ahead and make it 1 damage rather than spamming a possible error
 				if (ad.Damage == 0)
 				{
 					ad.Damage = 1;
-
-					// log this as a possible error if we should do some damage to target
-					//if (ad.Target.Level <= Level + 5 && weapon != null)
-					//{
-					//    log.ErrorFormat("Possible Damage Error: {0} Damage = 0 -> miss vs {1}.  AttackDamage {2}, weapon name {3}", Name, (ad.Target == null ? "null" : ad.Target.Name), AttackDamage(weapon), (weapon == null ? "None" : weapon.Name));
-					//}
-
-					//ad.AttackResult = eAttackResult.Missed;
 				}
 			}
 
@@ -1769,31 +1715,6 @@ namespace DOL.GS
 
 			// Attacked living may modify the attack data.  Primarily used for keep doors and components.
 			ad.Target.ModifyAttack(ad);
-
-			if (ad.AttackResult == eAttackResult.HitStyle)
-			{
-				if (this is GamePlayer)
-				{
-					GamePlayer player = this as GamePlayer;
-
-					string damageAmount = (ad.StyleDamage > 0) ? " (+" + ad.StyleDamage + ")" : "";
-					player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "StyleProcessor.ExecuteStyle.PerformPerfectly", ad.Style.Name, damageAmount), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				}
-				else if (this is GameNPC)
-				{
-					ControlledNpcBrain brain = ((GameNPC)this).Brain as ControlledNpcBrain;
-
-					if (brain != null)
-					{
-						GamePlayer owner = brain.GetPlayerOwner();
-						if (owner != null)
-						{
-							string damageAmount = (ad.StyleDamage > 0) ? " (+" + ad.StyleDamage + ")" : "";
-							owner.Out.SendMessage(LanguageMgr.GetTranslation(owner.Client.Account.Language, "StyleProcessor.ExecuteStyle.PerformsPerfectly", Name, ad.Style.Name, damageAmount), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-						}
-					}
-				}
-			}
 
 			string message = "";
 			bool broadcast = true;
