@@ -115,15 +115,6 @@ namespace DOL.GS.Spells
     [SpellHandlerAttribute("StrengthBuff")]
     public class StrengthBuff : SingleStatBuff
     {
-        public override void ApplyEffectOnTarget(GameLiving target, double effectiveness)
-        {
-            if (target.HasAbility(Abilities.VampiirStrength))
-            {
-                MessageToCaster("Your target already has an effect of that type!", eChatType.CT_Spell);
-                return;
-            }
-            base.ApplyEffectOnTarget(target, effectiveness);
-        }
         public override eProperty Property1 { get { return eProperty.Strength; } }
 
         // constructor
@@ -136,15 +127,6 @@ namespace DOL.GS.Spells
     [SpellHandlerAttribute("DexterityBuff")]
     public class DexterityBuff : SingleStatBuff
     {
-        public override void ApplyEffectOnTarget(GameLiving target, double effectiveness)
-        {
-            if (target.HasAbility(Abilities.VampiirDexterity))
-            {
-                MessageToCaster("Your target already has an effect of that type!", eChatType.CT_Spell);
-                return;
-            }
-            base.ApplyEffectOnTarget(target, effectiveness);
-        }
         public override eProperty Property1 { get { return eProperty.Dexterity; } }
 
         // constructor
@@ -157,15 +139,6 @@ namespace DOL.GS.Spells
     [SpellHandlerAttribute("ConstitutionBuff")]
     public class ConstitutionBuff : SingleStatBuff
     {
-        public override void ApplyEffectOnTarget(GameLiving target, double effectiveness)
-        {
-            if (target.HasAbility(Abilities.VampiirConstitution))
-            {
-                MessageToCaster("Your target already has an effect of that type!", eChatType.CT_Spell);
-                return;
-            }
-            base.ApplyEffectOnTarget(target, effectiveness);
-        }
         public override eProperty Property1 { get { return eProperty.Constitution; } }
 
         // constructor

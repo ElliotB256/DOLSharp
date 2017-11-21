@@ -103,9 +103,6 @@ namespace DOL.GS.Spells
 
 			SendEffectAnimation(player, 0, false, 1);
 
-			UniPortalEffect effect = new UniPortalEffect(this, 1000);
-			effect.Start(player);
-
 			player.MoveTo((ushort)player.BindRegion,	player.BindXpos, player.BindYpos, player.BindZpos, (ushort)player.BindHeading);
 		}
 

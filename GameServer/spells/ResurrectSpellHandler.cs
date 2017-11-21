@@ -174,10 +174,6 @@ namespace DOL.GS.Spells
 				player.UpdatePlayerStatus();
 				player.Out.SendMessage("You have been resurrected by " + m_caster.GetName(0, false) + "!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				player.Notify(GamePlayerEvent.Revive, player, new RevivedEventArgs(Caster, Spell));
-                
-                //Lifeflight add this should make it so players who have been ressurected don't take damage for 5 seconds
-                RezDmgImmunityEffect rezImmune = new RezDmgImmunityEffect();
-                rezImmune.Start(player);
 
 				IList<GameObject> attackers;
 				lock (player.Attackers) { attackers = new List<GameObject>(player.Attackers); }

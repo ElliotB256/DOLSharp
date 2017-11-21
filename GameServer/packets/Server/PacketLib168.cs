@@ -1172,7 +1172,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort(m_gameClient.Player.LevelPermill);
 				pak.WriteShort((ushort) m_gameClient.Player.SkillSpecialtyPoints);
 				pak.WriteInt((uint) m_gameClient.Player.BountyPoints);
-				pak.WriteShort((ushort) m_gameClient.Player.RealmSpecialtyPoints);
+				pak.WriteShort((ushort) 0); //RealmSpecPoints
 				pak.WriteShort(0); // unknown
 				SendTCP(pak);
 			}
@@ -2191,7 +2191,7 @@ namespace DOL.GS.PacketHandler
 				//todo i think it s realmpoint percent not realrank
 				pak.WriteByte((byte) player.RealmLevel); //urealm rank
 				pak.WritePascalString(player.RealmRankTitle(player.Client.Account.Language)); // Realm title
-				pak.WriteByte((byte) player.RealmSpecialtyPoints); // realm skill points
+				pak.WriteByte((byte) 0); // realm skill points
 				pak.WritePascalString(player.CharacterClass.BaseName); // base class
 				pak.WriteByte((byte) (HouseMgr.GetHouseNumberByPlayer(player) >> 8)); // personal house high byte
 				pak.WritePascalString(player.GuildName); // Guild name
@@ -2216,7 +2216,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteByte(0x0);
 				pak.WritePascalString(player.CraftTitle.GetValue(player, player)); //crafter title: legendary alchemist
 				pak.WriteByte(0x0);
-				pak.WritePascalString(player.MLTitle.GetValue(player, player)); //ML title
+				pak.WritePascalString(""); //ML title
 				SendTCP(pak);
 			}
 		}
@@ -2777,30 +2777,6 @@ namespace DOL.GS.PacketHandler
 					pak.WriteByte((byte) (spec.Level + 1));
 					pak.WritePascalString(spec.Name);
 				}
-				SendTCP(pak);
-			}
-
-
-			// send RA usable by this class
-			var raList = SkillBase.GetClassRealmAbilities(m_gameClient.Player.CharacterClass.ID).Where(ra => !(ra is RR5RealmAbility));
-			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.TrainerWindow)))
-			{
-				pak.WriteByte((byte) raList.Count());
-				pak.WriteByte((byte) m_gameClient.Player.RealmSpecialtyPoints);
-				pak.WriteByte(1);
-				pak.WriteByte(0);
-
-				int i = 0;
-				foreach (RealmAbility ra in raList)
-				{
-					int level = m_gameClient.Player.GetAbilityLevel(ra.KeyName);
-					pak.WriteByte((byte) i++);
-					pak.WriteByte((byte) level);
-					pak.WriteByte((byte) ra.CostForUpgrade(level));
-					bool canBeUsed = ra.CheckRequirement(m_gameClient.Player);
-					pak.WritePascalString(canBeUsed ? ra.Name : string.Format("[{0}]", ra.Name));
-				}
-
 				SendTCP(pak);
 			}
 		}

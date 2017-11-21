@@ -68,7 +68,7 @@ namespace DOL.GS.PacketHandler
 				//todo i think it s realmpoint percent not realrank
 				pak.WriteByte((byte) player.RealmLevel); //urealm rank
 				pak.WritePascalString(player.RealmRankTitle(player.Client.Account.Language)); // Realm title
-				pak.WriteByte((byte) player.RealmSpecialtyPoints); // realm skill points
+				pak.WriteByte((byte)0); // realm skill points
 				pak.WritePascalString(player.CharacterClass.BaseName); // base class
 				pak.WriteByte((byte)(HouseMgr.GetHouseNumberByPlayer(player) >> 8)); // personal house high byte
 				pak.WritePascalString(player.GuildName); // Guild name
@@ -93,7 +93,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteByte(0x0);
 				pak.WritePascalString(player.CraftTitle.GetValue(player, player)); //crafter title: legendary alchemist
 				pak.WriteByte(0x0);
-				pak.WritePascalString(player.MLTitle.GetValue(player, player)); //ML title
+				pak.WritePascalString(""); //ML title
 	
 				// new in 1.75
 				pak.WriteByte(0x0);
@@ -122,7 +122,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort(m_gameClient.Player.LevelPermill);
 				pak.WriteShort((ushort) m_gameClient.Player.SkillSpecialtyPoints);
 				pak.WriteInt((uint)m_gameClient.Player.BountyPoints);
-				pak.WriteShort((ushort) m_gameClient.Player.RealmSpecialtyPoints);
+				pak.WriteShort((ushort) 0);
 				pak.WriteShort(m_gameClient.Player.ChampionLevelPermill);
 				SendTCP(pak);
 			}

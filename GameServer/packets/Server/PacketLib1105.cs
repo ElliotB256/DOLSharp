@@ -78,28 +78,6 @@ namespace DOL.GS.PacketHandler
 				}
 				SendTCP(pak);
 			}
-
-			// send RA usable by this class
-			var raList = SkillBase.GetClassRealmAbilities(m_gameClient.Player.CharacterClass.ID).Where(ra => !(ra is RR5RealmAbility));
-			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.TrainerWindow)))
-			{
-				pak.WriteByte((byte)raList.Count());
-				pak.WriteByte((byte)player.RealmSpecialtyPoints);
-				pak.WriteByte(1); // RA Code
-				pak.WriteByte(0);
-
-				int i = 0;
-				foreach (RealmAbility ra in raList)
-				{
-					int level = player.GetAbilityLevel(ra.KeyName);
-					pak.WriteByte((byte)i++);
-					pak.WriteByte((byte)level);
-					pak.WriteByte((byte)ra.CostForUpgrade(level));
-					bool canBeUsed = ra.CheckRequirement(player);
-					pak.WritePascalString(canBeUsed ? ra.Name : string.Format("[{0}]", ra.Name));
-				}
-				SendTCP(pak);
-			}
 			
 			// Send Name Index for each spec.
 			// Get ALL skills for player, ordered by spec key.
@@ -275,32 +253,6 @@ namespace DOL.GS.PacketHandler
 				}
 				
 				SendTCP(pakskill);
-			}
-
-			// type 5 (realm abilities)
-			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.TrainerWindow)))
-			{
-				pak.WriteByte((byte)raList.Count());
-				pak.WriteByte((byte)player.RealmSpecialtyPoints);
-				pak.WriteByte(5);
-				pak.WriteByte(0);
-
-				foreach (RealmAbility ra in raList)
-				{
-					pak.WriteByte((byte)player.GetAbilityLevel(ra.KeyName));
-					
-					pak.WriteByte(0);
-					pak.WriteByte((byte)ra.MaxLevel);
-
-					for (int i = 0; i < ra.MaxLevel; i++)
-						pak.WriteByte((byte)ra.CostForUpgrade(i));
-
-					if (ra.CheckRequirement(m_gameClient.Player))
-						pak.WritePascalString(ra.KeyName);
-					else
-						pak.WritePascalString(string.Format("[{0}]", ra.Name));
-				}
-				SendTCP(pak);
 			}
 		}
 	}

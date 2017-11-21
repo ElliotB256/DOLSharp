@@ -5509,15 +5509,6 @@ namespace DOL.GS
 				return;
 			}
 
-			// Necromancer with summoned pet cannot attack
-			if (ControlledBrain != null)
-				if (ControlledBrain.Body != null)
-					if (ControlledBrain.Body is NecromancerPet)
-			{
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantInShadeMode"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
 			if (IsStunned)
 			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantAttackStunned"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
@@ -5526,21 +5517,6 @@ namespace DOL.GS
 			if (IsMezzed)
 			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantAttackmesmerized"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			long vanishTimeout = TempProperties.getProperty<long>(VanishEffect.VANISH_BLOCK_ATTACK_TIME_KEY);
-			if (vanishTimeout > 0 && vanishTimeout > CurrentRegion.Time)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.YouMustWaitAgain", (vanishTimeout - CurrentRegion.Time + 1000) / 1000), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			long VanishTick = this.TempProperties.getProperty<long>(VanishEffect.VANISH_BLOCK_ATTACK_TIME_KEY);
-			long changeTime = this.CurrentRegion.Time - VanishTick;
-			if (changeTime < 30000 && VanishTick > 0)
-			{
-				this.Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.YouMustWait", ((30000 - changeTime) / 1000).ToString()), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
 				return;
 			}
 
@@ -5590,30 +5566,6 @@ namespace DOL.GS
 				{
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantUseQuiver"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
 					return;
-				}
-
-				lock (EffectList)
-				{
-					foreach (IGameEffect effect in EffectList) // switch to the correct range attack type
-					{
-						if (effect is SureShotEffect)
-						{
-							RangedAttackType = eRangedAttackType.SureShot;
-							break;
-						}
-
-						if (effect is RapidFireEffect)
-						{
-							RangedAttackType = eRangedAttackType.RapidFire;
-							break;
-						}
-
-						if (effect is TrueshotEffect)
-						{
-							RangedAttackType = eRangedAttackType.Long;
-							break;
-						}
-					}
 				}
 
 				if (RangedAttackType == eRangedAttackType.Critical && Endurance < CRITICAL_SHOT_ENDURANCE)
@@ -6141,42 +6093,6 @@ namespace DOL.GS
 
 			switch (ad.AttackResult)
 			{
-				case eAttackResult.HitStyle:
-				case eAttackResult.HitUnstyled:
-					{
-						//keep component
-						if ((ad.Target is GameKeepComponent || ad.Target is GameKeepDoor || ad.Target is GameSiegeWeapon) && ad.Attacker is GamePlayer && ad.Attacker.GetModified(eProperty.KeepDamage) > 0)
-						{
-							int keepdamage = (int)Math.Floor((double)ad.Damage * ((double)ad.Attacker.GetModified(eProperty.KeepDamage) / 100));
-							int keepstyle = (int)Math.Floor((double)ad.StyleDamage * ((double)ad.Attacker.GetModified(eProperty.KeepDamage) / 100));
-							ad.Damage += keepdamage;
-							ad.StyleDamage += keepstyle;
-						}
-						// vampiir
-						if (CharacterClass is PlayerClass.ClassVampiir
-						    && target is GameKeepComponent == false
-						    && target is GameKeepDoor == false
-						    && target is GameSiegeWeapon == false)
-						{
-							int perc = Convert.ToInt32(((double)(ad.Damage + ad.CriticalDamage) / 100) * (55 - this.Level));
-							perc = (perc < 1) ? 1 : ((perc > 15) ? 15 : perc);
-							this.Mana += Convert.ToInt32(Math.Ceiling(((Decimal)(perc * this.MaxMana) / 100)));
-						}
-
-						//only miss when strafing when attacking a player
-						//30% chance to miss
-						if (IsStrafing && ad.Target is GamePlayer && Util.Chance(30))
-						{
-							ad.AttackResult = eAttackResult.Missed;
-							Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.StrafMiss"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-							break;
-						}
-						break;
-					}
-			}
-
-			switch (ad.AttackResult)
-			{
 				case eAttackResult.Blocked:
 				case eAttackResult.Fumbled:
 				case eAttackResult.HitStyle:
@@ -6190,113 +6106,6 @@ namespace DOL.GS
 					if (weapon != null && weapon is GameInventoryItem)
 					{
 						(weapon as GameInventoryItem).OnStrikeTarget(this, target);
-					}
-					//Camouflage - Camouflage will be disabled only when attacking a GamePlayer or ControlledNPC of a GamePlayer.
-					if (HasAbility(Abilities.Camouflage) && target is GamePlayer || (target is GameNPC && (target as GameNPC).Brain is IControlledBrain && ((target as GameNPC).Brain as IControlledBrain).GetPlayerOwner() != null))
-					{
-						CamouflageEffect camouflage = EffectList.GetOfType<CamouflageEffect>();
-												
-						if (camouflage != null)// Check if Camo is active, if true, cancel ability.
-						{
-							camouflage.Cancel(false);						
-						}
-						Skill camo = SkillBase.GetAbility(Abilities.Camouflage); // now we find the ability
-						DisableSkill(camo, CamouflageSpecHandler.DISABLE_DURATION); // and here we disable it.
-					}
-
-					// Multiple Hit check
-					if (ad.AttackResult == eAttackResult.HitStyle)
-					{
-						byte numTargetsCanHit = 0;
-						int random;
-						IList extraTargets = new ArrayList();
-						IList listAvailableTargets = new ArrayList();
-						InventoryItem attackWeapon = AttackWeapon;
-						InventoryItem leftWeapon = (Inventory == null) ? null : Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-						switch (style.ID)
-						{
-								case 374: numTargetsCanHit = 1; break; //Tribal Assault:   Hits 2 targets
-								case 377: numTargetsCanHit = 1; break; //Clan's Might:      Hits 2 targets
-								case 379: numTargetsCanHit = 2; break; //Totemic Wrath:      Hits 3 targets
-								case 384: numTargetsCanHit = 3; break; //Totemic Sacrifice:   Hits 4 targets
-								case 600: numTargetsCanHit = 255; break; //Shield Swipe: No Cap on Targets
-								default: numTargetsCanHit = 0; break; //For others;
-						}
-						if (numTargetsCanHit > 0)
-						{
-							if (style.ID != 600) // Not Shield Swipe
-							{
-								foreach (GamePlayer pl in GetPlayersInRadius(false, (ushort)AttackRange))
-								{
-									if (pl == null) continue;
-									if (GameServer.ServerRules.IsAllowedToAttack(this, pl, true))
-									{
-										listAvailableTargets.Add(pl);
-									}
-								}
-								foreach (GameNPC npc in GetNPCsInRadius(false, (ushort)AttackRange))
-								{
-									if (GameServer.ServerRules.IsAllowedToAttack(this, npc, true))
-									{
-										listAvailableTargets.Add(npc);
-									}
-								}
-
-								// remove primary target
-								listAvailableTargets.Remove(target);
-								numTargetsCanHit = (byte)Math.Min(numTargetsCanHit, listAvailableTargets.Count);
-
-								if (listAvailableTargets.Count > 1)
-								{
-									while (extraTargets.Count < numTargetsCanHit)
-									{
-										random = Util.Random(listAvailableTargets.Count - 1);
-										if (!extraTargets.Contains(listAvailableTargets[random]))
-											extraTargets.Add(listAvailableTargets[random] as GameObject);
-									}
-									foreach (GameObject obj in extraTargets)
-									{
-										if (obj is GamePlayer && ((GamePlayer)obj).IsSitting)
-										{
-											effectiveness *= 2;
-										}
-										new WeaponOnTargetAction(this, obj as GameObject, attackWeapon, leftWeapon, effectiveness, AttackSpeed(attackWeapon), null).Start(1);  // really start the attack
-									}
-								}
-							}
-							else // shield swipe
-							{
-								foreach (GameNPC npc in GetNPCsInRadius(false, (ushort)AttackRange))
-								{
-									if (GameServer.ServerRules.IsAllowedToAttack(this, npc, true))
-									{
-										listAvailableTargets.Add(npc);
-									}
-								}
-
-								listAvailableTargets.Remove(target);
-								numTargetsCanHit = (byte)Math.Min(numTargetsCanHit, listAvailableTargets.Count);
-
-								if (listAvailableTargets.Count > 1)
-								{
-									while (extraTargets.Count < numTargetsCanHit)
-									{
-										random = Util.Random(listAvailableTargets.Count - 1);
-										if (!extraTargets.Contains(listAvailableTargets[random]))
-										{
-											extraTargets.Add(listAvailableTargets[random] as GameObject);
-										}
-									}
-									foreach (GameNPC obj in extraTargets)
-									{
-										if (obj != ad.Target)
-										{
-											this.MakeAttack(obj, attackWeapon, null, 1, ServerProperties.Properties.SPELL_INTERRUPT_DURATION, false, false);
-										}
-									}
-								}
-							}
-						}
 					}
 					break;
 			}
@@ -6323,35 +6132,9 @@ namespace DOL.GS
 		{
 			if (Util.Chance(AttackCriticalChance(weapon)))
 			{
-				// triple wield prevents critical hits
-				if (ad.Target.EffectList.GetOfType<TripleWieldEffect>() != null) return 0;
+				int critMin = (int)(0.01 * ad.Damage);
+				int	critMax = ad.Damage;
 
-				int critMin;
-				int critMax;
-				BerserkEffect berserk = EffectList.GetOfType<BerserkEffect>();
-
-				if (berserk != null)
-				{
-					int level = GetAbilityLevel(Abilities.Berserk);
-					// According to : http://daoc.catacombs.com/forum.cfm?ThreadKey=10833&DefMessage=922046&forum=37
-					// Zerk 1 = 1-25%
-					// Zerk 2 = 1-50%
-					// Zerk 3 = 1-75%
-					// Zerk 4 = 1-99%
-					critMin = (int)(0.01 * ad.Damage);
-					critMax = (int)(Math.Min(0.99, (level * 0.25)) * ad.Damage);
-				}
-				else
-				{
-					//think min crit dmage is 10% of damage
-					critMin = ad.Damage / 10;
-					// Critical damage to players is 50%, low limit should be around 20% but not sure
-					// zerkers in Berserk do up to 99%
-					if (ad.Target is GamePlayer)
-						critMax = ad.Damage >> 1;
-					else
-						critMax = ad.Damage;
-				}
 				critMin = Math.Max(critMin, 0);
 				critMax = Math.Max(critMin, critMax);
 
@@ -6584,22 +6367,7 @@ namespace DOL.GS
 
 		public override void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
 		{
-
-			#region PVP DAMAGE
-
-			if (source is GamePlayer || (source is GameNPC && (source as GameNPC).Brain is IControlledBrain && ((source as GameNPC).Brain as IControlledBrain).GetPlayerOwner() != null))
-			{
-				if (Realm != source.Realm && source.Realm != 0)
-					DamageRvRMemory += (long)(damageAmount + criticalAmount);
-			}
-
-			#endregion PVP DAMAGE
-
 			base.TakeDamage(source, damageType, damageAmount, criticalAmount);
-			if(this.HasAbility(Abilities.DefensiveCombatPowerRegeneration))
-			{
-				this.Mana += (int)((damageAmount + criticalAmount) * 0.25);
-			}
 		}
 
 		/// <summary>
@@ -7200,30 +6968,7 @@ namespace DOL.GS
 
 			if (bowWeapon)
 			{
-				if (ServerProperties.Properties.ALLOW_OLD_ARCHERY)
-				{
-					//Draw Time formulas, there are very many ...
-					//Formula 2: y = iBowDelay * ((100 - ((iQuickness - 50) / 5 + iMasteryofArcheryLevel * 3)) / 100)
-					//Formula 1: x = (1 - ((iQuickness - 60) / 500 + (iMasteryofArcheryLevel * 3) / 100)) * iBowDelay
-					//Table a: Formula used: drawspeed = bowspeed * (1-(quickness - 50)*0.002) * ((1-MoA*0.03) - (archeryspeedbonus/100))
-					//Table b: Formula used: drawspeed = bowspeed * (1-(quickness - 50)*0.002) * (1-MoA*0.03) - ((archeryspeedbonus/100 * basebowspeed))
-
-					//For now use the standard weapon formula, later add ranger haste etc.
-					speed *= (1.0 - (qui - 60) * 0.002);
-					double percent = 0;
-					// Calcul ArcherySpeed bonus to substract
-					percent = speed * 0.01 * GetModified(eProperty.ArcherySpeed);
-					// Apply RA difference
-					speed -= percent;
-					//log.Debug("speed = " + speed + " percent = " + percent + " eProperty.archeryspeed = " + GetModified(eProperty.ArcherySpeed));
-					if (RangedAttackType == eRangedAttackType.Critical)
-						speed = speed * 2 - (GetAbilityLevel(Abilities.Critical_Shot) - 1) * speed / 10;
-				}
-				else
-				{
-					// no archery bonus
-					speed *= (1.0 - (qui - 60) * 0.002);
-				}
+				speed *= (1.0 - (qui - 60) * 0.002);
 			}
 			else
 			{
@@ -7837,7 +7582,7 @@ namespace DOL.GS
             {
                 if (m_runningSpellHandler != null)
                 {
-                    if (spell.CastTime > 0 && !(m_runningSpellHandler is ChamberSpellHandler) && spell.SpellType != "Chamber")
+                    if (spell.CastTime > 0)
                     {
                         if (SpellQueue)
                         {
@@ -7922,23 +7667,6 @@ namespace DOL.GS
 			{
 				return ticks;
 			}
-
-			if (CharacterClass.CanChangeCastingSpeed(line, spell) == false)
-				return ticks;
-
-			if (EffectList.GetOfType<QuickCastEffect>() != null)
-			{
-				// Most casters have access to the Quickcast ability (or the Necromancer equivalent, Facilitate Painworking).
-				// This ability will allow you to cast a spell without interruption.
-				// http://support.darkageofcamelot.com/kb/article.php?id=022
-
-				// A: You're right. The answer I should have given was that Quick Cast reduces the time needed to cast to a flat two seconds,
-				// and that a spell that has been quick casted cannot be interrupted. ...
-				// http://www.camelotherald.com/news/news_article.php?storyid=1383
-
-				return 2000;
-			}
-
 
 			double percent = DexterityCastTimeReduction;
 
@@ -11760,14 +11488,6 @@ namespace DOL.GS
 			
 			StringBuilder sra = new StringBuilder();
 			
-			foreach (RealmAbility rab in m_realmAbilities)
-			{
-				if (sra.Length > 0)
-					sra.Append(";");
-				
-				sra.AppendFormat("{0}|{1}", rab.KeyName, rab.Level);
-			}
-			
 			if (DBCharacter != null)
 			{
 				DBCharacter.SerializedAbilities = ab.ToString();
@@ -11857,29 +11577,6 @@ namespace DOL.GS
 					}
 				}
 			}
-			
-			// Retrieve Realm Abilities From Database to be handled by Career Spec
-			tmpStr = character.SerializedRealmAbilities;
-			if (tmpStr != null && tmpStr.Length > 0)
-			{
-				foreach (string abilities in tmpStr.SplitCSV())
-				{
-					string[] values = abilities.Split('|');
-					if (values.Length >= 2)
-					{
-						int level;
-						if (int.TryParse(values[1], out level))
-						{
-							Ability ability = SkillBase.GetAbility(values[0], level);
-							if (ability != null && ability is RealmAbility)
-							{
-								// this enable realm abilities for Career Computing.
-								m_realmAbilities.Add((RealmAbility)ability);
-							}
-						}
-					}
-				}
-			}
 
 			// Load dependent skills
 			RefreshSpecDependantSkills(false);
@@ -11956,29 +11653,8 @@ namespace DOL.GS
 					RemoveSpecialization(spec.KeyName);
 			}
 						
-			// sort ML Spec depending on ML Line
-			byte mlindex = 0;
 			foreach (KeyValuePair<Specialization, int> constraint in careers)
-			{
-				if (constraint.Key is IMasterLevelsSpecialization)
-				{
-					if (mlindex != MLLine)
-					{
-						if (HasSpecialization(constraint.Key.KeyName))
-							RemoveSpecialization(constraint.Key.KeyName);
-						
-						mlindex++;
-						continue;
-					}
-					
-					mlindex++;
-					
-					if (!MLGranted || MLLevel < 1)
-					{
-						continue;
-					}
-				}
-				
+			{				
 				// load if the spec doesn't exists
 				if (Level >= constraint.Value)
 				{
@@ -12610,12 +12286,6 @@ namespace DOL.GS
 					double npcLevel = Math.Max(npc.Level, 1.0);
 					double stealthLevel = player.GetModifiedSpecLevel(Specs.Stealth);
 					double detectRadius = 125.0 + ((npcLevel - stealthLevel) * 20.0);
-
-					// we have detect hidden and enemy don't = higher range
-					if (npc.HasAbility(Abilities.DetectHidden) && player.EffectList.GetOfType<CamouflageEffect>() == null)
-					{
-						detectRadius += 125;
-					}
 
 					if (detectRadius < 126) detectRadius = 126;
 
@@ -14962,22 +14632,6 @@ namespace DOL.GS
 				description = LanguageMgr.GetTranslation(Client.Account.Language, String.Format("SendMasterLevelWindow.Uncomplete.ML{0}.Step{1}", ml, step));
 
 			return description;
-		}
-
-		/// <summary>
-		/// Get the ML title string of the player
-		/// </summary>
-		public virtual IPlayerTitle MLTitle
-		{
-			get
-			{
-				var title = m_titles.FirstOrDefault(ttl => ttl is MasterlevelTitle);
-				
-				if (title != null && title.IsSuitable(this))
-					return title;
-				
-				return PlayerTitleMgr.ClearTitle;
-			}
 		}
 
 		#endregion

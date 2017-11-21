@@ -114,31 +114,6 @@ namespace DOL.GS
 
         private int TimerTick(RegionTimer timer)
         {
-            foreach (GamePlayer player in m_player.GetPlayersInRadius(1500))
-            {
-                if (player.Group != null && m_player.Group != null && m_player.Group.IsInTheGroup(player))
-                {
-                    if (GameServer.ServerRules.IsAllowedToAttack(m_player, player, true) == false)
-                    {
-                        GuildBannerEffect effect = GuildBannerEffect.CreateEffectOfClass(m_player, player);
-
-                        if (effect != null)
-                        {
-                            GuildBannerEffect oldEffect = player.EffectList.GetOfType(effect.GetType()) as GuildBannerEffect;
-							if (oldEffect == null)
-							{
-								effect.Start(player);
-							}
-							else
-							{
-								oldEffect.Stop();
-								effect.Start(player);
-							}
-                        }
-                    }
-                }
-            }
-
             return 9000; // Pulsing every 9 seconds with a duration of 9 seconds - Tolakram
         }
 

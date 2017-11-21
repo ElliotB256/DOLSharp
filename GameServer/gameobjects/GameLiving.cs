@@ -3081,24 +3081,6 @@ namespace DOL.GS
 				if (playerAttacker != null)
 				{
 					GameLiving attacker = ad.Attacker;
-
-					if (attacker.ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-					{
-						GamePlayer target = this as GamePlayer;
-						GamePlayer bodyguard = target.Bodyguard;
-						if (bodyguard != null)
-						{
-							target.Out.SendMessage(String.Format(LanguageMgr.GetTranslation(target.Client.Account.Language, "GameLiving.CalculateEnemyAttackResult.YouWereProtected"), bodyguard.Name, attacker.Name), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-
-							bodyguard.Out.SendMessage(String.Format(LanguageMgr.GetTranslation(bodyguard.Client.Account.Language, "GameLiving.CalculateEnemyAttackResult.YouHaveProtected"), target.Name, attacker.Name), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-
-							if (attacker == playerAttacker)
-								playerAttacker.Out.SendMessage(string.Format(LanguageMgr.GetTranslation(playerAttacker.Client.Account.Language, "GameLiving.CalculateEnemyAttackResult.YouAttempt"), target.Name, target.Name, bodyguard.Name), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-							else
-								playerAttacker.Out.SendMessage(string.Format(LanguageMgr.GetTranslation(playerAttacker.Client.Account.Language, "GameLiving.CalculateEnemyAttackResult.YourPetAttempts"), target.Name, target.Name, bodyguard.Name), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-							return eAttackResult.Bodyguarded;
-						}
-					}
 				}
 			}
 

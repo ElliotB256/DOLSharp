@@ -730,22 +730,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 						}
 						else
 						{
-							//delve on realm abilities
-							if (objectID >= 50)
-							{
-								int clientclassID = client.Player.CharacterClass.ID;
-								int sub = 50;
-								var ra_list = SkillBase.GetClassRealmAbilities(clientclassID).Where(ra => !(ra is RR5RealmAbility));
-								
-								RealmAbility ab = ra_list.ElementAtOrDefault((int)(objectID - sub));
-								
-								if (ab != null)
-								{
-									caption = ab.Name;
-									objectInfo.AddRange(ab.DelveInfo);
-									break;
-								}
-							}
 							caption = "Specialization not found";
 							objectInfo.Add("that specialization is not found, id=" + objectID);
 							break;
@@ -959,8 +943,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 						client.Out.SendDelveInfo(DelveSpell(client, objectID));
 					break;
 				case 27://RANew
-					if (client.CanSendTooltip(27, objectID))
-	                   client.Out.SendDelveInfo(DelveRealmAbility(client, objectID));
                     break;
 				case 28://AbilityNew
                     if (client.CanSendTooltip(28, objectID))
@@ -2231,39 +2213,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 
 		#endregion
 
-		/// <summary>
-		/// Delve the realm abilities for v1.110+ clients
-		/// </summary>
-		/// <param name="clt"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
-        public static string DelveRealmAbility(GameClient clt, int id)
-        {
-			Skill ra = clt.Player.GetAllUsableSkills().Where(e => e.Item1.InternalID == id && e.Item1 is Ability).Select(e => e.Item1).FirstOrDefault();
-			
-			if (ra == null)
-			{
-				ra = SkillBase.GetAbilityByInternalID(id);
-			}
-			
-			MiniDelveWriter dw = new MiniDelveWriter("RealmAbility");
-			dw.AddKeyValuePair("Index",  unchecked((short)id));
-			
-            if (ra is RealmAbility)
-            {
-           		((RealmAbility)ra).AddDelve(ref dw);
-            }
-            else if (ra != null)
-            {
-                dw.AddKeyValuePair("Name", ra.Name);
-            }
-            else
-            {
-           		dw.AddKeyValuePair("Name", "(not found)");
-            }
-            
-            return dw.ToString();
-        }
         #endregion
     }
 }

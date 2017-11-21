@@ -2266,16 +2266,6 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Return this character class RR5 Ability Level 1 or null
-		/// </summary>
-		/// <param name="charclass"></param>
-		/// <returns></returns>
-		public static Ability GetClassRR5Ability(int charclass)
-		{
-			return GetClassRealmAbilities(charclass).Where(ab => ab is RR5RealmAbility).FirstOrDefault();
-		}
-
-		/// <summary>
 		/// Get Ability by internal ID, used for Tooltip Details.
 		/// </summary>
 		/// <param name="internalID"></param>

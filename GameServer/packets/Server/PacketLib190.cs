@@ -63,7 +63,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort(m_gameClient.Player.LevelPermill);
 				pak.WriteShort((ushort)m_gameClient.Player.SkillSpecialtyPoints);
 				pak.WriteInt((uint)m_gameClient.Player.BountyPoints);
-				pak.WriteShort((ushort)m_gameClient.Player.RealmSpecialtyPoints);
+				pak.WriteShort((ushort)0);
 				pak.WriteShort(m_gameClient.Player.ChampionLevelPermill);
 				pak.WriteLongLowEndian((ulong)m_gameClient.Player.Experience);
 				pak.WriteLongLowEndian((ulong)m_gameClient.Player.ExperienceForNextLevel);

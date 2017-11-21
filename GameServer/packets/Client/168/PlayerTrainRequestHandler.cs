@@ -145,41 +145,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				}
 				else if (skillIndex >= 100)
 				{
-					// Realm Abilities
-					var raList = SkillBase.GetClassRealmAbilities(client.Player.CharacterClass.ID).Where(ra => !(ra is RR5RealmAbility));
-					if (skillIndex < raList.Count() + 100)
-					{
-						RealmAbility ra = raList.ElementAtOrDefault(skillIndex - 100);
-						if (ra != null)
-						{
-							ra.Level = client.Player.GetAbilityLevel(ra.KeyName);
-							int cost = ra.CostForUpgrade(ra.Level);
-							ra.Level++;
-							
-							if (client.Player.RealmSpecialtyPoints < cost)
-							{
-								client.Out.SendMessage(ra.Name + " costs " + (cost) + " realm ability points!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								client.Out.SendMessage("You don't have that many realm ability points left to get this.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								return;
-							}
-							if (!ra.CheckRequirement(client.Player))
-							{
-								client.Out.SendMessage("You are not experienced enough to get " + ra.Name + " now. Come back later.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								return;
-							}
-							
-							client.Player.AddRealmAbility(ra, true);
-							client.Out.SendUpdatePoints();
-							client.Out.SendUpdatePlayer();
-							client.Out.SendUpdatePlayerSkills();
-							client.Out.SendTrainerWindow();
-						}
-						else
-						{
-							client.Out.SendMessage("Unfortunately your training failed. Please report that to admins or game master. Thank you.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							log.Error("Realm Ability " + ra.Name + "(" + ra.KeyName + ") unexpected not found");
-						}
-					}
+                    //Realm Abilities
 				}
 
 				if (log.IsErrorEnabled)
@@ -269,71 +235,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 				}
 			}
 
-			if (amounts != null && amounts.Count > 0)
-			{
-				// Realm Abilities
-				var raList = SkillBase.GetClassRealmAbilities(client.Player.CharacterClass.ID).Where(ra => !(ra is RR5RealmAbility));
-				foreach (var kv in amounts)
-				{
-					RealmAbility ra = raList.ElementAtOrDefault((int)kv.Key);
-					if (ra != null)
-					{
-						RealmAbility playerRA = (RealmAbility)client.Player.GetAbility(ra.KeyName);
-						
-						if (playerRA != null && (playerRA.Level >= ra.MaxLevel || playerRA.Level >= kv.Value))
-							continue;
-						
-						int cost = 0;
-						for (int i = playerRA != null ? playerRA.Level : 0; i < kv.Value; i++)
-							cost += ra.CostForUpgrade(i);
-						
-						if (client.Player.RealmSpecialtyPoints < cost)
-						{
-							client.Out.SendMessage(ra.Name + " costs " + (cost) + " realm ability points!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							client.Out.SendMessage("You don't have that many realm ability points left to get this.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							continue;
-						}
-						
-						if (!ra.CheckRequirement(client.Player))
-						{
-							client.Out.SendMessage("You are not experienced enough to get " + ra.Name + " now. Come back later.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							continue;
-						}
-						
-						bool valid = false;
-						if (playerRA != null)
-						{
-							playerRA.Level = (int)kv.Value;
-							valid = true;
-						}
-						else
-						{
-							ra.Level = (int)kv.Value;
-							valid = true;
-							client.Player.AddRealmAbility(ra, false);
-						}
-						
-						if (valid)
-						{
-							client.Out.SendUpdatePoints();
-							client.Out.SendUpdatePlayer();
-							client.Out.SendCharResistsUpdate();
-							client.Out.SendCharStatsUpdate();
-							client.Out.SendUpdatePlayerSkills();
-							client.Out.SendTrainerWindow();
-							trained = true;
-						}
-						else
-						{
-							client.Out.SendMessage("Unfortunately your training failed. Please report that to admins or game master. Thank you.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-						}
-					}
-					else
-					{
-						client.Out.SendMessage("Unfortunately your training failed. Please report that to admins or game master. Thank you.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					}
-				}
-			}
 			if (trained)
 				client.Player.SaveIntoDatabase();
 		}

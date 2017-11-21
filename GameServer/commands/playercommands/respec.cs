@@ -195,7 +195,6 @@ namespace DOL.GS.Commands
 			if (response != 0x01) return; //declined
 
 			int specPoints = player.SkillSpecialtyPoints;
-			int realmSpecPoints = player.RealmSpecialtyPoints;
 
 			if (player.TempProperties.getProperty(ALL_RESPEC, false))
 			{
@@ -206,11 +205,6 @@ namespace DOL.GS.Commands
 			{
 				player.RespecDOL();
 				player.TempProperties.removeProperty(DOL_RESPEC);
-			}
-			if (player.TempProperties.getProperty(RA_RESPEC, false))
-			{
-				player.RespecRealm();
-				player.TempProperties.removeProperty(RA_RESPEC);
 			}
 			if (player.TempProperties.getProperty<object>(LINE_RESPEC, null) != null)
 			{
@@ -235,10 +229,6 @@ namespace DOL.GS.Commands
 			{
 				player.RemoveAllStyles(); // Kill styles
 				DisplayMessage(player, "You regain " + (player.SkillSpecialtyPoints - specPoints) + " specialization points!");
-			}
-			if (player.RealmSpecialtyPoints > realmSpecPoints)
-			{
-				 DisplayMessage(player, "You regain " + (player.RealmSpecialtyPoints - realmSpecPoints) + " realm specialization points!");
 			}
 			player.RefreshSpecDependantSkills(false);
 			// Notify Player of points

@@ -28,11 +28,6 @@ namespace DOL.GS.PropertyCalc
 				int cap = Math.Max(player.Level * 4, 20) + // at least 20
 						  Math.Min(living.ItemBonus[(int)eProperty.MaxHealthCapBonus], player.Level * 4);	
 				itemBonus = Math.Min(itemBonus, cap);
-                if (player.HasAbility(Abilities.ScarsOfBattle) && player.Level >= 40)
-                {
-                    int levelbonus = Math.Min(player.Level - 40, 10);
-                    hpBase = (int)(hpBase * (100 + levelbonus) * 0.01);
-                }
 				int abilityBonus = living.AbilityBonus[(int)property];
 
 				return Math.Max(hpBase + itemBonus + buffBonus + abilityBonus, 1); // at least 1

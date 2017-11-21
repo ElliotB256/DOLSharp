@@ -42,7 +42,7 @@ namespace DOL.GS.PropertyCalc
 				- debuff
 				+ Math.Min(10, living.ItemBonus[(int)property]));// http://www.camelotherald.com/more/1325.shtml
 
-			return item + ra;
+			return item;
 		}
 	}
 }

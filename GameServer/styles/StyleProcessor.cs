@@ -276,14 +276,6 @@ namespace DOL.GS.Styles
 						player.NextCombatBackupStyle = null;
 						player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "StyleProcessor.TryToUseStyle.PreparePerform", style.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 
-						if (living.IsEngaging)
-						{
-							// cancel engage effect if exist
-							EngageEffect effect = living.EffectList.GetOfType<EngageEffect>();
-							if (effect != null)
-								effect.Cancel(false);
-						}
-
 						// unstealth only on primary style to not break
 						// stealth with non-stealth backup styles
 						if (!style.StealthRequirement)
@@ -535,19 +527,7 @@ namespace DOL.GS.Styles
 		/// <param name="weaponSpd">The weapon speed</param>
 		/// <returns>Endurance needed to use style</returns>
 		public static int CalculateEnduranceCost(GameLiving living, Style style, int weaponSpd)
-		{
-
-            //[StephenxPimentel]
-            //1.108 - Valhallas Blessing now has a 75% chance to not use endurance.
-
-			// Apply Valkyrie RA5L effect
-			ValhallasBlessingEffect ValhallasBlessing = living.EffectList.GetOfType<ValhallasBlessingEffect>();
-			if (ValhallasBlessing != null && Util.Chance(75)) return 0;
-
-            //Camelot Herald 1.90 : Battlemaster styles will now cost a flat amount of Endurance, regardless of weapon speed
-            if (style.Spec == Specs.Battlemaster)
-                return Math.Max(1, (int)Math.Ceiling((30 * style.EnduranceCost / 40) * living.GetModified(eProperty.FatigueConsumption) * 0.01));
-            
+		{           
             int fatCost = weaponSpd * style.EnduranceCost / 40;
 			if (weaponSpd < 40)
 				fatCost++;
