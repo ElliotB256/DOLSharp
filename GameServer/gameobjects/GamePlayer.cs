@@ -5397,57 +5397,6 @@ namespace DOL.GS
 				return;
 			}
 
-			if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-			{
-				if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == false)
-				{
-					if ((eCharacterClass)CharacterClass.ID == eCharacterClass.Scout || (eCharacterClass)CharacterClass.ID == eCharacterClass.Hunter || (eCharacterClass)CharacterClass.ID == eCharacterClass.Ranger)
-					{
-						// There is no feedback on live when attempting to fire a bow with arrows
-						return;
-					}
-				}
-
-				// Check arrows for ranged attack
-				if (RangeAttackAmmo == null)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.SelectQuiver"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-					return;
-				}
-				// Check if selected ammo is compatible for ranged attack
-				if (!CheckRangedAmmoCompatibilityWithActiveWeapon())
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantUseQuiver"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-					return;
-				}
-
-				if (RangedAttackType == eRangedAttackType.Critical && Endurance < CRITICAL_SHOT_ENDURANCE)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.TiredShot"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-					return;
-				}
-
-				if (Endurance < RANGE_ATTACK_ENDURANCE)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.TiredUse", AttackWeapon.Name), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-					return;
-				}
-
-				if (IsStealthed)
-				{
-					// -Chance to unstealth while nocking an arrow = stealth spec / level
-					// -Chance to unstealth nocking a crit = stealth / level  0.20
-					int stealthSpec = GetModifiedSpecLevel(Specs.Stealth);
-					int stayStealthed = stealthSpec * 100 / Level;
-					if (RangedAttackType == eRangedAttackType.Critical)
-						stayStealthed -= 20;
-
-					if (!Util.Chance(stayStealthed))
-						Stealth(false);
-				}
-			}
-			else
-			{
 				if (attackTarget == null)
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatNoTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
 				else
@@ -5460,7 +5409,6 @@ namespace DOL.GS
                     {
                         Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget", attackTarget.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
                     }
-			}
 
 			base.StartAttack(attackTarget);
 
