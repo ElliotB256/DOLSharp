@@ -1085,6 +1085,7 @@ namespace DOL.GS
 		#endregion
 
 		#region release/bind/pray
+
 		#region Binding
 		/// <summary>
 		/// Property that holds tick when the player bind last time
@@ -1331,14 +1332,6 @@ namespace DOL.GS
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.NoValidBindpoint"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				releaseCommand = eReleaseType.Bind;
 			}
-			
-			//battlegrounds caps
-			Battleground bg = GameServer.KeepManager.GetBattleground(CurrentRegionID);
-			if (bg != null && releaseCommand == eReleaseType.RvR)
-			{
-				if (Level > bg.MaxLevel)
-					releaseCommand = eReleaseType.Normal;
-			}
 
 			if (IsAlive)
 			{
@@ -1469,130 +1462,12 @@ namespace DOL.GS
 					}
 				default:
 					{
-						if (!ServerProperties.Properties.DISABLE_TUTORIAL)
-						{
-							//Tutorial
-							if (BindRegion == 27)
-							{
-								switch (Realm)
-								{
-									case eRealm.Albion:
-										{
-											relRegion = 1; // Cotswold
-											relX = 8192 + 553251;
-											relY = 8192 + 502936;
-											relZ = 2280;
-											break;
-										}
-									case eRealm.Midgard:
-										{
-											relRegion = 100; // Mularn
-											relX = 8192 + 795621;
-											relY = 8192 + 719590;
-											relZ = 4680;
-											break;
-										}
-									case eRealm.Hibernia:
-										{
-											relRegion = 200; // MagMell
-											relX = 8192 + 338652;
-											relY = 8192 + 482335;
-											relZ = 5200;
-											break;
-										}
-								}
-								break;
-							}
-						}
-						switch (CurrentRegionID)
-						{
-								//battlegrounds
-							case 234:
-							case 235:
-							case 236:
-							case 237:
-							case 238:
-							case 239:
-							case 240:
-							case 241:
-							case 242:
-								{
-									//get the bg cap
-									byte cap = 50;
-									foreach (AbstractGameKeep keep in GameServer.KeepManager.GetKeepsOfRegion(CurrentRegionID))
-									{
-										if (keep.DBKeep.BaseLevel < cap)
-										{
-											cap = keep.DBKeep.BaseLevel;
-											break;
-										}
-									}
-									//get the portal location
-									foreach (AbstractGameKeep keep in GameServer.KeepManager.GetKeepsOfRegion(CurrentRegionID))
-									{
-										if (keep.DBKeep.BaseLevel > 50 && keep.Realm == Realm)
-										{
-											relRegion = (ushort)keep.Region;
-											relX = keep.X;
-											relY = keep.Y;
-											relZ = keep.Z;
-											break;
-										}
-									}
-									break;
-								}
-								//nf
-							case 163:
-								{
-									if (BindRegion != 163)
-									{
-										relRegion = 163;
-										switch (Realm)
-										{
-											case eRealm.Albion:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(1, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-											case eRealm.Midgard:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(3, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-											case eRealm.Hibernia:
-												{
-													GameServer.KeepManager.GetBorderKeepLocation(5, out relX, out relY, out relZ, out relHeading);
-													break;
-												}
-										}
-										break;
-									}
-									else
-									{
-										relRegion = (ushort)BindRegion;
-										relX = BindXpos;
-										relY = BindYpos;
-										relZ = BindZpos;
-										relHeading = (ushort)BindHeading;
-									}
-									break;
-								}/*
-								//bg45-49
-							case 165:
-								{
-									break;
-								}*/
-							default:
-								{
 									relRegion = (ushort)BindRegion;
 									relX = BindXpos;
 									relY = BindYpos;
 									relZ = BindZpos;
 									relHeading = (ushort)BindHeading;
 									break;
-								}
-						}
-						break;
 					}
 			}
 
@@ -1602,57 +1477,6 @@ namespace DOL.GS
 			{
 				m_releaseTimer.Stop();
 				m_releaseTimer = null;
-			}
-
-			if (Realm != eRealm.None)
-			{
-				if (Level > 5)
-				{
-					// actual lost exp, needed for 2nd stage deaths
-					long lostExp = Experience;
-					long lastDeathExpLoss = TempProperties.getProperty<long>(DEATH_EXP_LOSS_PROPERTY);
-					TempProperties.removeProperty(DEATH_EXP_LOSS_PROPERTY);
-
-					GainExperience(GameLiving.eXPSource.Other, -lastDeathExpLoss);
-					lostExp -= Experience;
-
-					// raise only the gravestone if xp has to be stored in it
-					if (lostExp > 0)
-					{
-						// find old gravestone of player and remove it
-						if (character.HasGravestone)
-						{
-							Region reg = WorldMgr.GetRegion((ushort)character.GravestoneRegion);
-							if (reg != null)
-							{
-								GameGravestone oldgrave = reg.FindGraveStone(this);
-								if (oldgrave != null)
-								{
-									oldgrave.Delete();
-								}
-							}
-							character.HasGravestone = false;
-						}
-
-						GameGravestone gravestone = new GameGravestone(this, lostExp);
-						gravestone.AddToWorld();
-						character.GravestoneRegion = gravestone.CurrentRegionID;
-						character.HasGravestone = true;
-						Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.GraveErected"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-						Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.ReturnToPray"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-					}
-				}
-			}
-
-			if (Level > 10)
-			{
-				int deathConLoss = TempProperties.getProperty<int>(DEATH_CONSTITUTION_LOSS_PROPERTY); // get back constitution lost at death
-				if (deathConLoss > 0)
-				{
-					TotalConstitutionLostAtDeath += deathConLoss;
-					Out.SendCharStatsUpdate();
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Release.LostConstitution"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-				}
 			}
 
 			//Update health&sit state first!
@@ -1672,17 +1496,9 @@ namespace DOL.GS
 			}
 
 			int oldRegion = CurrentRegionID;
-
-			//Call MoveTo after new GameGravestone(this...
-			//or the GraveStone will be located at the player's bindpoint
 			
 			MoveTo(relRegion, relX, relY, relZ, relHeading);
-			//It is enough if we revive the player on this client only here
-			//because for other players the player will be removed in the MoveTo
-			//method and added back again (if in view) with full health ... so no
-			//revive needed for others...
 			Out.SendPlayerRevive(this);
-			//			Out.SendUpdatePlayer();
 			Out.SendUpdatePoints();
 
 			//Set property indicating that we are releasing to another region; used for Released event
@@ -1694,8 +1510,6 @@ namespace DOL.GS
 				Notify(GamePlayerEvent.Revive, this);
 				Notify(GamePlayerEvent.Released, this);
 			}
-
-			TempProperties.removeProperty(DEATH_CONSTITUTION_LOSS_PROPERTY);
 
 			//Reset last valide position array to prevent /stuck avec /release
 			lock (m_lastUniqueLocations)
@@ -1784,119 +1598,11 @@ namespace DOL.GS
 						
 			if (player.IsUnderwater && player.CanBreathUnderWater == false)
 				player.Diving(waterBreath.Holding);
-			//We need two different sickness spells because RvR sickness is not curable by Healer NPC -Unty
-			if (player.Level > 5)
-			switch (DeathType)
-			{
-				case eDeathType.RvR:
-					SpellLine rvrsick = SkillBase.GetSpellLine(GlobalSpellsLines.Reserved_Spells);
-					if (rvrsick == null) return;
-					Spell rvrillness = SkillBase.FindSpell(8181, rvrsick);
-					player.CastSpell(rvrillness, rvrsick);
-					break;
-				case eDeathType.PvP: //PvP sickness is the same as PvE sickness - Curable
-				case eDeathType.PvE:
-					SpellLine pvesick = SkillBase.GetSpellLine(GlobalSpellsLines.Reserved_Spells);
-					if (pvesick == null) return;
-					Spell pveillness = SkillBase.FindSpell(2435, pvesick);
-					player.CastSpell(pveillness, pvesick);
-					break;
-			}
 			
 			GameEventMgr.RemoveHandler(this, GamePlayerEvent.Revive, new DOLEventHandler(OnRevive));
 			m_deathtype = eDeathType.None;
 		}
 
-		/// <summary>
-		/// Property that saves experience lost on last death
-		/// </summary>
-		public const string DEATH_EXP_LOSS_PROPERTY = "death_exp_loss";
-		/// <summary>
-		/// Property that saves condition lost on last death
-		/// </summary>
-		public const string DEATH_CONSTITUTION_LOSS_PROPERTY = "death_con_loss";
-		#endregion
-
-		#region Praying
-		/// <summary>
-		/// The timer that will be started when the player wants to pray
-		/// </summary>
-		protected RegionTimerAction<GameGravestone> m_prayAction;
-		/// <summary>
-		/// The delay to wait until xp is regained, in milliseconds
-		/// </summary>
-		protected virtual ushort PrayDelay { get { return 5000; }}
-		/// <summary>
-		/// Gets the praying-state of this living
-		/// </summary>
-		public virtual bool IsPraying
-		{
-			get { return m_prayAction != null && m_prayAction.IsAlive; }
-		}
-
-		/// <summary>
-		/// Prays on a gravestone for XP!
-		/// </summary>
-		public virtual void Pray()
-		{
-			string cantPrayMessage = string.Empty;
-			GameGravestone gravestone = TargetObject as GameGravestone;
-			
-			if (!IsAlive)
-				cantPrayMessage = "GamePlayer.Pray.CantPrayNow";
-			else if (IsRiding)
-				cantPrayMessage = "GamePlayer.Pray.CantPrayRiding";
-			else if (gravestone == null)
-				cantPrayMessage = "GamePlayer.Pray.NeedTarget";
-			else if (!gravestone.InternalID.Equals(InternalID))
-				cantPrayMessage = "GamePlayer.Pray.SelectGrave";
-			else if (!IsWithinRadius(gravestone, 2000))
-				cantPrayMessage = "GamePlayer.Pray.MustGetCloser";
-			else if (IsMoving)
-				cantPrayMessage = "GamePlayer.Pray.MustStandingStill";
-			else if (IsPraying)
-				cantPrayMessage = "GamePlayer.Pray.AlreadyPraying";
-			
-			if (cantPrayMessage != string.Empty)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, cantPrayMessage), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			if (m_prayAction != null)
-				m_prayAction.Stop();
-			
-			m_prayAction = new RegionTimerAction<GameGravestone>(gravestone, stn => {
-			                                                     	if (stn.XPValue > 0)
-			                                                     	{
-			                                                     		Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Pray.GainBack"), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-			                                                     		GainExperience(eXPSource.Praying, stn.XPValue);
-			                                                     	}
-			                                                     	stn.XPValue = 0;
-			                                                     	stn.Delete();
-			                                                     });
-			m_prayAction.Start(PrayDelay);
-
-			Sit(true);
-			Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Pray.Begin"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-
-			foreach (GamePlayer player in GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-			{
-				if (player == null) continue;
-				player.Out.SendEmoteAnimation(this, eEmote.Pray);
-			}
-		}
-
-		/// <summary>
-		/// Stop praying; used when player changes target
-		/// </summary>
-		public void PrayTimerStop()
-		{
-			if (!IsPraying)
-				return;
-			m_prayAction.Stop();
-			m_prayAction = null;
-		}
 		#endregion
 
 		#endregion

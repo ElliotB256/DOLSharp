@@ -189,7 +189,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 					}
 					else if (sk is Style)
 					{
-						player.ExecuteWeaponStyle((Style)sk);
+                        //player.ExecuteWeaponStyle((Style)sk);
+                        player.Out.SendMessage("UseSkillHandler.cs: Need to implement ExecuteWeaponStyle.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 					}
 						
 				}
