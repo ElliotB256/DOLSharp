@@ -68,8 +68,6 @@ namespace DOL.GS.PropertyCalc
 						abilityBonus += player.AbilityBonus[(int)eProperty.Acuity];
 					}
 				}
-
-				deathConDebuff = player.TotalConstitutionLostAtDeath;
 			}
 
 			// Apply debuffs, 100% effectiveness for player buffs, 50% effectiveness
@@ -90,10 +88,6 @@ namespace DOL.GS.PropertyCalc
 
 			int stat = unbuffedBonus + buffBonus + abilityBonus;
 			stat = (int)(stat * living.BuffBonusMultCategory1.Get((int)property));
-
-			// Possibly apply constitution loss at death.
-
-			stat -= (property == eProperty.Constitution)? deathConDebuff : 0;
 
 			return Math.Max(1, stat);
         }

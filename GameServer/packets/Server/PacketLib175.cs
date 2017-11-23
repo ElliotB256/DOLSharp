@@ -267,11 +267,7 @@ namespace DOL.GS.PacketHandler
 				// base
 				for (int i = 0; i < updateStats.Length; i++)
 				{
-					baseStats[i] = m_gameClient.Player.GetBaseStat(updateStats[i]);
-					
-					if (updateStats[i] == eStat.CON)
-						baseStats[i] -= m_gameClient.Player.TotalConstitutionLostAtDeath;
-					
+					baseStats[i] = m_gameClient.Player.GetBaseStat(updateStats[i]);					
 					pak.WriteShort((ushort)baseStats[i]);
 				}
 	
@@ -355,7 +351,7 @@ namespace DOL.GS.PacketHandler
 				//	pak.WriteByte((byte)(m_gameClient.Player.Level - 5)); // Vampire bonuses
 				//else
 				pak.WriteByte(0x00); // FF if resists packet
-				pak.WriteByte((byte) m_gameClient.Player.TotalConstitutionLostAtDeath);
+				pak.WriteByte((byte) 0);
 				pak.WriteShort((ushort) m_gameClient.Player.MaxHealth);
 				pak.WriteShort(0);
 	

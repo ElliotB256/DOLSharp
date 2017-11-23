@@ -133,11 +133,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 					player.Out.SendMessage("Server is running in DEBUG mode!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 
 				player.Out.SendPlayerFreeLevelUpdate();
-				if (player.FreeLevelState == 2)
-				{
-					player.Out.SendDialogBox(eDialogCode.SimpleWarning, 0, 0, 0, 0, eDialogType.Ok, true,
-					                         LanguageMgr.GetTranslation(player.Client.Account.Language, "PlayerInitRequestHandler.FreeLevel"));
-				}
 				player.Out.SendMasterLevelWindow(0);
 				AssemblyName an = Assembly.GetExecutingAssembly().GetName();
 				player.Out.SendMessage("Dawn of Light " + an.Name + " Version: " + an.Version, eChatType.CT_System,

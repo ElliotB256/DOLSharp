@@ -121,17 +121,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 						player.Out.SendObjectUpdate(myTarget);
 				}
 
-				if (player.IsPraying)
-				{
-					var gravestone = myTarget as GameGravestone;
-					if (gravestone == null || !gravestone.InternalID.Equals(player.InternalID))
-					{
-						player.Out.SendMessage("You are no longer targetting your grave. Your prayers fail.", eChatType.CT_System,
-						                       eChatLoc.CL_SystemWindow);
-						player.PrayTimerStop();
-					}
-				}
-
 				GameEventMgr.Notify(GamePlayerEvent.ChangeTarget, player, null);
 			}
 		}

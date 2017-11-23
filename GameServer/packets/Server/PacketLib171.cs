@@ -388,7 +388,7 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort((ushort)player.ObjectID);
 				pak.WriteByte(0x09); // subcode
 	
-				byte flag = player.FreeLevelState;
+				byte flag = 1;
 	
 				TimeSpan t = new TimeSpan((long)(DateTime.Now.Ticks - player.LastFreeLeveled.Ticks));
 	

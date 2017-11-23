@@ -1795,66 +1795,6 @@ namespace DOL.GS
 		#region Stats
 
 		/// <summary>
-		/// Holds if the player can gain a FreeLevel
-		/// </summary>
-		public virtual byte FreeLevelState
-		{
-			get
-			{
-				int freelevel_days = 7;
-				switch (Realm)
-				{
-					case eRealm.Albion:
-						if (ServerProperties.Properties.FREELEVEL_DAYS_ALBION == -1)
-							return 1;
-						else
-							freelevel_days = ServerProperties.Properties.FREELEVEL_DAYS_ALBION;
-						break;
-					case eRealm.Midgard:
-						if (ServerProperties.Properties.FREELEVEL_DAYS_MIDGARD == -1)
-							return 1;
-						else
-							freelevel_days = ServerProperties.Properties.FREELEVEL_DAYS_MIDGARD;
-						break;
-					case eRealm.Hibernia:
-						if (ServerProperties.Properties.FREELEVEL_DAYS_HIBERNIA == -1)
-							return 1;
-						else
-							freelevel_days = ServerProperties.Properties.FREELEVEL_DAYS_HIBERNIA;
-						break;
-				}
-
-				//flag 1 = above level, 2 = elligable, 3= time until, 4 = level and time until, 5 = level until
-				if (Level >= 48)
-					return 1;
-				
-				TimeSpan t = new TimeSpan((long)(DateTime.Now.Ticks - LastFreeLeveled.Ticks));
-				if (t.Days >= freelevel_days)
-				{
-					if (Level >= LastFreeLevel + 2)
-						return 2;
-					else return 5;
-				}
-				else
-				{
-					if (Level >= LastFreeLevel + 2)
-						return 3;
-					else return 4;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets/sets the player efficacy percent
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		public int TotalConstitutionLostAtDeath
-		{
-			get { return DBCharacter != null ? DBCharacter.ConLostAtDeath : 0; }
-			set { if (DBCharacter != null) DBCharacter.ConLostAtDeath = value; }
-		}
-
-		/// <summary>
 		/// Change a stat value
 		/// (delegate to PlayerCharacter)
 		/// </summary>
@@ -4686,10 +4626,6 @@ namespace DOL.GS
 			Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.YouRaise", Level), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
 			Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.YouAchieved", Level), eChatType.CT_ScreenCenter, eChatLoc.CL_SystemWindow);
 			Out.SendPlayerFreeLevelUpdate();
-			if (FreeLevelState == 2)
-			{
-				Out.SendDialogBox(eDialogCode.SimpleWarning, 0, 0, 0, 0, eDialogType.Ok, true, LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.FreeLevelEligible"));
-			}
 
 			if (Level == MaxLevel)
 			{
@@ -6472,11 +6408,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="killer">the killer</param>
 		public override void Die(GameObject killer)
-		{
-			// ambiant talk
-			if (killer is GameNPC)
-				(killer as GameNPC).FireAmbientSentence(GameNPC.eAmbientTrigger.killing, this);
-			
+		{		
 			CharacterClass.Die(killer);
 
 			bool realmDeath = killer != null && killer.Realm != eRealm.None;
@@ -6668,43 +6600,9 @@ namespace DOL.GS
 								Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Die.DeadRVR"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
 								xpLossPercent = 0;
 								m_deathtype = eDeathType.PvP;
-								if (ServerProperties.Properties.PVP_DEATH_CON_LOSS)
-								{
-									conpenalty = 3;
-									TempProperties.setProperty(DEATH_CONSTITUTION_LOSS_PROPERTY, conpenalty);
-								}
 								break;
 				 	}
 					 
-				}
-				else if (Level > 5) // under level 5 there is no penalty
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Die.LoseExperience"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-					// if this is the first death in level, you lose only half the penalty
-					switch (DeathCount)
-					{
-						case 0:
-							Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Die.DeathN1"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-							xpLossPercent /= 3;
-							break;
-						case 1:
-							Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Die.DeathN2"), eChatType.CT_YouDied, eChatLoc.CL_SystemWindow);
-							xpLossPercent = xpLossPercent * 2 / 3;
-							break;
-					}
-
-					DeathCount++;
-					m_deathtype = eDeathType.PvE;
-					long xpLoss = (ExperienceForNextLevel - ExperienceForCurrentLevel) * xpLossPercent / 1000;
-					GainExperience(eXPSource.Other, -xpLoss, 0, 0, 0, false, true);
-					TempProperties.setProperty(DEATH_EXP_LOSS_PROPERTY, xpLoss);
-
-					int conLoss = DeathCount;
-					if (conLoss > 3)
-						conLoss = 3;
-					else if (conLoss < 1)
-						conLoss = 1;
-					TempProperties.setProperty(DEATH_CONSTITUTION_LOSS_PROPERTY, conLoss);
 				}
 				GameEventMgr.AddHandler(this, GamePlayerEvent.Revive, new DOLEventHandler(OnRevive));
 			}
@@ -9799,11 +9697,6 @@ namespace DOL.GS
 					m_quitTimer = null;
 					Stuck = false;
 					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Sit.NoLongerWaitingQuit"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				//Stop praying if the player stands up...
-				if (IsPraying)
-				{
-					m_prayAction.Stop();
 				}
 			}
 			//Update the client
@@ -13792,7 +13685,7 @@ namespace DOL.GS
 			// - if champion max level reached
 			// - if experience is negative
 			// - if praying at your grave
-			if (!Champion || ChampionLevel == CL_MAX_LEVEL || experience <= 0 || IsPraying)
+			if (!Champion || ChampionLevel == CL_MAX_LEVEL || experience <= 0)
 				return;
 
 			if (source != eXPSource.GM && source != eXPSource.Quest)
