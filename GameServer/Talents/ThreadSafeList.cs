@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace DOL.Util
+namespace DOL.Concurrent
 {
     public class ThreadSafeList<T> : IList<T>
     {

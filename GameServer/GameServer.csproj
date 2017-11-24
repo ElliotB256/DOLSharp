@@ -246,7 +246,6 @@
     <Compile Include="commands\playercommands\facegloc.cs" />
     <Compile Include="commands\playercommands\faceloc.cs" />
     <Compile Include="commands\playercommands\Formation.cs" />
-    <Compile Include="commands\playercommands\freelevel.cs" />
     <Compile Include="commands\playercommands\friend.cs" />
     <Compile Include="commands\playercommands\gloc.cs" />
     <Compile Include="commands\playercommands\GroundAssist.cs" />
@@ -276,7 +275,6 @@
     <Compile Include="commands\playercommands\noqueue.cs" />
     <Compile Include="commands\playercommands\password.cs" />
     <Compile Include="commands\playercommands\played.cs" />
-    <Compile Include="commands\playercommands\pray.cs" />
     <Compile Include="commands\playercommands\quest.cs" />
     <Compile Include="commands\playercommands\quit.cs" />
     <Compile Include="commands\playercommands\random.cs" />
@@ -284,7 +282,6 @@
     <Compile Include="commands\playercommands\release.cs" />
     <Compile Include="commands\playercommands\Repair.cs" />
     <Compile Include="commands\playercommands\report.cs" />
-    <Compile Include="commands\playercommands\respec.cs" />
     <Compile Include="commands\playercommands\roll.cs" />
     <Compile Include="commands\playercommands\rp.cs" />
     <Compile Include="commands\playercommands\safety.cs" />
@@ -334,6 +331,11 @@
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
     <Compile Include="effects\SprintEffect.cs" />
     <Compile Include="effects\StealthEffect.cs" />
+    <Compile Include="Talents\Clientside\DAoCClientAbility.cs" />
+    <Compile Include="Talents\Clientside\DAoCClientSpell.cs" />
+    <Compile Include="Talents\Clientside\DAoCClientStyle.cs" />
+    <Compile Include="Talents\ITalent.cs" />
+    <Compile Include="Talents\Clientside\ITalentClientImplementation.cs" />
     <Compile Include="events\gameobjects\ExecuteCommandEventArgs.cs" />
     <Compile Include="events\gameobjects\InterruptedEventArgs.cs" />
     <Compile Include="events\gameobjects\NextCraftingTierReachedEventArgs.cs" />
@@ -667,7 +669,6 @@
     <Compile Include="gameobjects\CustomNPC\FaceCustomiser.cs" />
     <Compile Include="gameobjects\CustomNPC\GuildRegistrar.cs" />
     <Compile Include="gameobjects\CustomNPC\Hastener.cs" />
-    <Compile Include="gameobjects\CustomNPC\Healer.cs" />
     <Compile Include="gameobjects\CustomNPC\HousingHastener.cs" />
     <Compile Include="gameobjects\CustomNPC\MarketExplorer.cs" />
     <Compile Include="gameobjects\CustomNPC\NameRegistrar.cs" />
@@ -1506,6 +1507,10 @@
     <Compile Include="styles\StyleProcessor.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Talents\ITalentOwner.cs" />
+    <Compile Include="Talents\ITalentSet.cs" />
+    <Compile Include="Talents\TalentSet.cs" />
+    <Compile Include="Talents\ThreadSafeList.cs" />
     <Compile Include="world\AbstractArea.cs">
       <SubType>Code</SubType>
     </Compile>

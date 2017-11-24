@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
-using DOL.Util;
+
+using DOL.Concurrent;
 
 namespace DOL.Talents
 {

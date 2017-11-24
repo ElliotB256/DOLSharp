@@ -2632,8 +2632,6 @@ namespace DOL.GS
 			{
 				// Wipe skills and styles.
 				RespecAmountAllSkill--; // Decriment players respecs available.
-				if (Level == 5)
-					IsLevelRespecUsed = true;
 				
 				return true;
 			}
@@ -2656,10 +2654,6 @@ namespace DOL.GS
 		{
 			int specPoints = RespecSingleLine(specLine); // Wipe skills and styles.
 			RespecAmountSingleSkill--; // Decriment players respecs available.
-			if (Level == 20 || Level == 40)
-			{
-				IsLevelRespecUsed = true;
-			}
 			return specPoints;
 		}
 

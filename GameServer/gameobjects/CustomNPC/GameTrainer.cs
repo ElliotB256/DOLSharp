@@ -183,32 +183,6 @@ namespace DOL.GS
 			if (!base.WhisperReceive(source, text)) return false;
 			GamePlayer player = source as GamePlayer;
 			if (player == null) return false;
-			
-			//level respec for players
-			if (CanTrain(player) && text == LanguageMgr.GetTranslation(player.Client.Account.Language, "GameTrainer.Interact.CaseRespecialize"))
-			{
-				if (player.Level == 5 && !player.IsLevelRespecUsed)
-				{
-					int specPoints = player.SkillSpecialtyPoints;
-
-					player.RespecAll();
-
-					// Assign full points returned
-					if (player.SkillSpecialtyPoints > specPoints)
-					{
-						player.RemoveAllStyles(); // Kill styles
-						player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "GameTrainer.Interact.RegainPoints", (player.SkillSpecialtyPoints - specPoints)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					}
-					player.RefreshSpecDependantSkills(false);
-					// Notify Player of points
-					player.Out.SendUpdatePlayerSkills();
-					player.Out.SendUpdatePoints();
-					player.Out.SendUpdatePlayer();
-					player.Out.SendTrainerWindow();
-					player.SaveIntoDatabase();
-				}
-
-			}
 
 			//Now we turn the npc into the direction of the person
 			TurnTo(player, 10000);
