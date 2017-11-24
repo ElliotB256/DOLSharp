@@ -5,7 +5,7 @@ namespace DOL.Talents.Clientside
     /// <summary>
     /// Implements a talent as an ability
     /// </summary>
-    public class DAoCClientAbility : ITalentClientImplementation
+    public class ClientAbilityImplementation : ITalentClientImplementation
     {
         public byte Level { get; set; }
         public ushort InternalID { get; set; }

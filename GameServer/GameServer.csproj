@@ -331,9 +331,14 @@
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
     <Compile Include="effects\SprintEffect.cs" />
     <Compile Include="effects\StealthEffect.cs" />
-    <Compile Include="Talents\Clientside\DAoCClientAbility.cs" />
-    <Compile Include="Talents\Clientside\DAoCClientSpell.cs" />
-    <Compile Include="Talents\Clientside\DAoCClientStyle.cs" />
+    <Compile Include="playerclasses\base\ClassMystic.cs" />
+    <Compile Include="playerclasses\midgard\ClassRunemaster.cs" />
+    <Compile Include="Talents\Clientside\ClientAbilityImplementation.cs" />
+    <Compile Include="Talents\Clientside\ClientSpellImplementation.cs" />
+    <Compile Include="Talents\Clientside\SkillGroupTalent.cs" />
+    <Compile Include="Talents\Clientside\ClientSkillList.cs" />
+    <Compile Include="Talents\Clientside\ClientSkillListManager.cs" />
+    <Compile Include="Talents\Clientside\ClientStyleImplementation.cs" />
     <Compile Include="Talents\ITalent.cs" />
     <Compile Include="Talents\Clientside\ITalentClientImplementation.cs" />
     <Compile Include="events\gameobjects\ExecuteCommandEventArgs.cs" />
@@ -1509,6 +1514,8 @@
     </Compile>
     <Compile Include="Talents\ITalentOwner.cs" />
     <Compile Include="Talents\ITalentSet.cs" />
+    <Compile Include="Talents\Passives\PassiveTalent.cs" />
+    <Compile Include="Talents\Passives\TestTalent.cs" />
     <Compile Include="Talents\TalentSet.cs" />
     <Compile Include="Talents\ThreadSafeList.cs" />
     <Compile Include="world\AbstractArea.cs">

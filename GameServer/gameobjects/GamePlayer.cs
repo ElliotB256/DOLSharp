@@ -2417,15 +2417,21 @@ namespace DOL.GS
 			return m_customFaceAttributes[(int)part];
 		}
 
-		#endregion
+        #endregion
 
-		#region Spells/Skills/Abilities/Effects
-		
-		/// <summary>
-		/// Holds the player specializable skills and style lines
-		/// (KeyName -> Specialization)
-		/// </summary>
-		protected readonly Dictionary<string, Specialization> m_specialization = new Dictionary<string, Specialization>();
+        #region Talent System
+
+
+
+        #endregion
+
+        #region Spells/Skills/Abilities/Effects
+
+        /// <summary>
+        /// Holds the player specializable skills and style lines
+        /// (KeyName -> Specialization)
+        /// </summary>
+        protected readonly Dictionary<string, Specialization> m_specialization = new Dictionary<string, Specialization>();
 
 		/// <summary>
 		/// Holds the Spell lines the player can use

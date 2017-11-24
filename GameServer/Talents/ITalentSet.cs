@@ -23,5 +23,10 @@ namespace DOL.Talents
         /// </summary>
         /// <returns></returns>
         IEnumerable<ITalent> GetAllTalents();
+
+        /// <summary>
+        /// Owner of the ITalentSet
+        /// </summary>
+        ITalentOwner Owner { get; }
     }
 }

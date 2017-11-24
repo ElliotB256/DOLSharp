@@ -362,7 +362,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 								playerAccount.LastLoginIP = ipAddress;
 								playerAccount.LastClientVersion = ((int)client.Version).ToString();
 								playerAccount.Language = Properties.SERV_LANGUAGE;
-								playerAccount.PrivLevel = 1;
+								playerAccount.PrivLevel = (uint)Properties.DEFAULT_ACCOUNT_PLVL;
 
 								if (Log.IsInfoEnabled)
 									Log.Info("New account created: " + userName);

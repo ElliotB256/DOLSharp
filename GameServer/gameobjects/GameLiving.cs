@@ -30,10 +30,11 @@ using DOL.GS.Effects;
 using DOL.GS.Keeps;
 using DOL.GS.PacketHandler;
 using DOL.GS.PropertyCalc;
-using DOL.GS.SkillHandler;
 using DOL.GS.Spells;
 using DOL.GS.Styles;
 using DOL.Language;
+
+using DOL.Talents;
 
 namespace DOL.GS
 {
@@ -41,7 +42,7 @@ namespace DOL.GS
 	/// This class holds all information that each
 	/// living object in the world uses
 	/// </summary>
-	public abstract class GameLiving : GameObject
+	public abstract class GameLiving : GameObject, ITalentOwner
 	{
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -5459,14 +5460,23 @@ namespace DOL.GS
 			return list;
 		}
 
-		#endregion Abilities
+        #endregion Abilities
 
-		/// <summary>
-		/// Checks if living has ability to use items of this type
-		/// </summary>
-		/// <param name="item"></param>
-		/// <returns>true if living has ability to use item</returns>
-		public virtual bool HasAbilityToUseItem(ItemTemplate item)
+        #region Talents
+
+        protected ITalentSet m_talents = null;
+
+        public ITalentSet Talents
+        { get { return m_talents; } }
+
+        #endregion
+
+        /// <summary>
+        /// Checks if living has ability to use items of this type
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>true if living has ability to use item</returns>
+        public virtual bool HasAbilityToUseItem(ItemTemplate item)
 		{
 			return GameServer.ServerRules.CheckAbilityToUseItem(this, item);
 		}
@@ -6005,6 +6015,7 @@ namespace DOL.GS
 			m_mana = 1;
 			m_endurance = 1;
 			m_maxEndurance = 1;
-		}
+            m_talents = new TalentSet(this);
+        }
 	}
 }

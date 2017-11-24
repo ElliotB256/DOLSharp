@@ -5,5 +5,6 @@
     /// </summary>
     public interface ITalentOwner
     {
+        ITalentSet Talents { get; }
     }
 }

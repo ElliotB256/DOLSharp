@@ -18,6 +18,12 @@
         void Remove(ITalentOwner owner);
 
         /// <summary>
+        /// Is the specified owner a suitable candidate for the ITalent
+        /// </summary>
+        /// <param name="owner"></param>
+        bool IsValid(ITalentOwner owner);
+
+        /// <summary>
         /// Client-side implementation and display of the talent.
         /// </summary>
         ITalentClientImplementation ClientImplementation { get; }

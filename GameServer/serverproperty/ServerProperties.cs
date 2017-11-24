@@ -1951,10 +1951,16 @@ namespace DOL.GS.ServerProperties
 		[ServerProperty("account", "allow_auto_account_creation", "Allow auto-account creation  This is also set in serverconfig.xml and must be enabled for this property to work.", true)]
 		public static bool ALLOW_AUTO_ACCOUNT_CREATION;
 
-		/// <summary>
-		/// Account bombing prevention
-		/// </summary>
-		[ServerProperty("account", "time_between_account_creation", "The time in minutes between 2 accounts creation. This avoid account bombing with dynamic ip. 0 to disable", 0)]
+        /// <summary>
+        /// Default account priv level. Useful for debugging.
+        /// </summary>
+        [ServerProperty("account", "default_account_plvl", "New accounts are created with this priv level.", 1)]
+        public static int DEFAULT_ACCOUNT_PLVL;
+
+        /// <summary>
+        /// Account bombing prevention
+        /// </summary>
+        [ServerProperty("account", "time_between_account_creation", "The time in minutes between 2 accounts creation. This avoid account bombing with dynamic ip. 0 to disable", 0)]
 		public static int TIME_BETWEEN_ACCOUNT_CREATION;
 
 		/// <summary>

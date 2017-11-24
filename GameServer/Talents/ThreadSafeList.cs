@@ -23,6 +23,8 @@ namespace DOL.Concurrent
 
         protected static object _lock = new object();
 
+        public object Lock { get { return _lock; } }
+
         public int Count { get { return Clone().Count; } }
 
         public bool IsReadOnly
