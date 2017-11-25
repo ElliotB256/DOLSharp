@@ -340,6 +340,7 @@
     <Compile Include="Talents\Clientside\ClientSkillList.cs" />
     <Compile Include="Talents\Clientside\ClientSkillListManager.cs" />
     <Compile Include="Talents\Clientside\ClientStyleImplementation.cs" />
+    <Compile Include="Talents\IUseableTalent.cs" />
     <Compile Include="Talents\ITalent.cs" />
     <Compile Include="Talents\Clientside\ITalentClientImplementation.cs" />
     <Compile Include="events\gameobjects\ExecuteCommandEventArgs.cs" />

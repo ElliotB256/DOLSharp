@@ -20,6 +20,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using DOL.Talents;
+using DOL.Talents.Clientside;
 using log4net;
 
 namespace DOL.GS.PacketHandler.Client.v168
@@ -135,55 +137,27 @@ namespace DOL.GS.PacketHandler.Client.v168
 				player.TargetInView = (m_flagSpeedData & 0xa000) != 0; // why 2 bits? that has to be figured out
 				player.GroundTargetInView = ((m_flagSpeedData & 0x1000) != 0);
 
-				List<Tuple<SpellLine, List<Skill>>> snap = player.GetAllUsableListSpells();
-				Skill sk = null;
-				SpellLine sl = null;
+                List<ClientSkillList> spellLines = player.ClientSkillListManager.GetSkillLists();
+                ITalent used = null;
 				
-				// is spelline in index ?
-				if (m_spellLineIndex < snap.Count)
+				if (m_spellLineIndex < spellLines.Count)
 				{
-					int index = snap[m_spellLineIndex].Item2.FindIndex(s => s is Spell ? 
-					                                                   s.Level == m_spellLevel 
-					                                                   : (s is Styles.Style ? ((Styles.Style)s).SpecLevelRequirement == m_spellLevel
-					                                                      : (s is Ability ? ((Ability)s).SpecLevelRequirement == m_spellLevel : false)));
-					
-					if (index > -1)
-					{
-						sk = snap[m_spellLineIndex].Item2[index];
-					}
-					
-					sl = snap[m_spellLineIndex].Item1;
+                    //For our particular case, spells are sent in flat order, not at 'levels'.
+                    int spellSlot = m_spellLevel - 1;
+                    if (spellSlot >= 0 && spellSlot < spellLines[m_spellLineIndex].Spells.Count)                        
+                        used = spellLines[m_spellLineIndex].Spells[spellSlot];
 				}
-				
-				if (sk is Spell && sl != null)
-				{
-					player.CastSpell((Spell)sk, sl);
-				}
-				else if (sk is Styles.Style)
-				{
-                    //player.ExecuteWeaponStyle((Styles.Style)sk);
-                    player.Out.SendMessage("UseSpellHandler.cs: Need to implement ExecuteWeaponStyle.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+
+                if (used == null)
+                {
+                    Log.Warn(string.Format("Player requested UseSpellHandler for spellLineIndex={0} and spellLevel={1}. Could not find skill.", m_spellLineIndex, m_spellLevel));
+                    player.Out.SendMessage(string.Format("Error : Spell (Line {0}, Level {1}) can't be resolved...", m_spellLineIndex, m_spellLevel), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
                 }
-				else if (sk is Ability)
-				{
-					Ability ab = (Ability)sk;
-					IAbilityActionHandler handler = SkillBase.GetAbilityActionHandler(ab.KeyName);
-					if (handler != null)
-					{
-						handler.Execute(ab, player);
-					}
-					
-					ab.Execute(player);
-				}
-				else
-				{
-					if (Log.IsWarnEnabled)
-						Log.Warn("Client <" + player.Client.Account.Name + "> requested incorrect spell at level " + m_spellLevel +
-							" in spell-line " + ((sl == null || sl.Name == null) ? "unkown" : sl.Name));
-					
-					player.Out.SendMessage(string.Format("Error : Spell (Line {0}, Level {1}) can't be resolved...", m_spellLineIndex, m_spellLevel), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-				}
-				
+                else
+                {
+                    if (used is IUseableTalent)
+                        (used as IUseableTalent).Use();
+                }
 			}
 		}
 
