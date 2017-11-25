@@ -2284,7 +2284,6 @@ namespace DOL.GS.PacketHandler
 							pak.WriteByte((byte)0);
 							pak.WriteShort((ushort)ab.Icon);
 							pak.WritePascalString(ab.Name);
-							
 						}
 						else if (skill is Spell)
 						{
@@ -2424,7 +2423,7 @@ namespace DOL.GS.PacketHandler
 
                     // Add All Spells...
                     byte spellNum = 1;
-					foreach (ITalent sp in spellLine.Talents)
+					foreach (ITalent sp in spellLine.Spells)
 					{
                         if (sp.ClientImplementation is ClientSpellImplementation)
                         {

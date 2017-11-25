@@ -7,9 +7,9 @@ namespace DOL.Talents.Clientside
     /// </summary>
     public class ClientSpellImplementation : ITalentClientImplementation
     {
-        public byte Level { get; set; }
-        public ushort InternalID { get; set; }
-        public SkillGroupTalent SpellLine {get;set;}
+        public byte Level { get; set; } //not used
+        public ushort InternalID { get; set; } //not yet used
+        public SkillGroupTalent SkillGroup {get;set;}
         public ushort Icon { get; set; }
         public String Name { get; set; }
     }

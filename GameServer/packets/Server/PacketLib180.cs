@@ -18,11 +18,9 @@
  */
 #define NOENCRYPTION
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using DOL.GS.Styles;
-using DOL.GS.Effects;
+using System.Linq;
 using DOL.Talents;
 using DOL.Talents.Clientside;
 
@@ -30,7 +28,7 @@ using log4net;
 
 namespace DOL.GS.PacketHandler
 {
-	[PacketLib(180, GameClient.eClientVersion.Version180)]
+    [PacketLib(180, GameClient.eClientVersion.Version180)]
 	public class PacketLib180 : PacketLib179
 	{
 		/// <summary>
@@ -247,20 +245,16 @@ namespace DOL.GS.PacketHandler
 
             m_gameClient.Player.ClientSkillListManager.Build();
 
-            List<ITalent> talents = new List<ITalent>(m_gameClient.Player.Talents.GetAllTalents());
-
-            //List<Tuple<Skill, Skill>> usableSkills = m_gameClient.Player.GetAllUsableSkills(true);
-						
-			bool sent = false; // set to true once we can't send packet anymore !
+            // Build a list of talents to send, in the order they will be sent.
+            List<ITalent> orderedTalents = m_gameClient.Player.ClientSkillListManager.OrderTalentsForClient();
+            
+            bool sent = false; // set to true once we can't send packet anymore !
 			int index = 0; // index of our position in the list !
+            byte stylenum = 1;
 
-
-            int total = 0;
-
-            //Count talents that we will be adding in this packet
-            foreach (ITalent it in talents)
-                if (it.ClientImplementation is ClientAbilityImplementation)
-                    total++;
+            //Select talents that we will be adding in this packet
+            List<ITalent> talents = new List<ITalent>(orderedTalents.Where(p => p.ClientImplementation is ClientAbilityImplementation || p.ClientImplementation is ClientStyleImplementation));
+            int total = talents.Count;
 
 			int packetCount = 0; // Number of packet sent for the entire list
 			while (!sent)
@@ -296,6 +290,29 @@ namespace DOL.GS.PacketHandler
                             pak.WriteShort((ushort)cai.Icon);
                             pak.WritePascalString(cai.Name);
                         }
+                        else if (talent.ClientImplementation is ClientStyleImplementation)
+                        {
+                            ClientStyleImplementation style = (ClientStyleImplementation)talent.ClientImplementation;
+                            ushort pre = 0x100;
+
+                            byte spec = 0;
+                            if (style.SkillGroup != null && style.SkillGroup.Name != null)
+                                spec = GlobalConstants.GetSpecToInternalIndex(style.SkillGroup.Name);
+                            if (spec != 0)
+                            {
+                                pak.WriteByte((byte)stylenum);
+                                pak.WriteByte((byte)eSkillPage.Styles);
+                                pak.WriteShort(pre);
+                                pak.WriteByte(spec);
+                                pak.WriteShort((ushort)style.Icon);
+                                pak.WritePascalString(style.Name);
+                                stylenum++;
+                            } else
+                            {
+                                log.Debug(String.Format("Could not send style to player as associated spec ID was 0. player={0} and style name={1}", m_gameClient.Player.Name, style.Name));
+                            }
+                        }
+                   
 
 						// Enter Packet Values !! Format Level - Type - SpecialField - Bonus - Icon - Name
 						//Skill skill = usableSkills[index].Item1;

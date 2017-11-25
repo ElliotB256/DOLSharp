@@ -1517,6 +1517,7 @@
     <Compile Include="Talents\ITalentSet.cs" />
     <Compile Include="Talents\Passives\PassiveTalent.cs" />
     <Compile Include="Talents\Testing\TestAbility.cs" />
+    <Compile Include="Talents\Testing\TestStyle.cs" />
     <Compile Include="Talents\Testing\TestSpell.cs" />
     <Compile Include="Talents\TalentSet.cs" />
     <Compile Include="Talents\ThreadSafeList.cs" />

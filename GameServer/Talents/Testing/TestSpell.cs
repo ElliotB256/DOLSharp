@@ -10,7 +10,7 @@ namespace DOL.Talents
             m_clientSpell = new Clientside.ClientSpellImplementation();
             m_clientSpell.Icon = icon;
             m_clientSpell.Name = name;
-            m_clientSpell.SpellLine = group;
+            m_clientSpell.SkillGroup = group;
         }
 
         protected ClientSpellImplementation m_clientSpell;

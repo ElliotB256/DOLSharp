@@ -28,7 +28,8 @@ namespace DOL.GS.Commands
         "Adds or removes talents from target.",
         "/talent passive <name>",
         "/talent spellline <name>",
-        "/talent spell <icon> <name>")]
+        "/talent spell <icon> <name>",
+        "/talent style <icon> <name>")]
     public class TalentCommandHandler : ICommandHandler
     {
         public void OnCommand(GameClient client, string[] args)
@@ -68,6 +69,40 @@ namespace DOL.GS.Commands
                         player.Talents.Add(ts);
                         player.Out.SendUpdatePlayerSkills();
                         player.Out.SendMessage("Spell added!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                        break;
+                    case "style":
+
+                        if (args.Length < 4)
+                            return;
+
+                        ushort styleIcon = 0;
+                        if (!ushort.TryParse(args[2], out styleIcon))
+                        {
+                            player.Out.SendMessage("Could not parse icon id.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                            return;
+                        }
+                        string styleName = string.Join(" ", args, 3, args.Length - 3);
+
+                        // Find skill line for player
+                        Talents.Clientside.SkillGroupTalent group = null;
+                        foreach (ITalent talent in player.Talents.GetAllTalents())
+                        {
+                            if (talent is Talents.Clientside.SkillGroupTalent)
+                            {
+                                group = talent as Talents.Clientside.SkillGroupTalent;
+                                break;
+                            }
+                        }
+                        if (group == null)
+                        {
+                            group = new Talents.Clientside.SkillGroupTalent("Two Handed");
+                            player.Talents.Add(group);
+                        }
+
+                        TestStyle testStyle = new TestStyle(group, styleName, styleIcon);
+                        player.Talents.Add(testStyle);
+                        player.Out.SendUpdatePlayerSkills();
+                        player.Out.SendMessage("Style added!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
                         break;
                     case "clear":
                         foreach (ITalent it in player.Talents.GetAllTalents())

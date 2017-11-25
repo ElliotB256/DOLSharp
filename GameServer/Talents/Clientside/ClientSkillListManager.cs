@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace DOL.Talents.Clientside
@@ -15,7 +16,7 @@ namespace DOL.Talents.Clientside
         private object m_skillListLock = new object();
 
         /// <summary>
-        /// Set of talents used for constructing spell lists
+        /// Set of talents used for constructing skill lists
         /// </summary>
         private ITalentSet m_talentSet;
 
@@ -27,7 +28,7 @@ namespace DOL.Talents.Clientside
 
         public const String UNCATEGORISED_SPELLLINE_NAME = "Abilities";
 
-        private SkillGroupTalent UncategorisedSpellLine = new SkillGroupTalent(UNCATEGORISED_SPELLLINE_NAME);
+        private SkillGroupTalent UncategorisedSkillLine = new SkillGroupTalent(UNCATEGORISED_SPELLLINE_NAME);
 
         /// <summary>
         /// Constructs spell lists from ITalentSet
@@ -40,17 +41,17 @@ namespace DOL.Talents.Clientside
             lock (m_skillListLock)
             {
                 m_skillLists.Clear();
-                Dictionary<SkillGroupTalent, ClientSkillList> spelllines = new Dictionary<SkillGroupTalent, ClientSkillList>();
-                spelllines.Add(UncategorisedSpellLine, new ClientSkillList(UncategorisedSpellLine));
+                Dictionary<SkillGroupTalent, ClientSkillList> skilllines = new Dictionary<SkillGroupTalent, ClientSkillList>();
+                skilllines.Add(UncategorisedSkillLine, new ClientSkillList(UncategorisedSkillLine));
 
                 // Create spell lines
                 foreach (ITalent talent in talents)
                 {
                     if (talent is SkillGroupTalent)
-                        spelllines.Add(talent as SkillGroupTalent, new ClientSkillList((SkillGroupTalent)talent));
+                        skilllines.Add(talent as SkillGroupTalent, new ClientSkillList((SkillGroupTalent)talent));
                 }
 
-                // Enumerate through spells, add them to lines
+                // Enumerate through skills, add them to lines
                 foreach (ITalent talent in talents)
                 {
                     if (talent.ClientImplementation is ClientSpellImplementation)
@@ -58,15 +59,26 @@ namespace DOL.Talents.Clientside
                         ClientSpellImplementation sp = (ClientSpellImplementation)talent.ClientImplementation;
 
                         //Find and add spell to line
-                        if (sp.SpellLine != null && spelllines.ContainsKey(sp.SpellLine))
-                            spelllines[sp.SpellLine].Talents.Add(talent);
+                        if (sp.SkillGroup != null && skilllines.ContainsKey(sp.SkillGroup))
+                            skilllines[sp.SkillGroup].Talents.Add(talent);
                         else
-                            spelllines[UncategorisedSpellLine].Talents.Add(talent);
+                            skilllines[UncategorisedSkillLine].Talents.Add(talent);
+                    }
+
+                    if (talent.ClientImplementation is ClientStyleImplementation)
+                    {
+                        ClientStyleImplementation sp = (ClientStyleImplementation)talent.ClientImplementation;
+
+                        //Find and add spell to line
+                        if (sp.SkillGroup != null && skilllines.ContainsKey(sp.SkillGroup))
+                            skilllines[sp.SkillGroup].Talents.Add(talent);
+                        else
+                            skilllines[UncategorisedSkillLine].Talents.Add(talent);
                     }
                 }
 
                 //Build client spell lists
-                foreach (ClientSkillList list in spelllines.Values)
+                foreach (ClientSkillList list in skilllines.Values)
                     m_skillLists.Add(list);
             }
         }
@@ -102,6 +114,30 @@ namespace DOL.Talents.Clientside
                 return null;
             }
             return skilllist.Talents[levelIndex];
+        }
+
+        /// <summary>
+        /// Orders the list of talents for use client side
+        /// </summary>
+        /// <returns></returns>
+        public List<ITalent> OrderTalentsForClient()
+        {
+            List<ITalent> orderedTalents = new List<ITalent>();
+            List<ITalent> allTalents = new List<ITalent>(m_talentSet.GetAllTalents());
+
+            // First add abilities
+            orderedTalents.AddRange(allTalents.Where(p => p.ClientImplementation is ClientAbilityImplementation));
+
+            // add styles
+            orderedTalents.AddRange(allTalents.Where(p => p.ClientImplementation is ClientStyleImplementation));
+
+            // add each spell line
+            foreach (ClientSkillList list in GetSkillLists())
+            {
+                orderedTalents.Add(list.SpellLine);
+                orderedTalents.AddRange(list.Spells);
+            }
+            return orderedTalents;
         }
     }
 }

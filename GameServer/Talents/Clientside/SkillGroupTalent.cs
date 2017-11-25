@@ -1,4 +1,5 @@
 ﻿using System;
+using DOL.GS;
 
 namespace DOL.Talents.Clientside
 {
@@ -36,7 +37,7 @@ namespace DOL.Talents.Clientside
         }
 
         /// <summary>
-        /// Name of the spell line as displayed to the client.
+        /// Name of the skill line as displayed to the client.
         /// </summary>
         public string Name
         { get; private set; }

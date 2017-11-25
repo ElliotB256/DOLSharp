@@ -105,6 +105,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 				player.TargetInView = (m_flagSpeedData & 0xa000) != 0; // why 2 bits? that has to be figured out
 				player.GroundTargetInView = ((m_flagSpeedData & 0x1000) != 0);
 
+                Log.Debug(String.Format("player {0} clicks to use skill: m_index = {1}, m_type = {2}", player.Name, m_index, m_type));
+
 				List<Tuple<Skill, Skill>> snap = player.GetAllUsableSkills();
                 
 				
