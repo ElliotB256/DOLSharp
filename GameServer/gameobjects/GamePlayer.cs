@@ -42,6 +42,7 @@ using DOL.GS.Styles;
 using DOL.GS.Utils;
 using DOL.Language;
 using log4net;
+using DOL.Talents.Clientside;
 
 namespace DOL.GS
 {
@@ -2421,7 +2422,12 @@ namespace DOL.GS
 
         #region Talent System
 
+        protected ClientSkillListManager m_clientSkillListManager;
 
+        /// <summary>
+        /// Builds and manages client skill lists from available ITalents in player's ITalentSet.
+        /// </summary>
+        public ClientSkillListManager ClientSkillListManager { get { return m_clientSkillListManager; } }
 
         #endregion
 
@@ -13701,7 +13707,9 @@ namespace DOL.GS
 			LoadFromDatabase(dbChar);
 
 			CreateStatistics();
-		}
+
+            m_clientSkillListManager = new ClientSkillListManager(this.Talents);
+        }
 
 		/// <summary>
 		/// Create this players inventory

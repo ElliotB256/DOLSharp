@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using DOL.GS.Styles;
 using DOL.GS.Effects;
+using DOL.Talents;
+using DOL.Talents.Clientside;
 
 using log4net;
 
@@ -242,13 +244,24 @@ namespace DOL.GS.PacketHandler
 		{
 			if (m_gameClient.Player == null)
 				return;
-			
-			// Get Skills as "Usable Skills" which are in network order ! (with forced update)
-			List<Tuple<Skill, Skill>> usableSkills = m_gameClient.Player.GetAllUsableSkills(true);
+
+            m_gameClient.Player.ClientSkillListManager.Build();
+
+            List<ITalent> talents = new List<ITalent>(m_gameClient.Player.Talents.GetAllTalents());
+
+            //List<Tuple<Skill, Skill>> usableSkills = m_gameClient.Player.GetAllUsableSkills(true);
 						
 			bool sent = false; // set to true once we can't send packet anymore !
 			int index = 0; // index of our position in the list !
-			int total = usableSkills.Count; // cache List count.
+
+
+            int total = 0;
+
+            //Count talents that we will be adding in this packet
+            foreach (ITalent it in talents)
+                if (it.ClientImplementation is ClientAbilityImplementation)
+                    total++;
+
 			int packetCount = 0; // Number of packet sent for the entire list
 			while (!sent)
 			{
@@ -266,15 +279,29 @@ namespace DOL.GS.PacketHandler
 					while(index < total)
 					{
 						// this item will break the limit, send the packet before, keep index as is to continue !
-						if ((index >= byte.MaxValue) || ((pak.Length + 8 + usableSkills[index].Item1.Name.Length) > 1400))
+						if ((index >= byte.MaxValue) || ((pak.Length + 8) > 1300))
 						{
 							break;
 						}
-						
-						// Enter Packet Values !! Format Level - Type - SpecialField - Bonus - Icon - Name
-						Skill skill = usableSkills[index].Item1;
-						Skill skillrelated = usableSkills[index].Item2;
 
+                        ITalent talent = talents[index];
+
+                        if (talent.ClientImplementation is ClientAbilityImplementation)
+                        {
+                            ClientAbilityImplementation cai = (ClientAbilityImplementation)talent.ClientImplementation;
+                            pak.WriteByte((byte)0);
+                            pak.WriteByte((byte)eSkillPage.Abilities);
+                            pak.WriteShort(0);
+                            pak.WriteByte((byte)0);
+                            pak.WriteShort((ushort)cai.Icon);
+                            pak.WritePascalString(cai.Name);
+                        }
+
+						// Enter Packet Values !! Format Level - Type - SpecialField - Bonus - Icon - Name
+						//Skill skill = usableSkills[index].Item1;
+						//Skill skillrelated = usableSkills[index].Item2;
+
+                        /*
 						if (skill is Specialization)
 						{
 							Specialization spec = (Specialization)skill;
@@ -367,10 +394,11 @@ namespace DOL.GS.PacketHandler
 							pak.WriteShort((ushort)style.Icon);
 							pak.WritePascalString(style.Name);
 						}						
-						
-						packetEntry++;
+						*/
+                        packetEntry++;
 						index++;
 					}
+                    
 
 					// test if we finished sending packets
 					if (index >= total || index >= byte.MaxValue)

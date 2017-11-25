@@ -169,6 +169,7 @@
     <Compile Include="commands\gmcommands\cast.cs" />
     <Compile Include="commands\gmcommands\ClientList.cs" />
     <Compile Include="commands\gmcommands\gmstealth.cs" />
+    <Compile Include="commands\gmcommands\talent.cs" />
     <Compile Include="commands\gmcommands\translate.cs" />
     <Compile Include="commands\gmcommands\zone.cs" />
     <Compile Include="commands\gmcommands\crafting.cs" />
@@ -1515,7 +1516,8 @@
     <Compile Include="Talents\ITalentOwner.cs" />
     <Compile Include="Talents\ITalentSet.cs" />
     <Compile Include="Talents\Passives\PassiveTalent.cs" />
-    <Compile Include="Talents\Passives\TestTalent.cs" />
+    <Compile Include="Talents\Testing\TestAbility.cs" />
+    <Compile Include="Talents\Testing\TestSpell.cs" />
     <Compile Include="Talents\TalentSet.cs" />
     <Compile Include="Talents\ThreadSafeList.cs" />
     <Compile Include="world\AbstractArea.cs">
@@ -1781,6 +1783,7 @@
     <Folder Include="gameutils\KDTree\" />
     <Folder Include="language\DE\Quests\Midgard\" />
     <Folder Include="language\EN\Quests\Midgard\" />
+    <Folder Include="Talents\Spell\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

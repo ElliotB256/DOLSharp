@@ -34,6 +34,7 @@ namespace DOL.Talents.Clientside
         /// </summary>
         public void Build()
         {
+            log.Debug(String.Format("Building ClientSkillLists for owner={0}", m_talentSet.Owner));
             IEnumerable<ITalent> talents = m_talentSet.GetAllTalents();
 
             lock (m_skillListLock)
@@ -57,7 +58,7 @@ namespace DOL.Talents.Clientside
                         ClientSpellImplementation sp = (ClientSpellImplementation)talent.ClientImplementation;
 
                         //Find and add spell to line
-                        if (spelllines.ContainsKey(sp.SpellLine))
+                        if (sp.SpellLine != null && spelllines.ContainsKey(sp.SpellLine))
                             spelllines[sp.SpellLine].Talents.Add(talent);
                         else
                             spelllines[UncategorisedSpellLine].Talents.Add(talent);

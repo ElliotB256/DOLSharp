@@ -1,10 +1,10 @@
 ﻿using DOL.GS;
 
-namespace DOL.Talents.Passives
+namespace DOL.Talents
 {
-    public class TestTalent : PassiveTalent
+    public class TestAbility : PassiveTalent
     {
-        public TestTalent() : base("Test Ability")
+        public TestAbility(string name) : base(name)
         { }
 
         public override void Apply(ITalentOwner owner)

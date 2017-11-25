@@ -119,24 +119,11 @@
     <Compile Include="dbupdater\ServerPropertiesUpdate.cs" />
     <Compile Include="dbupdater\UnloadXMLCommandHandler.cs" />
     <Compile Include="examples\CustomInventoryLoggingExample.cs" />
-    <Compile Include="gameevents\DOLTestServer.cs" />
     <Compile Include="gameevents\StartupGuilds.cs" />
-    <Compile Include="gameevents\FightingNPC.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="gameevents\FollowingNPC.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="gameevents\HorseRace.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="gameevents\PlayerEnterExit.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="gameevents\StartupLocations.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="gameevents\TalkingNPC.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="gameevents\TutorialJumpPointHandler.cs" />

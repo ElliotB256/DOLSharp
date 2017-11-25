@@ -34,6 +34,8 @@ using DOL.GS.PlayerTitles;
 using DOL.GS.Quests;
 using DOL.GS.Spells;
 using DOL.GS.Styles;
+using DOL.Talents;
+using DOL.Talents.Clientside;
 
 using log4net;
 
@@ -2394,38 +2396,44 @@ namespace DOL.GS.PacketHandler
 			if (player == null)
 				return;
 
-			List<Tuple<SpellLine, List<Skill>>> spellsXLines = player.GetAllUsableListSpells(true);
-			
-			int lineIndex = 0;
-			foreach (var spXsl in spellsXLines)
+            m_gameClient.Player.ClientSkillListManager.Build();
+            List<ITalent> talents = new List<ITalent>(m_gameClient.Player.Talents.GetAllTalents());
+            List<ClientSkillList> spellLines = m_gameClient.Player.ClientSkillListManager.GetSkillLists();
+
+            int lineIndex = 0;
+			foreach (var spellLine in spellLines)
 			{
+                //Determine the number of spells we can send
+                int spellCount = 0;
+                foreach (ITalent t in spellLine.Talents)
+                    if (t.ClientImplementation is ClientSpellImplementation)
+                        spellCount++;
+
 				// Prepare packet
 				using(var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.VariousUpdate)))
 				{
 					// Add Line Header
 					pak.WriteByte(0x02); //subcode
-					pak.WriteByte((byte)(spXsl.Item2.Count + 1)); //number of entry
+					pak.WriteByte((byte)(spellCount + 1)); //number of entry
 					pak.WriteByte(0x02); //subtype
 					pak.WriteByte((byte)lineIndex); //number of line
 					
 					pak.WriteByte(0); // level, not used when spell line
 					pak.WriteShort(0); // icon, not used when spell line
-					pak.WritePascalString(spXsl.Item1.Name);
-					
-					// Add All Spells...
-					foreach (Skill sp in spXsl.Item2)
+					pak.WritePascalString(spellLine.SpellLine.Name);
+
+                    // Add All Spells...
+                    byte spellNum = 1;
+					foreach (ITalent sp in spellLine.Talents)
 					{
-						int reqLevel = 1;
-						if (sp is Style)
-							reqLevel = ((Style)sp).SpecLevelRequirement;
-						else if (sp is Ability)
-							reqLevel = ((Ability)sp).SpecLevelRequirement;
-						else
-							reqLevel = sp.Level;
-						
-						pak.WriteByte((byte)reqLevel);
-						pak.WriteShort(sp.Icon);
-						pak.WritePascalString(sp.Name);
+                        if (sp.ClientImplementation is ClientSpellImplementation)
+                        {
+                            ClientSpellImplementation csi = (ClientSpellImplementation)sp.ClientImplementation;
+                            pak.WriteByte(spellNum);
+                            pak.WriteShort(csi.Icon);
+                            pak.WritePascalString(csi.Name);
+                            spellNum++;
+                        }
 					}
 					
 					// Send

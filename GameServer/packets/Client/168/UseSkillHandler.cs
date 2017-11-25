@@ -106,6 +106,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 				player.GroundTargetInView = ((m_flagSpeedData & 0x1000) != 0);
 
 				List<Tuple<Skill, Skill>> snap = player.GetAllUsableSkills();
+                
 				
 				Skill sk = null;
 				Skill sksib = null;
@@ -123,8 +124,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 						sk = snap[m_index + begin].Item1;
 						sksib = snap[m_index + begin].Item2;
 					}
-					
-				}
+                }
 				else
 				{
 					// mostly a spec !

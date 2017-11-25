@@ -1,7 +1,7 @@
 ﻿using System;
 using DOL.Talents.Clientside;
 
-namespace DOL.Talents.Passives
+namespace DOL.Talents
 {
     /// <summary>
     /// Base class for passive talents.
