@@ -24,6 +24,7 @@ using DOL.Database;
 using DOL.GS.Housing;
 using DOL.GS.PacketHandler;
 using DOL.GS.PacketHandler.Client.v168;
+using DOL.GS.Representation;
 using log4net;
 
 namespace DOL.GS
@@ -174,6 +175,11 @@ namespace DOL.GS
         public virtual Dictionary<int, InventoryItem> GetClientInventory(GamePlayer player)
         {
 			return this.GetClientItems(player);
+        }
+
+        public virtual Dictionary<int, IInventoryItemRepresentation> GetClientInventoryRepresentation(GamePlayer player)
+        {
+            return this.GetClientItemRepresentations(player);
         }
 
         /// <summary>
@@ -676,12 +682,12 @@ namespace DOL.GS
                     continue;
                 }
 
-                observer.Client.Out.SendInventoryItemsUpdate(updateItems, eInventoryWindowType.Update);
+                observer.Client.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(updateItems), eInventoryWindowType.Update);
 
 				// The above code is suspect, it seems to work 80% of the time, so let's make sure we update the player doing the move - Tolakram
 				if (hasUpdatedPlayer == false)
 				{
-					player.Client.Out.SendInventoryItemsUpdate(updateItems, PacketHandler.eInventoryWindowType.Update);
+					player.Client.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(updateItems), PacketHandler.eInventoryWindowType.Update);
 				}
 			}
 
@@ -720,7 +726,8 @@ namespace DOL.GS
 
             if (house.CanUseConsignmentMerchant(player, ConsignmentPermissions.Any))
             {
-				player.Out.SendInventoryItemsUpdate(GetClientInventory(player), eInventoryWindowType.ConsignmentOwner);
+                
+                player.Out.SendInventoryItemsUpdate(GetClientInventoryRepresentation(player), eInventoryWindowType.ConsignmentOwner);
 
                 long amount = m_totalMoney;
                 player.Out.SendConsignmentMerchantMoney(amount);
@@ -732,7 +739,7 @@ namespace DOL.GS
             }
             else
             {
-				player.Out.SendInventoryItemsUpdate(GetClientInventory(player), eInventoryWindowType.ConsignmentViewer);
+				player.Out.SendInventoryItemsUpdate(GetClientInventoryRepresentation(player), eInventoryWindowType.ConsignmentViewer);
             }
 
             return true;

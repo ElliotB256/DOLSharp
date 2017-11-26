@@ -23,6 +23,7 @@ using DOL.GS.Quests;
 using DOL.Database;
 using log4net;
 using DOL.GS.Behaviour;
+using DOL.GS.Representation;    
 
 namespace DOL.GS.PacketHandler
 {
@@ -122,13 +123,13 @@ namespace DOL.GS.PacketHandler
                 pak.WriteByte((byte)quest.FinalRewards.Count);
 				foreach (ItemTemplate reward in quest.FinalRewards)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
+					WriteItemData(pak, new InventoryItemRepresentation(GameInventoryItem.Create(reward)));
 				}
 				pak.WriteByte((byte)quest.NumOptionalRewardsChoice);
 				pak.WriteByte((byte)quest.OptionalRewards.Count);
 				foreach (ItemTemplate reward in quest.OptionalRewards)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
+					WriteItemData(pak, new InventoryItemRepresentation(GameInventoryItem.Create(reward)));
 				}
 				SendTCP(pak);
 			}
@@ -197,14 +198,14 @@ namespace DOL.GS.PacketHandler
 				pak.WriteByte((byte)quest.Rewards.BasicItems.Count);
 				foreach (ItemTemplate reward in quest.Rewards.BasicItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
-				}
+                    WriteItemData(pak, new InventoryItemRepresentation(GameInventoryItem.Create(reward)));
+                }
 				pak.WriteByte((byte)quest.Rewards.ChoiceOf);
 				pak.WriteByte((byte)quest.Rewards.OptionalItems.Count);
 				foreach (ItemTemplate reward in quest.Rewards.OptionalItems)
 				{
-					WriteItemData(pak, GameInventoryItem.Create(reward));
-				}
+                    WriteItemData(pak, new InventoryItemRepresentation(GameInventoryItem.Create(reward)));
+                }
 				SendTCP(pak);
 			}
 		}

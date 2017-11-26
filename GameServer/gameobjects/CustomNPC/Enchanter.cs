@@ -25,6 +25,7 @@ using System;
 using System.Collections;
 using DOL.Database;
 using DOL.GS.PacketHandler;
+using DOL.GS.Representation;
 using DOL.Language;
 
 namespace DOL.GS
@@ -129,7 +130,7 @@ namespace DOL.GS
 				item.Bonus = 35;
 
             item.Name = LanguageMgr.GetTranslation(player.Client.Account.Language, "Enchanter.EnchanterDialogResponse.Text3") + " " + item.Name;
-            player.Out.SendInventoryItemsUpdate(new InventoryItem[] { item });
+            player.Out.SendInventorySlotsUpdate(new int[] { item.SlotPosition });
             player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language, "Enchanter.EnchanterDialogResponse.Text4", 
                                     GetName(0, false, player.Client.Account.Language, this), Money.GetString(Fee)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
             player.RemoveMoney(Fee, null);

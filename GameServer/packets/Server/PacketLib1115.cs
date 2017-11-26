@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using DOL.Database;
+using DOL.GS.Representation;
 using DOL.GS.Keeps;
 
 using log4net;
@@ -93,7 +94,7 @@ namespace DOL.GS.PacketHandler
 		/// </summary>
 		/// <param name="pak"></param>
 		/// <param name="item"></param>
-		protected override void WriteItemData(GSTCPPacketOut pak, InventoryItem item)
+		protected override void WriteItemData(GSTCPPacketOut pak, IInventoryItemRepresentation item)
 		{
 			if (item == null)
 			{

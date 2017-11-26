@@ -27,6 +27,7 @@ using DOL.Database;
 using DOL.AI.Brain;
 using DOL.GS.Keeps;
 using DOL.GS.Housing;
+using DOL.GS.Representation;
 
 namespace DOL.Tests
 {
@@ -413,8 +414,8 @@ namespace DOL.Tests
 		{
 			if (SendGroupMembersUpdateMethod != null) SendGroupMembersUpdateMethod(this, updateIcons);
 		}
-		public Action<TestPacketLib, ICollection<InventoryItem>> SendInventoryItemsUpdateMethod { get; set; }
-		public void SendInventoryItemsUpdate(ICollection<InventoryItem> itemsToUpdate)
+		public Action<TestPacketLib, ICollection<IInventoryItemRepresentation>> SendInventoryItemsUpdateMethod { get; set; }
+		public void SendInventoryItemsUpdate(ICollection<IInventoryItemRepresentation> itemsToUpdate)
 		{
 			if (SendInventoryItemsUpdateMethod != null) SendInventoryItemsUpdateMethod(this, itemsToUpdate);
 		}
@@ -423,13 +424,13 @@ namespace DOL.Tests
 		{
 			if (SendInventorySlotsUpdateMethod != null) SendInventorySlotsUpdateMethod(this, slots);
 		}
-		public Action<TestPacketLib, eInventoryWindowType, ICollection<InventoryItem>> SendInventoryItemsUpdateWindowMethod { get; set; }
-		public void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<InventoryItem> itemsToUpdate)
+		public Action<TestPacketLib, eInventoryWindowType, ICollection<IInventoryItemRepresentation>> SendInventoryItemsUpdateWindowMethod { get; set; }
+		public void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<IInventoryItemRepresentation> itemsToUpdate)
 		{
 			if (SendInventoryItemsUpdateWindowMethod != null) SendInventoryItemsUpdateWindowMethod(this, windowType, itemsToUpdate);
 		}
-		public Action<TestPacketLib, IDictionary<int, InventoryItem>, eInventoryWindowType> SendInventoryItemsUpdateDictMethod { get; set; }
-		public void SendInventoryItemsUpdate(IDictionary<int, InventoryItem> updateItems, eInventoryWindowType windowType)
+		public Action<TestPacketLib, IDictionary<int, IInventoryItemRepresentation>, eInventoryWindowType> SendInventoryItemsUpdateDictMethod { get; set; }
+		public void SendInventoryItemsUpdate(IDictionary<int, IInventoryItemRepresentation> updateItems, eInventoryWindowType windowType)
 		{
 			if (SendInventoryItemsUpdateDictMethod != null) SendInventoryItemsUpdateDictMethod(this, updateItems, windowType);
 		}

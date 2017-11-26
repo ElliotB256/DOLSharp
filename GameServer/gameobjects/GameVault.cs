@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using DOL.Database;
+using DOL.GS.Representation;
 using DOL.GS.PacketHandler;
 
 namespace DOL.GS
@@ -172,7 +173,7 @@ namespace DOL.GS
 			}
 
 			player.ActiveInventoryObject = this;
-			player.Out.SendInventoryItemsUpdate(GetClientInventory(player), eInventoryWindowType.HouseVault);
+			player.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(GetClientInventory(player)), eInventoryWindowType.HouseVault);
 
 			return true;
 		}
@@ -331,7 +332,7 @@ namespace DOL.GS
 		/// <param name="updateItems"></param>
 		protected virtual void NotifyObservers(GamePlayer player, IDictionary<int, InventoryItem> updateItems)
 		{
-			player.Client.Out.SendInventoryItemsUpdate(updateItems, eInventoryWindowType.Update);
+			player.Client.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(updateItems), eInventoryWindowType.Update);
 		}
 
 		/// <summary>

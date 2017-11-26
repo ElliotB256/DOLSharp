@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using DOL.Database;
 using System.Collections.Generic;
+using DOL.GS.Representation;
 
 // Tolakram - January 7, 2012
  
@@ -96,11 +97,32 @@ namespace DOL.GS
 			return inventory;
 		}
 
+        /// <summary>
+        /// Get the items of this object, mapped to the client inventory slots
+        /// </summary>
+        public static Dictionary<int, IInventoryItemRepresentation> GetClientItemRepresentations(this IGameInventoryObject thisObject, GamePlayer player)
+        {
+            var reps = new Dictionary<int, IInventoryItemRepresentation>();
+            int slotOffset = thisObject.FirstClientSlot - thisObject.FirstDBSlot;
+            foreach (InventoryItem item in thisObject.DBItems(player))
+            {
+                if (item != null)
+                {
+                    if (!reps.ContainsKey(item.SlotPosition + slotOffset))
+                    {
+                        reps.Add(item.SlotPosition + slotOffset, new InventoryItemRepresentation(item));
+                    }
+                }
+            }
 
-		/// <summary>
-		/// Move an item from the inventory object to a player's backpack (uses client slots)
-		/// </summary>
-		public static IDictionary<int, InventoryItem> MoveItemFromObject(this IGameInventoryObject thisObject, GamePlayer player, eInventorySlot fromClientSlot, eInventorySlot toClientSlot)
+            return reps;
+        }
+
+
+        /// <summary>
+        /// Move an item from the inventory object to a player's backpack (uses client slots)
+        /// </summary>
+        public static IDictionary<int, InventoryItem> MoveItemFromObject(this IGameInventoryObject thisObject, GamePlayer player, eInventorySlot fromClientSlot, eInventorySlot toClientSlot)
 		{
 			// We will only allow moving to the backpack.
 

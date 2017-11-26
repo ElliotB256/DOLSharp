@@ -25,6 +25,7 @@ using DOL.Database;
 using DOL.Language;
 using DOL.GS.Movement;
 using DOL.GS.PacketHandler;
+using DOL.GS.Representation;
 using log4net;
 
 namespace DOL.GS
@@ -606,7 +607,7 @@ namespace DOL.GS
 						break;
 				}
 
-				player.Out.SendInventoryItemsUpdate(items);
+				player.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(items));
 				player.Out.SendMessage(message, eChatType.CT_Merchant, eChatLoc.CL_SystemWindow);
 			}
 		}

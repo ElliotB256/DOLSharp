@@ -154,8 +154,8 @@ namespace DOL.GS
 			item.Charges = item.MaxCharges;
 			item.Charges1 = item.MaxCharges1;
 
-			player.Out.SendInventoryItemsUpdate(new InventoryItem[] {item});
-			SayTo(player, LanguageMgr.GetTranslation(player.Client.Account.Language, "Scripts.Recharger.RechargerDialogResponse.FullyCharged"));
+            player.Out.SendInventorySlotsUpdate(new int[] { item.SlotPosition });
+            SayTo(player, LanguageMgr.GetTranslation(player.Client.Account.Language, "Scripts.Recharger.RechargerDialogResponse.FullyCharged"));
 			return;
 		}
 

@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using DOL.Database;
+using DOL.GS.Representation;
 using log4net;
 
 namespace DOL.GS
@@ -393,15 +394,15 @@ namespace DOL.GS
 			return items;
 		}
 
-		/// <summary>
-		/// Searches for the first occurrence of an item with given
-		/// ID between specified slots
-		/// </summary>
-		/// <param name="uniqueID">item ID</param>
-		/// <param name="minSlot">fist slot for search</param>
-		/// <param name="maxSlot">last slot for search</param>
-		/// <returns>found item or null</returns>
-		public InventoryItem GetFirstItemByID(string uniqueID, eInventorySlot minSlot, eInventorySlot maxSlot)
+        /// <summary>
+        /// Searches for the first occurrence of an item with given
+        /// ID between specified slots
+        /// </summary>
+        /// <param name="uniqueID">item ID</param>
+        /// <param name="minSlot">fist slot for search</param>
+        /// <param name="maxSlot">last slot for search</param>
+        /// <returns>found item or null</returns>
+        public InventoryItem GetFirstItemByID(string uniqueID, eInventorySlot minSlot, eInventorySlot maxSlot)
 		{
 			minSlot = GetValidInventorySlot(minSlot);
 			maxSlot = GetValidInventorySlot(maxSlot);
@@ -1258,6 +1259,54 @@ namespace DOL.GS
 
 		#endregion
 
-		//Defines all the slots that hold equipment
-	}
+        /// <summary>
+        /// Get representation of the given slot.
+        /// </summary>
+        /// <param name="slot"></param>
+        /// <returns></returns>
+		public virtual IInventoryItemRepresentation GetItemRepresentation(eInventorySlot slot)
+        {
+            InventoryItem ii = GetItem(slot);
+            if (ii == null)
+                return null;
+            return new InventoryItemRepresentation(ii);
+        }
+
+        /// <summary>
+        /// Gets list of client representations of items in the specified range
+        /// </summary>
+        public virtual ICollection<IInventoryItemRepresentation> GetItemRepresentationRange(eInventorySlot minSlot, eInventorySlot maxSlot)
+        {
+            ICollection<IInventoryItemRepresentation> list = new List<IInventoryItemRepresentation>();
+
+            if (minSlot == eInventorySlot.Invalid || maxSlot == eInventorySlot.Invalid)
+                return null;
+
+            if (minSlot > maxSlot)
+            {
+                eInventorySlot t = maxSlot;
+                maxSlot = minSlot;
+                minSlot = t;
+            }
+
+            for (eInventorySlot i = minSlot; i <= maxSlot; i++)
+            {
+                IInventoryItemRepresentation rep = GetItemRepresentation(i);
+                if (rep != null)
+                    list.Add(rep);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Client side representation of items equipped by the client
+        /// </summary>
+        public ICollection<IInventoryItemRepresentation> EquippedItemsRepresentation
+        {
+            get
+            {
+                return GetItemRepresentationRange(eInventorySlot.MinEquipable, eInventorySlot.MaxEquipable);
+            }
+        }
+    }
 }

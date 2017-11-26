@@ -332,6 +332,11 @@
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
     <Compile Include="effects\SprintEffect.cs" />
     <Compile Include="effects\StealthEffect.cs" />
+    <Compile Include="ItemSkils\DAoEPlayerInventory.cs" />
+    <Compile Include="ItemSkils\IPluggable.cs" />
+    <Compile Include="ItemSkils\ISocketable.cs" />
+    <Compile Include="packets\Representations\IInventoryItemRepresentation.cs" />
+    <Compile Include="packets\Representations\InventoryItemRepresentation.cs" />
     <Compile Include="playerclasses\base\ClassMystic.cs" />
     <Compile Include="playerclasses\midgard\ClassRunemaster.cs" />
     <Compile Include="Talents\Clientside\ClientAbilityImplementation.cs" />

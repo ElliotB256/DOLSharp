@@ -531,7 +531,6 @@ namespace DOL.GS
 				case eInventorySlot.FirstEmptyBackpack:
 					slot = FindFirstEmptySlot(eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack);
 					break;
-					// INVENTAIRE DES CHEVAUX
 				case eInventorySlot.LastEmptyBagHorse:
 					slot = FindLastEmptySlot(eInventorySlot.FirstBagHorse, eInventorySlot.LastBagHorse);
 					break;
@@ -548,7 +547,6 @@ namespace DOL.GS
 			    || (slot >= eInventorySlot.Consignment_First && slot <= eInventorySlot.Consignment_Last)
 			    || (slot == eInventorySlot.PlayerPaperDoll)
 			    || (slot == eInventorySlot.Mythical)
-			    // INVENTAIRE DES CHEVAUX
 			    || (slot >= eInventorySlot.FirstBagHorse && slot <= eInventorySlot.LastBagHorse))
 				return slot;
 

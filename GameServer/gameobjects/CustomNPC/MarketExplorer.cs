@@ -240,7 +240,9 @@ namespace DOL.GS
 			}
 
 			player.ActiveInventoryObject = cm; // activate the target con merchant
-			player.Out.SendInventoryItemsUpdate(cm.GetClientInventory(player), eInventoryWindowType.ConsignmentViewer);
+
+
+			player.Out.SendInventoryItemsUpdate(cm.GetClientInventoryRepresentation(player), eInventoryWindowType.ConsignmentViewer);
 			cm.AddObserver(player);
 		}
 

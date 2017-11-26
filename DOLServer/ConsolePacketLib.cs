@@ -27,6 +27,7 @@ using DOL.GS.Housing;
 using DOL.GS.Keeps;
 using DOL.GS.PacketHandler;
 using DOL.GS.Quests;
+using DOL.GS.Representation;
 
 using log4net;
 using DOL.Database;
@@ -132,11 +133,11 @@ namespace DOLGameServerConsole
 		public void SendGroupWindowUpdate() { }
 		public void SendGroupMemberUpdate(bool updateIcons, GameLiving living) { }
 		public void SendGroupMembersUpdate(bool updateIcons) { }
-		public void SendInventoryItemsUpdate(ICollection<InventoryItem> itemsToUpdate) { }
+		public void SendInventoryItemsUpdate(ICollection<IInventoryItemRepresentation> itemsToUpdate) { }
 		public void SendInventorySlotsUpdate(ICollection<int> slots) { }
-		public void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<InventoryItem> itemsToUpdate) { }
-		public void SendInventoryItemsUpdate(IDictionary<int, InventoryItem> updateItems, eInventoryWindowType windowType) { }
-		public void SendInventoryItemsPartialUpdate(IDictionary<int, InventoryItem> items, eInventoryWindowType windowType) { }
+		public void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<IInventoryItemRepresentation> itemsToUpdate) { }
+		public void SendInventoryItemsUpdate(IDictionary<int, IInventoryItemRepresentation> updateItems, eInventoryWindowType windowType) { }
+		public void SendInventoryItemsPartialUpdate(IDictionary<int, IInventoryItemRepresentation> items, eInventoryWindowType windowType) { }
 		public void SendDoorState(Region region, IDoor door) { }
 		public void SendMerchantWindow(MerchantTradeItems itemlist, eMerchantWindowType windowType) { }
 		public void SendTradeWindow() { }

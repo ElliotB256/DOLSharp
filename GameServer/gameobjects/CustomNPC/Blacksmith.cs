@@ -21,6 +21,7 @@ using System;
 using System.Collections;
 using DOL.Database;
 using DOL.GS.PacketHandler;
+using DOL.GS.Representation;
 using DOL.Language;
 
 namespace DOL.GS
@@ -193,9 +194,8 @@ namespace DOL.GS
 				if (!item.IsNotLosingDur) item.Durability -= (ToRecoverCond + 1);
 			}
 
-
-			player.Out.SendInventoryItemsUpdate(new InventoryItem[] { item });
-			player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language,
+            player.Out.SendInventorySlotsUpdate(new int[] { item.SlotPosition });
+            player.Out.SendMessage(LanguageMgr.GetTranslation(player.Client.Account.Language,
 			                                                  "Scripts.Blacksmith.ItsDone", item.Name), eChatType.CT_System,
 			                       eChatLoc.CL_SystemWindow);
 

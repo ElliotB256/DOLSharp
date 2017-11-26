@@ -36,6 +36,7 @@ using DOL.GS.Spells;
 using DOL.GS.Styles;
 using DOL.Talents;
 using DOL.Talents.Clientside;
+using DOL.GS.Representation;
 
 using log4net;
 
@@ -1755,23 +1756,24 @@ namespace DOL.GS.PacketHandler
 			}
 		}
 
-		public virtual void SendInventoryItemsUpdate(IDictionary<int, InventoryItem> updateItems, eInventoryWindowType windowType)
+		public virtual void SendInventoryItemsUpdate(IDictionary<int, IInventoryItemRepresentation> updateItems, eInventoryWindowType windowType)
 		{
 		}
 
-		protected virtual void SendInventoryItemsPartialUpdate(IDictionary<int, InventoryItem> items, eInventoryWindowType windowType)
+		protected virtual void SendInventoryItemsPartialUpdate(IDictionary<int, IInventoryItemRepresentation> items, eInventoryWindowType windowType)
 		{
 		}
 
-		public virtual void SendInventoryItemsUpdate(ICollection<InventoryItem> itemsToUpdate)
+		public virtual void SendInventoryItemsUpdate(ICollection<IInventoryItemRepresentation> itemsToUpdate)
 		{
 			SendInventoryItemsUpdate(eInventoryWindowType.Update, itemsToUpdate);
 		}
 
-		public virtual void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<InventoryItem> itemsToUpdate)
+		public virtual void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<IInventoryItemRepresentation> itemsToUpdate)
 		{
 			if (m_gameClient.Player == null)
 				return;
+
 			if (itemsToUpdate == null)
 			{
 				SendInventorySlotsUpdateRange(null, windowType);
@@ -1781,7 +1783,7 @@ namespace DOL.GS.PacketHandler
 			// clients crash if too long packet is sent
 			// so we send big updates in parts
 			var slotsToUpdate = new List<int>(Math.Min(ServerProperties.Properties.MAX_ITEMS_PER_PACKET, itemsToUpdate.Count));
-			foreach (InventoryItem item in itemsToUpdate)
+			foreach (IInventoryItemRepresentation item in itemsToUpdate)
 			{
 				if (item == null)
 					continue;
@@ -4100,7 +4102,8 @@ namespace DOL.GS.PacketHandler
 								(byte) (updatedSlot - (int) eInventorySlot.Consignment_First + (int) eInventorySlot.HousingInventory_First));
 						else
 							pak.WriteByte((byte) (updatedSlot));
-						InventoryItem item = m_gameClient.Player.Inventory.GetItem((eInventorySlot) updatedSlot);
+
+                        IInventoryItemRepresentation item = m_gameClient.Player.Inventory.GetItemRepresentation((eInventorySlot)updatedSlot);
 
 						if (item == null)
 						{
@@ -4108,77 +4111,30 @@ namespace DOL.GS.PacketHandler
 							continue;
 						}
 
-						pak.WriteByte((byte) item.Level);
-
-						int value1; // some object types use this field to display count
-						int value2; // some object types use this field to display count
-						switch (item.Object_Type)
-						{
-							case (int) eObjectType.Arrow:
-							case (int) eObjectType.Bolt:
-							case (int) eObjectType.Poison:
-							case (int) eObjectType.GenericItem:
-								value1 = item.Count;
-								value2 = item.SPD_ABS;
-								break;
-							case (int) eObjectType.Thrown:
-								value1 = item.DPS_AF;
-								value2 = item.Count;
-								break;
-							case (int) eObjectType.Instrument:
-								value1 = (item.DPS_AF == 2 ? 0 : item.DPS_AF); // 0x00 = Lute ; 0x01 = Drum ; 0x03 = Flute
-								value2 = 0;
-								break; // unused
-							case (int) eObjectType.Shield:
-								value1 = item.Type_Damage;
-								value2 = item.DPS_AF;
-								break;
-							case (int) eObjectType.GardenObject:
-								value1 = 0;
-								value2 = item.SPD_ABS;
-								break;
-							default:
-								value1 = item.DPS_AF;
-								value2 = item.SPD_ABS;
-								break;
-						}
-						pak.WriteByte((byte) value1);
-						pak.WriteByte((byte) value2);
-
-						if (item.Object_Type == (int) eObjectType.GardenObject)
-							pak.WriteByte((byte) (item.DPS_AF));
-						else
-							pak.WriteByte((byte) (item.Hand << 6));
-						pak.WriteByte((byte) ((item.Type_Damage > 3 ? 0 : item.Type_Damage << 6) | item.Object_Type));
-						pak.WriteShort((ushort) item.Weight);
-						pak.WriteByte(item.ConditionPercent); // % of con
-						pak.WriteByte(item.DurabilityPercent); // % of dur
-						pak.WriteByte((byte) item.Quality); // % of qua
-						pak.WriteByte((byte) item.Bonus); // % bonus
-						pak.WriteShort((ushort) item.Model);
+						pak.WriteByte(item.Level);
+						pak.WriteByte(item.Value1);
+						pak.WriteByte(item.Value2);
+                        pak.WriteByte(item.HandFlag);
+						pak.WriteByte((byte) ((item.TypeDamage > 3 ? 0 : item.TypeDamage << 6) | item.ObjectType));
+						pak.WriteShort(item.Weight);
+						pak.WriteByte(item.Condition); // % of con
+						pak.WriteByte(item.Durability); // % of dur
+						pak.WriteByte(item.Quality); // % of qua
+						pak.WriteByte(item.Bonus); // % bonus
+						pak.WriteShort(item.Model);
 						if (item.Emblem != 0)
-							pak.WriteShort((ushort) item.Emblem);
+							pak.WriteShort(item.Emblem);
 						else
-							pak.WriteShort((ushort) item.Color);
-						pak.WriteShort((ushort) item.Effect);
-						string name = item.Name;
-						if (item.Count > 1)
-							name = item.Count + " " + name;
-						if (item.SellPrice > 0)
-						{
-							if (ServerProperties.Properties.CONSIGNMENT_USE_BP)
-								name += "[" + item.SellPrice + " BP]";
-							else
-								name += "[" + Money.GetString(item.SellPrice) + "]";
-						}
-						pak.WritePascalString(name);
+							pak.WriteShort(item.Color);
+						pak.WriteShort(item.Effect);
+						pak.WritePascalString(item.Name);
 					}
 				}
 				SendTCP(pak);
 			}
 		}
 
-		public virtual void SendInventoryItemsPartialUpdate(List<InventoryItem> items, eInventoryWindowType windowType)
+		public virtual void SendInventoryItemsPartialUpdate(List<IInventoryItemRepresentation> items, eInventoryWindowType windowType)
 		{
 		}
 

@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DOL.Database;
 using DOL.GS.Housing;
+using DOL.GS.Representation;
 
 namespace DOL.GS
 {
@@ -215,7 +216,7 @@ namespace DOL.GS
 			var inactiveList = new List<string>();
 			bool hasUpdatedPlayer = false;
 
-			lock (_vaultLock)
+            lock (_vaultLock)
 			{
 				foreach (GamePlayer observer in _observers.Values)
 				{
@@ -233,7 +234,7 @@ namespace DOL.GS
 						continue;
 					}
 
-					observer.Client.Out.SendInventoryItemsUpdate(updateItems, PacketHandler.eInventoryWindowType.Update);
+					observer.Client.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(updateItems), PacketHandler.eInventoryWindowType.Update);
 
 					if (observer == player)
 						hasUpdatedPlayer = true;
@@ -248,7 +249,7 @@ namespace DOL.GS
 				// The above code is suspect, it seems to work 80% of the time, so let's make sure we update the player doing the move - Tolakram
 				if (hasUpdatedPlayer == false)
 				{
-					player.Client.Out.SendInventoryItemsUpdate(updateItems, PacketHandler.eInventoryWindowType.Update);
+					player.Client.Out.SendInventoryItemsUpdate(InventoryItemRepresentation.CreateFrom(updateItems), PacketHandler.eInventoryWindowType.Update);
 				}
 			}
 		}

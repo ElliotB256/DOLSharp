@@ -156,8 +156,8 @@ namespace DOL.GS.PacketHandler.Client.v168
 				//Now find the friends that are online
 				player.Out.SendUpdateMaxSpeed(); // Speed after conc buffs
 				player.Out.SendStatusUpdate();
-				player.Out.SendInventoryItemsUpdate(eInventoryWindowType.Equipment, player.Inventory.EquippedItems);
-                player.Out.SendInventoryItemsUpdate(eInventoryWindowType.Inventory, player.Inventory.GetItemRange(eInventorySlot.FirstBackpack, eInventorySlot.LastBagHorse));
+				player.Out.SendInventoryItemsUpdate(eInventoryWindowType.Equipment, player.Inventory.EquippedItemsRepresentation);
+                player.Out.SendInventoryItemsUpdate(eInventoryWindowType.Inventory, player.Inventory.GetItemRepresentationRange(eInventorySlot.FirstBackpack, eInventorySlot.LastBagHorse));
 				player.Out.SendUpdatePlayerSkills();   //TODO Insert 0xBE - 08 Various in SendUpdatePlayerSkills() before send spells
 				player.Out.SendUpdateCraftingSkills(); // ^
 				player.Out.SendUpdatePlayer();

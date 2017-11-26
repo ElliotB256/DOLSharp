@@ -25,6 +25,7 @@ using DOL.Database;
 using DOL.GS.Housing;
 using DOL.GS.Keeps;
 using DOL.GS.Quests;
+using DOL.GS.Representation;
 
 namespace DOL.GS.PacketHandler
 {
@@ -688,10 +689,10 @@ namespace DOL.GS.PacketHandler
 		void SendGroupWindowUpdate();
 		void SendGroupMemberUpdate(bool updateIcons, GameLiving living);
 		void SendGroupMembersUpdate(bool updateIcons);
-		void SendInventoryItemsUpdate(ICollection<InventoryItem> itemsToUpdate);
+		void SendInventoryItemsUpdate(ICollection<IInventoryItemRepresentation> itemsToUpdate);
 		void SendInventorySlotsUpdate(ICollection<int> slots);
-		void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<InventoryItem> itemsToUpdate);
-		void SendInventoryItemsUpdate(IDictionary<int, InventoryItem> updateItems, eInventoryWindowType windowType);
+		void SendInventoryItemsUpdate(eInventoryWindowType windowType, ICollection<IInventoryItemRepresentation> itemsToUpdate);
+		void SendInventoryItemsUpdate(IDictionary<int, IInventoryItemRepresentation> updateItems, eInventoryWindowType windowType);
 		void SendDoorState(Region region, IDoor door);
 		void SendMerchantWindow(MerchantTradeItems itemlist, eMerchantWindowType windowType);
 		void SendTradeWindow();

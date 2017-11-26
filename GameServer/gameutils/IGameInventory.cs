@@ -21,6 +21,7 @@ using System;
 using System.Collections;
 using DOL.Database;
 using System.Collections.Generic;
+using DOL.GS.Representation;
 
 namespace DOL.GS
 {
@@ -159,9 +160,11 @@ namespace DOL.GS
 		bool			RemoveTemplate(string templateID, int count, eInventorySlot minSlot, eInventorySlot maxSlot);
 		bool            MoveItem(eInventorySlot fromSlot, eInventorySlot toSlot, int itemCount);
 		InventoryItem   GetItem(eInventorySlot slot);
-		ICollection<InventoryItem> GetItemRange(eInventorySlot minSlot, eInventorySlot maxSlot);
+        IInventoryItemRepresentation GetItemRepresentation(eInventorySlot slot);
+        ICollection<InventoryItem> GetItemRange(eInventorySlot minSlot, eInventorySlot maxSlot);
+        ICollection<IInventoryItemRepresentation> GetItemRepresentationRange(eInventorySlot minSlot, eInventorySlot maxSlot);
 
-		void            BeginChanges();
+        void            BeginChanges();
 		void            CommitChanges();
 		void			ClearInventory();
 
@@ -182,6 +185,8 @@ namespace DOL.GS
 		ICollection<InventoryItem> EquippedItems	{ get; }
 		ICollection<InventoryItem> AllItems			{ get; }
 
-		int InventoryWeight { get; }
+        ICollection<IInventoryItemRepresentation> EquippedItemsRepresentation { get; }
+
+        int InventoryWeight { get; }
 	}
 }
