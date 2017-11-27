@@ -13716,8 +13716,9 @@ namespace DOL.GS
 		/// </summary>
 		protected virtual void CreateInventory()
 		{
-			m_inventory = new GamePlayerInventory(this);
-		}
+            //m_inventory = new GamePlayerInventory(this);
+            m_inventory = new DAoEPlayerInventory(this);
+        }
 		#endregion
 
 		#region Delving

@@ -93,7 +93,17 @@ namespace DOL.GS.Commands
 	{
 		private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		public void OnCommand(GameClient client, string[] args)
+        public eInventorySlot GetDefaultEditSlot()
+        {
+            return eInventorySlot.FirstVault;
+        }
+
+        public eInventorySlot GetDefaultCreateSlot()
+        {
+            return eInventorySlot.FirstEmptyVault;
+        }
+
+        public void OnCommand(GameClient client, string[] args)
 		{
 			if (args.Length < 2)
 			{
@@ -112,7 +122,7 @@ namespace DOL.GS.Commands
 							newTemplate.Name = "(blank item)";
 							newTemplate.Id_nb = InventoryItem.BLANK_ITEM;
 							GameInventoryItem item = new GameInventoryItem(newTemplate);
-							if (client.Player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, item))
+							if (client.Player.Inventory.AddItem(GetDefaultCreateSlot(), item))
 							{
 								client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "GMCommands.Item.Blank.ItemCreated"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 								InventoryLogging.LogInventoryAction(client.Player, client.Player, eInventoryActionType.Other, item.Template, item.Count);
@@ -127,7 +137,7 @@ namespace DOL.GS.Commands
 						#region Classes
 					case "classes":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length >= 4)
 							{
@@ -176,7 +186,7 @@ namespace DOL.GS.Commands
 								{
 									item.Count = count;
 								}
-								if (client.Player.Inventory.AddItem(eInventorySlot.FirstEmptyBackpack, item))
+								if (client.Player.Inventory.AddItem(GetDefaultCreateSlot(), item))
 								{
 									client.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "GMCommands.Item.Create.Created", item.Level, item.GetName(0, false), count), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 									InventoryLogging.LogInventoryAction(client.Player, client.Player, eInventoryActionType.Other, item.Template, item.Count);
@@ -188,7 +198,7 @@ namespace DOL.GS.Commands
 						#region Count
 					case "count":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length >= 4)
 							{
@@ -224,7 +234,7 @@ namespace DOL.GS.Commands
 						#region MaxCount
 					case "maxcount":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length >= 4)
 							{
@@ -247,7 +257,7 @@ namespace DOL.GS.Commands
 						#region PackSize
 					case "packsize":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length >= 4)
 							{
@@ -286,7 +296,7 @@ namespace DOL.GS.Commands
 						#region Model
 					case "model":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -295,7 +305,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -314,7 +324,7 @@ namespace DOL.GS.Commands
 						#region Extension
 					case "extension":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -323,7 +333,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -348,7 +358,7 @@ namespace DOL.GS.Commands
 						#region Color
 					case "color":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -357,7 +367,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -382,7 +392,7 @@ namespace DOL.GS.Commands
 						#region Effect
 					case "effect":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -391,7 +401,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -410,7 +420,7 @@ namespace DOL.GS.Commands
 						#region Type
 					case "type":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -419,7 +429,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -436,7 +446,7 @@ namespace DOL.GS.Commands
 						#region Object
 					case "object":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -445,7 +455,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -462,7 +472,7 @@ namespace DOL.GS.Commands
 						#region Hand
 					case "hand":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -471,7 +481,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -488,7 +498,7 @@ namespace DOL.GS.Commands
 						#region DamageType
 					case "damagetype":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -497,7 +507,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -515,7 +525,7 @@ namespace DOL.GS.Commands
 					case "name":
 						{
 							string name = args[2];
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (int.TryParse(args[args.Length - 1], out slot))
 							{
@@ -524,7 +534,7 @@ namespace DOL.GS.Commands
 							else
 							{
 								name = string.Join(" ", args, 2, args.Length - 2);
-								slot = (int)eInventorySlot.LastBackpack;
+								slot = (int)GetDefaultEditSlot();
 							}
 
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -543,7 +553,7 @@ namespace DOL.GS.Commands
 					case "description":
 						{
 							string desc = args[2];
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (int.TryParse(args[args.Length - 1], out slot))
 							{
@@ -552,7 +562,7 @@ namespace DOL.GS.Commands
 							else
 							{
 								desc = string.Join(" ", args, 2, args.Length - 2);
-								slot = (int)eInventorySlot.LastBackpack;
+								slot = (int)GetDefaultEditSlot();
 							}
 
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -570,7 +580,7 @@ namespace DOL.GS.Commands
 						#region CrafterName
 					case "craftername":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -579,7 +589,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -597,7 +607,7 @@ namespace DOL.GS.Commands
 						#region Emblem
 					case "emblem":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -606,7 +616,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -631,7 +641,7 @@ namespace DOL.GS.Commands
 						#region Level
 					case "level":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -640,7 +650,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -657,7 +667,7 @@ namespace DOL.GS.Commands
 						#region Price
 					case "price":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 7)
 							{
 								try
@@ -666,7 +676,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -683,7 +693,7 @@ namespace DOL.GS.Commands
 						#region Condition
 					case "condition":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 5)
 							{
 								try
@@ -692,7 +702,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -718,7 +728,7 @@ namespace DOL.GS.Commands
 						#region Durability
 					case "durability":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 5)
 							{
 								try
@@ -727,7 +737,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -753,7 +763,7 @@ namespace DOL.GS.Commands
 						#region Quality
 					case "quality":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -762,7 +772,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -780,7 +790,7 @@ namespace DOL.GS.Commands
 						#region Bonus
 					case "bonus":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -789,7 +799,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -940,7 +950,7 @@ namespace DOL.GS.Commands
 						#region Weight
 					case "weight":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -949,7 +959,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -968,7 +978,7 @@ namespace DOL.GS.Commands
 					case "dps":
 					case "af":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -977,7 +987,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -996,7 +1006,7 @@ namespace DOL.GS.Commands
 					case "spd":
 					case "abs":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1005,7 +1015,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1172,7 +1182,7 @@ namespace DOL.GS.Commands
 						#region Spell
 					case "spell":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 6)
 							{
 								try
@@ -1181,7 +1191,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1208,7 +1218,7 @@ namespace DOL.GS.Commands
 						#region Spell1
 					case "spell1":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 6)
 							{
 								try
@@ -1217,7 +1227,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1244,7 +1254,7 @@ namespace DOL.GS.Commands
 						#region Proc
 					case "proc":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1253,7 +1263,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1270,7 +1280,7 @@ namespace DOL.GS.Commands
 						#region Proc1
 					case "proc1":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1279,7 +1289,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1296,7 +1306,7 @@ namespace DOL.GS.Commands
 						#region ProcChance
 					case "procchance":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1305,7 +1315,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1322,7 +1332,7 @@ namespace DOL.GS.Commands
 						#region Poison
 					case "poison":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 6)
 							{
 								try
@@ -1331,7 +1341,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1383,7 +1393,7 @@ namespace DOL.GS.Commands
 						#region Level Required
 					case "levelrequired":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1392,7 +1402,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1410,7 +1420,7 @@ namespace DOL.GS.Commands
 						#region Bonus Level
 					case "bonuslevel":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1419,7 +1429,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1438,11 +1448,11 @@ namespace DOL.GS.Commands
 					case "classtype":
 						{
 							string classType = args[2];
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (int.TryParse(args[args.Length - 1], out slot) == false)
 							{
-								slot = (int)eInventorySlot.LastBackpack;
+								slot = (int)GetDefaultEditSlot();
 							}
 
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1461,11 +1471,11 @@ namespace DOL.GS.Commands
 					case "packageid":
 						{
 							string packageID = args[2];
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (int.TryParse(args[args.Length - 1], out slot) == false)
 							{
-								slot = (int)eInventorySlot.LastBackpack;
+								slot = (int)GetDefaultEditSlot();
 							}
 
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);
@@ -1484,7 +1494,7 @@ namespace DOL.GS.Commands
 					case "flags":
 						{
 							int flags = Convert.ToInt32(args[2]);
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length == 4)
 							{
@@ -1507,7 +1517,7 @@ namespace DOL.GS.Commands
 					case "salvageid":
 						{
 							int salvageID = Convert.ToInt32(args[2]);
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 
 							if (args.Length == 4)
 							{
@@ -1638,7 +1648,7 @@ namespace DOL.GS.Commands
 					case "update":
 					case "updatetemplate":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length == 3)
 							{
 								slot = Convert.ToInt32(args[2]);
@@ -1658,7 +1668,7 @@ namespace DOL.GS.Commands
 						#region SaveUnique
 					case "saveunique":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							string idnb = string.Empty;
 							if (args.Length >= 4)
 							{
@@ -1668,15 +1678,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
-								}
-								if (slot > (int)eInventorySlot.LastBackpack)
-								{
-									slot = (int)eInventorySlot.LastBackpack;
-								}
-								if (slot < 0)
-								{
-									slot = 0;
+									slot = (int)GetDefaultEditSlot();
 								}
 
 								idnb = args[2];
@@ -1717,7 +1719,7 @@ namespace DOL.GS.Commands
 					case "save":
 					case "addunique":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							string idnb = string.Empty;
 							if (args.Length >= 4)
 							{
@@ -1727,15 +1729,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
-								}
-								if (slot > (int)eInventorySlot.LastBackpack)
-								{
-									slot = (int)eInventorySlot.LastBackpack;
-								}
-								if (slot < 0)
-								{
-									slot = 0;
+									slot = (int)GetDefaultEditSlot();
 								}
 
 								idnb = args[2];
@@ -1925,7 +1919,7 @@ namespace DOL.GS.Commands
 						#region LoadSpells
 					case "loadspells":
 						{
-							int slot = (int)eInventorySlot.LastBackpack;
+							int slot = (int)GetDefaultEditSlot();
 							if (args.Length >= 4)
 							{
 								try
@@ -1934,7 +1928,7 @@ namespace DOL.GS.Commands
 								}
 								catch
 								{
-									slot = (int)eInventorySlot.LastBackpack;
+									slot = (int)GetDefaultEditSlot();
 								}
 							}
 							InventoryItem item = client.Player.Inventory.GetItem((eInventorySlot)slot);

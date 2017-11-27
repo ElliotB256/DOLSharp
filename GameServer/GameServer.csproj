@@ -170,6 +170,7 @@
     <Compile Include="commands\gmcommands\ClientList.cs" />
     <Compile Include="commands\gmcommands\gmstealth.cs" />
     <Compile Include="commands\gmcommands\talent.cs" />
+    <Compile Include="commands\gmcommands\testskillitems.cs" />
     <Compile Include="commands\gmcommands\translate.cs" />
     <Compile Include="commands\gmcommands\zone.cs" />
     <Compile Include="commands\gmcommands\crafting.cs" />
@@ -208,6 +209,7 @@
     <Compile Include="commands\gmcommands\titlegm.cs" />
     <Compile Include="commands\gmcommands\walk.cs" />
     <Compile Include="commands\gmcommands\weather.cs" />
+    <Compile Include="commands\playercommands\inventory.cs" />
     <Compile Include="commands\RefreshCommandAttribute.cs" />
     <Compile Include="commands\playercommands\advice.cs" />
     <Compile Include="commands\playercommands\advisor.cs" />
@@ -332,9 +334,11 @@
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
     <Compile Include="effects\SprintEffect.cs" />
     <Compile Include="effects\StealthEffect.cs" />
-    <Compile Include="ItemSkils\DAoEPlayerInventory.cs" />
-    <Compile Include="ItemSkils\IPluggable.cs" />
-    <Compile Include="ItemSkils\ISocketable.cs" />
+    <Compile Include="ItemSkills\DAoEPlayerInventory.cs" />
+    <Compile Include="ItemSkills\EmptyArmorIcon.cs" />
+    <Compile Include="ItemSkills\EmptySocket.cs" />
+    <Compile Include="ItemSkills\ISocketable.cs" />
+    <Compile Include="ItemSkills\SkillGem.cs" />
     <Compile Include="packets\Representations\IInventoryItemRepresentation.cs" />
     <Compile Include="packets\Representations\InventoryItemRepresentation.cs" />
     <Compile Include="playerclasses\base\ClassMystic.cs" />
