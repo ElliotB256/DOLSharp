@@ -336,6 +336,7 @@
     <Compile Include="effects\StealthEffect.cs" />
     <Compile Include="ItemSkills\DAoEPlayerInventory.cs" />
     <Compile Include="ItemSkills\EmptyArmorIcon.cs" />
+    <Compile Include="ItemSkills\SocketedSkillGemClientRepresentation.cs" />
     <Compile Include="ItemSkills\EmptySocket.cs" />
     <Compile Include="ItemSkills\ISocketable.cs" />
     <Compile Include="ItemSkills\SkillGem.cs" />

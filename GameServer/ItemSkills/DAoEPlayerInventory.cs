@@ -91,7 +91,7 @@ namespace DOL.GS
             }
             if (socketSlots.Contains(fromSlot) && toItem != null && !(toItem is ISocketable))
             {
-                m_player.Out.SendMessage(String.Format("You cannot place {0} into an equipment socket.", toItem.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
+                m_player.Out.SendMessage(String.Format("You cannot swap {0} into an equipment socket.", toItem.Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
                 m_player.Out.SendInventorySlotsUpdate(new int[] { (int)originalFrom });
                 return false;
             }
@@ -210,11 +210,15 @@ namespace DOL.GS
 
         public override IInventoryItemRepresentation GetItemRepresentation(eInventorySlot slot)
         {
-            // For slots used for items, we send an 'Empty Socket' item if the slot is empty.
             if (GetAllSocketSlots().Contains(slot))
             {
-                if (GetItem(slot) == null)
+                InventoryItem item = GetItem(slot);
+                // For slots used for items, we send an 'Empty Socket' item if the slot is empty.
+                if (item == null)
                     return new EmptySocket((int)slot);
+
+                //For socketed items, show the text as inset
+                return new SocketedSkillGemRepresentation(item);
             }
 
             // For slots corresponding to icons, instead show the item in equip slot

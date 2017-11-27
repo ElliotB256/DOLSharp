@@ -21,11 +21,12 @@ using DOL.GS.PacketHandler;
 
 namespace DOL.GS.Commands
 {
-	[CmdAttribute(
-		"&inventory",
+    [CmdAttribute(
+        "&inv",
+        new string[] { "&inventory" },
 		ePrivLevel.Player,
 		"Open the players inventory",
-		"/inventory")]
+		"/inv")]
 	public class InventoryCommandHandler : AbstractCommandHandler, ICommandHandler
 	{
 		public void OnCommand(GameClient client, string[] args)
