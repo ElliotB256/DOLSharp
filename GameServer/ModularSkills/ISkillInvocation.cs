@@ -10,6 +10,8 @@
         /// <summary>
         /// Executed when the skill is invoked
         /// </summary>
-        event ModularSkill.InvocationCompleteHandler Completed;
+        event SkillInvocationHandler<GameObject> Completed;
     }
+
+    public delegate void SkillInvocationHandler<TTarget>(TTarget target) where TTarget : GameObject;
 }

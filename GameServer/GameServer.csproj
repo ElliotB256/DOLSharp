@@ -340,6 +340,11 @@
     <Compile Include="ItemSkills\EmptySocket.cs" />
     <Compile Include="ItemSkills\ISocketable.cs" />
     <Compile Include="ItemSkills\SkillGem.cs" />
+    <Compile Include="ModularSkills\ISkillApplicator.cs" />
+    <Compile Include="ModularSkills\ISkillEffect.cs" />
+    <Compile Include="ModularSkills\ISkillInvocation.cs" />
+    <Compile Include="ModularSkills\ITargetSelector.cs" />
+    <Compile Include="ModularSkills\ModularSkill.cs" />
     <Compile Include="packets\Representations\IInventoryItemRepresentation.cs" />
     <Compile Include="packets\Representations\InventoryItemRepresentation.cs" />
     <Compile Include="playerclasses\base\ClassMystic.cs" />

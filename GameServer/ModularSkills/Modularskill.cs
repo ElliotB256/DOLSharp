@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DOL.GS.ModularSkills
 {
@@ -9,37 +10,24 @@ namespace DOL.GS.ModularSkills
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private ISkillInvocation m_invocation;
+
         /// <summary>
         /// Invocation method for the skill
         /// </summary> 
-        public ISkillInvocation Invocation { get; set; }
-
-        //Setter for Invocation should set IModularSkill Parent element to this, and register OnComplete delegate
-
-        /// <summary>
-        /// A component of a modular skill
-        /// </summary>
-        public class SkillComponent
+        public ISkillInvocation Invocation
         {
-            /// <summary>
-            /// Target selection method for the skill component
-            /// </summary>
-            public ITargetSelector TargetSelector { get; set; }
-
-            /// <summary>
-            /// Method by which effects are applied to target.
-            /// </summary>
-            public ISkillApplicator Applicator { get; set; }
-
-            /// <summary>
-            /// List of effects to apply to targets.
-            /// Subsequent effects are applied if the preceding effect 'Apply'
-            /// returns true.
-            /// </summary>
-            public ICollection<ISkillEffect> SkillEffectChain { get; set; }
+            get { return m_invocation; }
+            set
+            {
+                if (m_invocation != null)
+                    m_invocation.Completed -= OnInvoked;
+                m_invocation = value;
+                m_invocation.Completed += OnInvoked;
+            }
         }
 
-        ICollection<SkillComponent> Components { get; set; }
+        public IList<SkillComponent> Components { get; set; }
 
         public GameLiving Owner { get; set; }
 
@@ -51,8 +39,9 @@ namespace DOL.GS.ModularSkills
             if (Invocation == null)
             {
                 Log.Error(string.Format("Could not start skill - null Invocation. skill Owner={0}", Owner));
+                return;
             }
-
+            
             Invocation.Start(Owner.TargetObject);
         }
 
@@ -64,7 +53,10 @@ namespace DOL.GS.ModularSkills
             foreach (SkillComponent sc in Components)
             {
                 if (sc == null)
+                {
+                    Log.Error(string.Format("SkillComponent was null in OnInvoked. Owner={0}", Owner));
                     continue;
+                }
 
                 ICollection<GameObject> targets = sc.TargetSelector.SelectTargets(Owner, target);
 
@@ -74,7 +66,6 @@ namespace DOL.GS.ModularSkills
                 }
             }
         }
-        public delegate void InvocationCompleteHandler(GameObject target);
 
         /// <summary>
         /// Invoked when skill effect chain is to be applied to target.
