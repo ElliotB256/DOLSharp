@@ -43,10 +43,11 @@ namespace DOL.GS.ModularSkills
             {
                 GameLiving user = Skill.Owner;
                 int distance = user.GetDistanceTo(target);
-                if (distance < 0)
+                if (distance > Range)
                 {
                     // TODO: Change messages like this to instead raise a bunch of events, eg TargetPreconditionsFailedEvent, Reasons.TargetTooFar.
                     // GamePlayer casters can listen to this event and send appropriate messages accordingly.
+                    // This would also allow GameNPCs to act appropriately, eg by following player until the player is back in range.
                     if (user is GamePlayer)
                         ((GamePlayer)user).Out.SendMessage("That target is too far!", PacketHandler.eChatType.CT_SpellResisted, PacketHandler.eChatLoc.CL_SystemWindow);
                     return false;
