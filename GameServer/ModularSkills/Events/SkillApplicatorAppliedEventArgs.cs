@@ -5,11 +5,14 @@
     /// </summary>
     public class SkillApplicatorAppliedEventArgs
     {
-        public SkillApplicatorAppliedEventArgs(GameObject recipient, SkillComponent sc)
+        public SkillApplicatorAppliedEventArgs(GameObject invoker, GameObject recipient, SkillComponent sc)
         {
+            Invoker = invoker;
             Recipient = recipient;
             SkillComponent = sc;
         }
+
+        public GameObject Invoker { get; private set; }
 
         public GameObject Recipient { get; private set; }
 

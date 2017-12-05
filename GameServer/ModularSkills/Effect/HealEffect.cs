@@ -12,6 +12,9 @@ namespace DOL.GS.ModularSkills
         public bool Apply(GameObject recipient)
         {
             recipient.Health += CalculateHeal();
+
+            // TODO: broadcast heal spell effect. The effect used should be chosen according to the percentage of health healed.
+
             return true;
         }
 

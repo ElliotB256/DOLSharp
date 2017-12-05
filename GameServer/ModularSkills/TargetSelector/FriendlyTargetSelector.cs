@@ -82,7 +82,7 @@ namespace DOL.GS.ModularSkills
             return GameServer.ServerRules.IsFriendly(user, target);
         }
 
-        public ICollection<GameObject> SelectTargets(IModularSkillUser invoker, GameObject target)
+        public ICollection<GameObject> SelectTargets(GameLiving invoker, GameObject target)
         {
             List<GameObject> list = new List<GameObject>();
             List<GameObject> potentials = new List<GameObject>();

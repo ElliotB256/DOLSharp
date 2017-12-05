@@ -9,7 +9,7 @@ namespace DOL.GS.ModularSkills
     /// <summary>
     /// Checks various prerequisites of the skill to be triggered
     /// </summary>
-    public abstract class InstantInvocation : ISkillInvocation
+    public class InstantInvocation : ISkillInvocation
     {
         public event EventHandler<SkillInvokedEventArgs> Completed;
 
@@ -20,19 +20,18 @@ namespace DOL.GS.ModularSkills
             Skill = skill;
         }
 
-        public void Start(IModularSkillUser invoker)
+        public void Start(GameLiving invoker)
         {
-            GameLiving living = invoker as GameLiving;
             GameObject target = null;
-            if (living != null)
-                target = living.TargetObject;
+            if (invoker != null)
+                target = invoker.TargetObject;
 
             ITargetSelector ts = Skill.PrimaryTargetSelector;
             if (!ts.CheckRequirementsForUse(target))
                 return;
 
             //Invocation successful
-            Completed(this, new SkillInvokedEventArgs(living, target));
+            Completed(this, new SkillInvokedEventArgs(invoker, target));
         }
     }
 }

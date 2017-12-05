@@ -9,7 +9,7 @@ namespace DOL.GS.ModularSkills
         /// Gather a list of eligible targets for the skill.
         /// SelectTargets should assume that all checks between invoker and target have already been performed (eg LOS, distance, valid target etc)
         /// </summary>
-        ICollection<GameObject> SelectTargets(IModularSkillUser invoker, GameObject target);
+        ICollection<GameObject> SelectTargets(GameLiving invoker, GameObject target);
 
         /// <summary>
         /// Checks whether a skill can be used against the target object.

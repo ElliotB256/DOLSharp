@@ -169,6 +169,7 @@
     <Compile Include="commands\gmcommands\cast.cs" />
     <Compile Include="commands\gmcommands\ClientList.cs" />
     <Compile Include="commands\gmcommands\gmstealth.cs" />
+    <Compile Include="commands\gmcommands\modularSkill.cs" />
     <Compile Include="commands\gmcommands\talent.cs" />
     <Compile Include="commands\gmcommands\testskillitems.cs" />
     <Compile Include="commands\gmcommands\translate.cs" />
@@ -342,15 +343,18 @@
     <Compile Include="ItemSkills\SkillGem.cs" />
     <Compile Include="ModularSkills\Applicators\DirectSkillApplicator.cs" />
     <Compile Include="ModularSkills\Effect\HealEffect.cs" />
+    <Compile Include="ModularSkills\Events\SkillApplicatorAppliedEventArgs.cs" />
+    <Compile Include="ModularSkills\Events\ApplySkillEffectEventArgs.cs" />
     <Compile Include="ModularSkills\Modifiers\IEfficacious.cs" />
     <Compile Include="ModularSkills\Events\InvokingSkillEventArgs.cs" />
     <Compile Include="ModularSkills\Events\FailSkillTargetRequirementEventArgs.cs" />
     <Compile Include="ModularSkills\Events\SkillInvokedEventArgs.cs" />
     <Compile Include="ModularSkills\Invocation\InstantInvocation.cs" />
-    <Compile Include="ModularSkills\ISkillApplicator.cs" />
+    <Compile Include="ModularSkills\Applicators\ISkillApplicator.cs" />
     <Compile Include="ModularSkills\Effect\ISkillEffect.cs" />
     <Compile Include="ModularSkills\Invocation\ISkillInvocation.cs" />
     <Compile Include="ModularSkills\IModularSkillUser.cs" />
+    <Compile Include="ModularSkills\ModularSkillTalent.cs" />
     <Compile Include="ModularSkills\TargetSelector\ITargetSelector.cs" />
     <Compile Include="ModularSkills\ModularSkill.cs" />
     <Compile Include="ModularSkills\SkillComponent.cs" />

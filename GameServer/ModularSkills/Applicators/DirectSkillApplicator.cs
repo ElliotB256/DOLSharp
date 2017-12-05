@@ -15,7 +15,7 @@ namespace DOL.GS.ModularSkills
             // TODO: Add LOS check.
 
             var eventhandler = Applied;
-            eventhandler?.Invoke(this, new SkillApplicatorAppliedEventArgs(target, sc));
+            eventhandler?.Invoke(this, new SkillApplicatorAppliedEventArgs(invoker, target, sc));
         }
     }
 }

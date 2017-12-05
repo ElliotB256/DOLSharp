@@ -7,7 +7,7 @@ namespace DOL.GS.ModularSkills
         /// <summary>
         /// Invoker starts to use specified skill
         /// </summary>
-        void Start(IModularSkillUser invoker);
+        void Start(GameLiving invoker);
 
         /// <summary>
         /// Executed when the skill is successfully invoked upon target gameobject

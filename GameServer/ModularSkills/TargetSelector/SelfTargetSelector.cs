@@ -6,13 +6,10 @@ namespace DOL.GS.ModularSkills
     /// <summary>
     /// Selects user of skill
     /// </summary>
-    public abstract class SelfTargetSelector : ITargetSelector
-    {
-        public ModularSkill Skill { get; private set; }
-
-        public SelfTargetSelector(ModularSkill ms)
+    public class SelfTargetSelector : ITargetSelector
+    { 
+        public SelfTargetSelector()
         {
-            Skill = ms;
         }
 
         public event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
@@ -22,11 +19,11 @@ namespace DOL.GS.ModularSkills
             return true;
         }
 
-        public ICollection<GameObject> SelectTargets(IModularSkillUser invoker, GameObject target)
+        public ICollection<GameObject> SelectTargets(GameLiving invoker, GameObject target)
         {
             ICollection<GameObject> list = new List<GameObject>();
-            if (invoker is GameObject)
-                list.Add((GameObject)invoker);
+            if (invoker != null)
+                list.Add(invoker);
             return list;
         }
     }
