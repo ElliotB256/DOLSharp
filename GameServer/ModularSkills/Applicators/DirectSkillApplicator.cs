@@ -8,14 +8,14 @@ namespace DOL.GS.ModularSkills
 {
     public class DirectSkillApplicator : ISkillApplicator
     {
-        public event SkillAppliedHandler<GameObject> Applied;
+        public event EventHandler<SkillApplicatorAppliedEventArgs> Applied;
 
-        public void Start(GameObject target, SkillComponent sc)
+        public void Start(GameObject invoker, GameObject target, SkillComponent sc)
         {
-            // TODO: Add LOS check. Needs second GameObject reference.
+            // TODO: Add LOS check.
 
             var eventhandler = Applied;
-            eventhandler?.Invoke(target);
+            eventhandler?.Invoke(this, new SkillApplicatorAppliedEventArgs(target, sc));
         }
     }
 }
