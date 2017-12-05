@@ -17,7 +17,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>Library</OutputType>
-    <RootNamespace>DOL</RootNamespace>
+    <RootNamespace>DOL.GS</RootNamespace>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -340,6 +340,9 @@
     <Compile Include="ItemSkills\EmptySocket.cs" />
     <Compile Include="ItemSkills\ISocketable.cs" />
     <Compile Include="ItemSkills\SkillGem.cs" />
+    <Compile Include="ModularSkills\Applicators\DirectSkillApplicator.cs" />
+    <Compile Include="ModularSkills\Effect\HealEffect.cs" />
+    <Compile Include="ModularSkills\Modifiers\IEfficacious.cs" />
     <Compile Include="ModularSkills\Events\InvokingSkillEventArgs.cs" />
     <Compile Include="ModularSkills\Events\FailSkillTargetRequirementEventArgs.cs" />
     <Compile Include="ModularSkills\Events\SkillInvokedEventArgs.cs" />
