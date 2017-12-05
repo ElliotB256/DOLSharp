@@ -471,5 +471,10 @@ namespace DOL.GS.ServerRules
 		/// </summary>
 		void OnPlayerLevelUp(GamePlayer player, int previousLevel);
 
+        /// <summary>
+        /// Return true if A considers B friendly
+        /// </summary>
+        bool IsFriendly(GameObject A, GameObject B);
+
 	}
 }

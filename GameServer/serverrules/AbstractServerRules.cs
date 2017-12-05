@@ -2346,6 +2346,15 @@ namespace DOL.GS.ServerRules
 			if (living is GamePlayer)
 				((GamePlayer)living).Out.SendMessage(message, type, loc);
 		}
-		#endregion
-	}
+
+        #endregion
+
+        /// <summary>
+        /// Returns true if A considers B friendly
+        /// </summary>
+        public bool IsFriendly(GameObject A, GameObject B)
+        {
+            return (A.Realm == B.Realm);
+        }
+    }
 }

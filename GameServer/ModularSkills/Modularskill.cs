@@ -27,9 +27,23 @@ namespace DOL.GS.ModularSkills
             }
         }
 
+        /// <summary>
+        /// Target selector used for purposes of determining if the skill can be invoked.
+        /// </summary>
+        public ITargetSelector PrimaryTargetSelector
+        {
+            get
+            {
+                IList<SkillComponent> comps = Components;
+                if (comps.Count > 1)
+                    return comps[0].TargetSelector;
+                return null;
+            }
+        }
+
         public IList<SkillComponent> Components { get; set; }
 
-        public GameLiving Owner { get; set; }
+        public IModularSkillUser Owner { get; set; }
 
         /// <summary>
         /// Owner of the skill tries to use it
@@ -42,7 +56,7 @@ namespace DOL.GS.ModularSkills
                 return;
             }
             
-            Invocation.Start(Owner.TargetObject);
+            Invocation.Start(Owner);
         }
 
         /// <summary>

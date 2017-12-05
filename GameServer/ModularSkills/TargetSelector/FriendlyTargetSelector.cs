@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DOL.GS.ModularSkills.TargetSelector;
+using DOL.GS;
 
 namespace DOL.GS.ModularSkills
 {
@@ -31,7 +32,7 @@ namespace DOL.GS.ModularSkills
         public float Range
         { get; set; }
 
-        public bool CheckPreconditionsForUse(GameObject target)
+        public bool CheckRequirementsForUse(GameObject target)
         {
             if (Skill == null || Skill.Owner == null)
             {
@@ -39,17 +40,30 @@ namespace DOL.GS.ModularSkills
                 return false;
             }
 
+            GameLiving oLiving = Skill.Owner as GameLiving;
+            if (oLiving == null)
+            {
+                Log.Warn("Cannot determine preconditions for non-GameLiving Owner.");
+                return false;
+            }
+
+            if (target == null)
+                target = oLiving;
+
+            if (!IsValidTarget(oLiving, target))
+            {
+                Skill.Owner.ModularSkillEventHandlers.OnFailSkillTargetRequirements(
+                    new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.InvalidTarget));
+                return false;
+            }
+
             if (Range > 0)
             {
-                GameLiving user = Skill.Owner;
-                int distance = user.GetDistanceTo(target);
+                int distance = oLiving.GetDistanceTo(target);
                 if (distance > Range)
                 {
-                    // TODO: Change messages like this to instead raise a bunch of events, eg TargetPreconditionsFailedEvent, Reasons.TargetTooFar.
-                    // GamePlayer casters can listen to this event and send appropriate messages accordingly.
-                    // This would also allow GameNPCs to act appropriately, eg by following player until the player is back in range.
-                    if (user is GamePlayer)
-                        ((GamePlayer)user).Out.SendMessage("That target is too far!", PacketHandler.eChatType.CT_SpellResisted, PacketHandler.eChatLoc.CL_SystemWindow);
+                    Skill.Owner.ModularSkillEventHandlers.OnFailSkillTargetRequirements(
+                    new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.TargetTooFar));
                     return false;
                 }
             }
@@ -57,9 +71,24 @@ namespace DOL.GS.ModularSkills
             return true;
         }
 
-        public ICollection<GameObject> SelectTargets(GameLiving invoker, GameObject target)
+        /// <summary>
+        /// Checks if the target is valid for user.
+        /// </summary>
+        public bool IsValidTarget(GameLiving user, GameObject target)
         {
-            throw new NotImplementedException();
+            return GameServer.ServerRules.IsFriendly(user, target);
+        }
+
+        public ICollection<GameObject> SelectTargets(IModularSkillUser invoker, GameObject target)
+        {
+            List<GameObject> list = new List<GameObject>();
+            List<GameObject> potentials = new List<GameObject>();
+
+            //Bah! GetNPCsInRadius is not Generic!
+            //if (Radius > 0)
+            //{ potentials.AddRange(target.GetNPCsInRadius((ushort)Radius, false))
+
+            return list;
         }
     }
 }

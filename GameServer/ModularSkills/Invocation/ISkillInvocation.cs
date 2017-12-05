@@ -5,10 +5,10 @@
         /// <summary>
         /// Invoker starts to use specified skill
         /// </summary>
-        void Start(GameObject invoker);
+        void Start(IModularSkillUser invoker);
 
         /// <summary>
-        /// Executed when the skill is invoked
+        /// Executed when the skill is successfully invoked upon target gameobject
         /// </summary>
         event SkillInvocationHandler<GameObject> Completed;
     }

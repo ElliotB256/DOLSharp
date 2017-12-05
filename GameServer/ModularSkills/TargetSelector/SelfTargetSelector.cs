@@ -15,15 +15,16 @@ namespace DOL.GS.ModularSkills
             Skill = ms;
         }
 
-        public bool CheckPreconditionsForUse(GameObject target)
+        public bool CheckRequirementsForUse(GameObject target)
         {
             return true;
         }
 
-        public ICollection<GameObject> SelectTargets(GameLiving invoker, GameObject target)
+        public ICollection<GameObject> SelectTargets(IModularSkillUser invoker, GameObject target)
         {
             ICollection<GameObject> list = new List<GameObject>();
-            list.Add(Skill.Owner);
+            if (invoker is GameObject)
+                list.Add((GameObject)invoker);
             return list;
         }
     }
