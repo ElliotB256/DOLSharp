@@ -15,6 +15,8 @@ namespace DOL.GS.ModularSkills
             Skill = ms;
         }
 
+        public event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
+
         public bool CheckRequirementsForUse(GameObject target)
         {
             return true;

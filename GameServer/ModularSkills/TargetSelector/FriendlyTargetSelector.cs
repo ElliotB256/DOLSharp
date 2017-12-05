@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DOL.GS.ModularSkills.TargetSelector;
 using DOL.GS;
 
@@ -11,6 +12,8 @@ namespace DOL.GS.ModularSkills
     public class FriendlyTargetSelector : ITargetSelector, IRadial, IRanged
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
 
         public FriendlyTargetSelector(ModularSkill skill)
         {
@@ -52,7 +55,7 @@ namespace DOL.GS.ModularSkills
 
             if (!IsValidTarget(oLiving, target))
             {
-                FailSkillTargetRequirements(
+                FailSkillTargetRequirements(this,
                     new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.InvalidTarget));
                 return false;
             }
@@ -62,8 +65,8 @@ namespace DOL.GS.ModularSkills
                 int distance = oLiving.GetDistanceTo(target);
                 if (distance > Range)
                 {
-                    Skill.Owner.ModularSkillEventHandlers.OnFailSkillTargetRequirements(
-                    new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.TargetTooFar));
+                    FailSkillTargetRequirements(this,
+                        new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.TargetTooFar));
                     return false;
                 }
             }
@@ -84,9 +87,11 @@ namespace DOL.GS.ModularSkills
             List<GameObject> list = new List<GameObject>();
             List<GameObject> potentials = new List<GameObject>();
 
-            //Bah! GetNPCsInRadius is not Generic!
-            //if (Radius > 0)
-            //{ potentials.AddRange(target.GetNPCsInRadius((ushort)Radius, false))
+            if (Radius > 0)
+            {
+                potentials.AddRange(target.GetNPCsInRadius((ushort)Radius, false).OfType<GameLiving>());
+                potentials.AddRange(target.GetPlayersInRadius((ushort)Radius, false).OfType<GameLiving>());
+            }
 
             return list;
         }

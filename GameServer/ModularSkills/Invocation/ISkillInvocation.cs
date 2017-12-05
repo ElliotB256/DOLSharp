@@ -1,4 +1,6 @@
-﻿namespace DOL.GS.ModularSkills
+﻿using System;
+
+namespace DOL.GS.ModularSkills
 {
     public interface ISkillInvocation
     {
@@ -10,8 +12,6 @@
         /// <summary>
         /// Executed when the skill is successfully invoked upon target gameobject
         /// </summary>
-        event SkillInvocationHandler<GameObject> Completed;
+        event EventHandler<SkillInvokedEventArgs> Completed;
     }
-
-    public delegate void SkillInvocationHandler<TTarget>(TTarget target) where TTarget : GameObject;
 }

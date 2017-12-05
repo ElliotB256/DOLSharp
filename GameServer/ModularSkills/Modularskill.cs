@@ -62,13 +62,16 @@ namespace DOL.GS.ModularSkills
         /// <summary>
         /// Invoked when skill has successfully been cast.
         /// </summary>
-        protected void OnInvoked(GameObject target)
+        protected void OnInvoked(object sender, SkillInvokedEventArgs e)
         {
+            GameObject target = e.Target;
+            GameObject invoker = e.Invoker;
+
             foreach (SkillComponent sc in Components)
             {
                 if (sc == null)
                 {
-                    Log.Error(string.Format("SkillComponent was null in OnInvoked. Owner={0}", Owner));
+                    Log.Error(string.Format("SkillComponent was null in OnInvoked. Invoker={0}", Owner));
                     continue;
                 }
 

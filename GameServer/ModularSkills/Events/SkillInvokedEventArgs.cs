@@ -5,11 +5,14 @@
     /// </summary>
     public class SkillInvokedEventArgs
     {
-        public SkillInvokedEventArgs(ModularSkill ms)
+        public SkillInvokedEventArgs(GameObject invoker, GameObject target)
         {
-            Skill = ms;
+            Target = target;
+            Invoker = invoker;
         }
 
-        public ModularSkill Skill { get; private set; }
+        public GameObject Target { get; private set; }
+
+        public GameObject Invoker { get; private set; }
     }
 }

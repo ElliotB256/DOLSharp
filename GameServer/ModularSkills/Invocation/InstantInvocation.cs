@@ -11,7 +11,7 @@ namespace DOL.GS.ModularSkills
     /// </summary>
     public abstract class InstantInvocation : ISkillInvocation
     {
-        public event SkillInvocationHandler<GameObject> Completed;
+        public event EventHandler<SkillInvokedEventArgs> Completed;
 
         public ModularSkill Skill { get; private set; }
 
@@ -32,8 +32,7 @@ namespace DOL.GS.ModularSkills
                 return;
 
             //Invocation successful
-            invoker.ModularSkillEventHandlers.OnSkillInvoked(new SkillInvokedEventArgs(Skill));
-            Completed(target);
+            Completed(this, new SkillInvokedEventArgs(living, target));
         }
     }
 }
