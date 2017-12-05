@@ -52,7 +52,7 @@ namespace DOL.GS.ModularSkills
 
             if (!IsValidTarget(oLiving, target))
             {
-                Skill.Owner.ModularSkillEventHandlers.OnFailSkillTargetRequirements(
+                FailSkillTargetRequirements(
                     new FailSkillTargetRequirementsEventArgs(FailSkillTargetRequirementsEventArgs.eReason.InvalidTarget));
                 return false;
             }

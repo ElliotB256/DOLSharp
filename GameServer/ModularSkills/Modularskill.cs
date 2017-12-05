@@ -6,7 +6,7 @@ namespace DOL.GS.ModularSkills
     /// <summary>
     /// Represents a skill composed of different modules
     /// </summary>
-    public class ModularSkill
+    public class ModularSkill : IModularSkill
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 

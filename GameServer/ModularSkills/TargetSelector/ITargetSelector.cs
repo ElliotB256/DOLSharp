@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DOL.GS.ModularSkills
 {
@@ -17,5 +18,10 @@ namespace DOL.GS.ModularSkills
         /// <param name="target"></param>
         /// <returns>true if skill can be used</returns>
         bool CheckRequirementsForUse(GameObject target);
+
+        /// <summary>
+        /// Raised when the requirements to use the skill are not met
+        /// </summary>
+        event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
     }
 }

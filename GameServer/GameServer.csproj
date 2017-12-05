@@ -340,10 +340,9 @@
     <Compile Include="ItemSkills\EmptySocket.cs" />
     <Compile Include="ItemSkills\ISocketable.cs" />
     <Compile Include="ItemSkills\SkillGem.cs" />
-    <Compile Include="ModularSkills\Events\BeginInvokingEvent.cs" />
-    <Compile Include="ModularSkills\Events\CheckPreconditionsFailedEvent.cs" />
-    <Compile Include="ModularSkills\Events\SkillInvokedEvent.cs" />
-    <Compile Include="ModularSkills\Invocation\AInvocation.cs" />
+    <Compile Include="ModularSkills\Events\InvokingSkillEventArgs.cs" />
+    <Compile Include="ModularSkills\Events\FailSkillTargetRequirementEventArgs.cs" />
+    <Compile Include="ModularSkills\Events\SkillInvokedEventArgs.cs" />
     <Compile Include="ModularSkills\Invocation\InstantInvocation.cs" />
     <Compile Include="ModularSkills\ISkillApplicator.cs" />
     <Compile Include="ModularSkills\Effect\ISkillEffect.cs" />

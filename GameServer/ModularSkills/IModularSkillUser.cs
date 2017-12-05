@@ -25,18 +25,18 @@ namespace DOL.GS.ModularSkills
         /// The skill user does not fulfill the conditions to use the skill.
         /// </summary>
         event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
-        void OnFailSkillTargetRequirements(FailSkillTargetRequirementsEventArgs args);
+        //void OnFailSkillTargetRequirements(FailSkillTargetRequirementsEventArgs args);
 
         /// <summary>
         /// The skill user begins to invoke a skill with a finite deployment time.
         /// </summary>
         event EventHandler<InvokingSkillEventArgs> StartInvoking;
-        void OnStartInvoking(InvokingSkillEventArgs args);
+        //void OnStartInvoking(InvokingSkillEventArgs args);
 
         /// <summary>
         /// The skill user invokes a skill
         /// </summary>
         event EventHandler<SkillInvokedEventArgs> SkillInvoked;
-        void OnSkillInvoked(SkillInvokedEventArgs args);
+        //void OnSkillInvoked(SkillInvokedEventArgs args);
     }
 }
