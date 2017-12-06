@@ -345,6 +345,10 @@
     <Compile Include="ModularSkills\Effect\HealEffect.cs" />
     <Compile Include="ModularSkills\Events\SkillApplicatorAppliedEventArgs.cs" />
     <Compile Include="ModularSkills\Events\ApplySkillEffectEventArgs.cs" />
+    <Compile Include="ModularSkills\Invocation\DelayedInvocation.cs" />
+    <Compile Include="ModularSkills\Invocation\GesturedInvocation.cs" />
+    <Compile Include="ModularSkills\Invocation\IInterruptible.cs" />
+    <Compile Include="ModularSkills\Invocation\IInvocationDuration.cs" />
     <Compile Include="ModularSkills\Modifiers\IEfficacious.cs" />
     <Compile Include="ModularSkills\Events\InvokingSkillEventArgs.cs" />
     <Compile Include="ModularSkills\Events\FailSkillTargetRequirementEventArgs.cs" />
@@ -353,7 +357,6 @@
     <Compile Include="ModularSkills\Applicators\ISkillApplicator.cs" />
     <Compile Include="ModularSkills\Effect\ISkillEffect.cs" />
     <Compile Include="ModularSkills\Invocation\ISkillInvocation.cs" />
-    <Compile Include="ModularSkills\IModularSkillUser.cs" />
     <Compile Include="ModularSkills\ModularSkillTalent.cs" />
     <Compile Include="ModularSkills\TargetSelector\ITargetSelector.cs" />
     <Compile Include="ModularSkills\ModularSkill.cs" />

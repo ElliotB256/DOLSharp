@@ -35,19 +35,41 @@ namespace DOL.GS.Commands
         {
             GamePlayer player = client.Player;
 
+            ModularSkillTalent testMS = null;
+            SkillComponent sc = null;
+
             if (args.Length > 1)
             {
                 switch (args[1])
                 {
                     case "heal":
 
-                        var testMS = new ModularSkillTalent();
+                        testMS = new ModularSkillTalent();
                         testMS.Invocation = new InstantInvocation(testMS);
-                        SkillComponent sc = new SkillComponent();
+                        sc = new SkillComponent();
                         sc.Applicator = new DirectSkillApplicator();
                         sc.TargetSelector = new SelfTargetSelector();
                         sc.SkillEffectChain = new List<ISkillEffect>();
                         sc.SkillEffectChain.Add( new HealEffect() );
+                        testMS.Components.Add(sc);
+
+                        player.Talents.Add(testMS);
+                        player.Out.SendUpdatePlayerSkills();
+                        player.Out.SendMessage("Passive ability added.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+
+                        break;
+                    case "castheal":
+
+                        testMS = new ModularSkillTalent();
+                        var gi = new GesturedInvocation(testMS);
+                        gi.SpellAnimation = 2065;
+                        gi.Duration = 3f;
+                        testMS.Invocation = gi;
+                        sc = new SkillComponent();
+                        sc.Applicator = new DirectSkillApplicator();
+                        sc.TargetSelector = new SelfTargetSelector();
+                        sc.SkillEffectChain = new List<ISkillEffect>();
+                        sc.SkillEffectChain.Add(new HealEffect());
                         testMS.Components.Add(sc);
 
                         player.Talents.Add(testMS);

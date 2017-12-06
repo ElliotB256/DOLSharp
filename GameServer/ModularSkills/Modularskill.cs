@@ -33,6 +33,8 @@ namespace DOL.GS.ModularSkills
 
         public GameLiving Owner { get; set; }
 
+        private bool m_firstTimeUse = true;
+
         /// <summary>
         /// Owner of the skill tries to use it
         /// </summary>
@@ -45,7 +47,11 @@ namespace DOL.GS.ModularSkills
             }
 
             // Connect up required event chains
-            Components.ForEach(sc => sc.Applicator.Applied += OnApplicatorApplied);
+            if (m_firstTimeUse)
+            {
+                Components.ForEach(sc => sc.Applicator.Applied += OnApplicatorApplied);
+                m_firstTimeUse = false;
+            }
             Log.Debug(string.Format("TryUse() of ModularSkill, user={0}", Owner));
             Invocation.Start(Owner);
         }
