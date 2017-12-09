@@ -25,10 +25,12 @@ using System.Linq;
 namespace DOL.GS.Commands
 {
     [CmdAttribute(
-        "&modularskill",
+        "&ms",
         ePrivLevel.GM,
         "Adds a test modular skill to the user.",
-        "/modularskill heal")]
+        "/ms heal",
+        "/ms castheal",
+        "/ms pulseheal")]
     public class ModularSkillCommandHandler : ICommandHandler
     {
         public void OnCommand(GameClient client, string[] args)
@@ -72,6 +74,23 @@ namespace DOL.GS.Commands
                         sc.SkillEffectChain.Add(new HealEffect());
                         testMS.Components.Add(sc);
 
+                        player.Talents.Add(testMS);
+                        player.Out.SendUpdatePlayerSkills();
+                        player.Out.SendMessage("Passive ability added.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+
+                        break;
+
+                    case "pulseheal":
+
+                        testMS = new ModularSkillTalent();
+                        var pi = new PulsedInvocation(testMS);
+                        testMS.Invocation = pi;
+                        sc = new SkillComponent();
+                        sc.Applicator = new DirectSkillApplicator();
+                        sc.TargetSelector = new SelfTargetSelector();
+                        sc.SkillEffectChain = new List<ISkillEffect>();
+                        sc.SkillEffectChain.Add(new HealEffect());
+                        testMS.Components.Add(sc);
                         player.Talents.Add(testMS);
                         player.Out.SendUpdatePlayerSkills();
                         player.Out.SendMessage("Passive ability added.", eChatType.CT_System, eChatLoc.CL_SystemWindow);

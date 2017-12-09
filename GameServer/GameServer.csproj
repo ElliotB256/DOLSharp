@@ -346,6 +346,8 @@
     <Compile Include="ModularSkills\Events\SkillApplicatorAppliedEventArgs.cs" />
     <Compile Include="ModularSkills\Events\ApplySkillEffectEventArgs.cs" />
     <Compile Include="ModularSkills\Events\TryUsingSkillEventArgs.cs" />
+    <Compile Include="ModularSkills\Invocation\IFrequency.cs" />
+    <Compile Include="ModularSkills\Invocation\PulsedInvocation.cs" />
     <Compile Include="ModularSkills\Invocation\DelayedInvocation.cs" />
     <Compile Include="ModularSkills\Invocation\GesturedInvocation.cs" />
     <Compile Include="ModularSkills\Invocation\IInterruptible.cs" />

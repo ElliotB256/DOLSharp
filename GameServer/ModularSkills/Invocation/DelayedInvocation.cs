@@ -10,7 +10,7 @@ namespace DOL.GS.ModularSkills
     /// <summary>
     /// Skill invoked with a finite non-zero cast time
     /// </summary>
-    public abstract class DelayedInvocation : ISkillInvocation, IInvocationDuration, IInterruptible
+    public abstract class DelayedInvocation : ISkillInvocation, IDuration, IInterruptible
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 

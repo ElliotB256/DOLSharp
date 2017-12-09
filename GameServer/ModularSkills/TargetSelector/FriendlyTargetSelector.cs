@@ -90,15 +90,22 @@ namespace DOL.GS.ModularSkills
             if (target == null)
                 target = invoker;
 
+            //If range is 0 use invoker to pick targets.
+            if (Range == 0)
+                target = invoker;
+
             if (Radius > 0)
             {
-                if (target != null)
+                if (target != null && invoker.GetDistanceTo(target) < Radius)
                 {
-                    potentials.Add(target);
+                    //potentials.Add(target);
                     potentials.AddRange(target.GetNPCsInRadius((ushort)Radius, false).OfType<GameLiving>());
                     potentials.AddRange(target.GetPlayersInRadius((ushort)Radius, false).OfType<GameLiving>());
                 }
             }
+            else if (invoker.GetDistanceTo(target) < Range)
+                potentials.Add(target);
+
 
             list.AddRange(potentials.Where(o => IsValidTarget(invoker, o)));
             return list;

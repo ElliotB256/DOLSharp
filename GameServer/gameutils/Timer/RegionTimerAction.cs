@@ -40,6 +40,11 @@ namespace DOL.GS
 		/// Source of GameTimer Event
 		/// </summary>
 		private readonly T m_source;
+
+        /// <summary>
+        /// Source of GameTimer Event
+        /// </summary>
+        public T Source { get { return m_source; } }
 		
 		/// <summary>
 		/// Build a Stopped RegionTimerAction with GameObject Source.
