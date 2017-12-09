@@ -32,7 +32,7 @@ namespace DOL.GS.ModularSkills
                 target = invoker.TargetObject;
 
             //If we are already pulsing, using the skill cancels it.
-            if (Pulsing())
+            if (IsPulsing())
             {
                 StopPulsing();
                 return;
@@ -74,7 +74,7 @@ namespace DOL.GS.ModularSkills
         /// <summary>
         /// Is the invocation currently pulsing?
         /// </summary>
-        public bool Pulsing() {
+        public bool IsPulsing() {
             var pt = m_pulseTimer;
             return pt != null && pt.IsAlive;
         }
@@ -95,7 +95,7 @@ namespace DOL.GS.ModularSkills
         {
             // If other skill is a pulsing skill, cancel current skill. Can only have one pulsing skill active at a time!
             var pulseI = e.Skill.Invocation as PulsedInvocation;
-            if (pulseI != null && Pulsing() && pulseI != this)
+            if (pulseI != null && IsPulsing() && pulseI != this)
             {
                 StopPulsing();
             }
