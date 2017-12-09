@@ -87,7 +87,9 @@ namespace DOL.GS.Commands
                         testMS.Invocation = pi;
                         sc = new SkillComponent();
                         sc.Applicator = new DirectSkillApplicator();
-                        sc.TargetSelector = new SelfTargetSelector();
+                        var targetSelector = new FriendlyTargetSelector(testMS);
+                        targetSelector.Radius = 300;
+                        sc.TargetSelector = targetSelector; 
                         sc.SkillEffectChain = new List<ISkillEffect>();
                         sc.SkillEffectChain.Add(new HealEffect());
                         testMS.Components.Add(sc);

@@ -361,6 +361,9 @@
     <Compile Include="ModularSkills\Effect\ISkillEffect.cs" />
     <Compile Include="ModularSkills\Invocation\ISkillInvocation.cs" />
     <Compile Include="ModularSkills\ModularSkillTalent.cs" />
+    <Compile Include="ModularSkills\TargetSelector\AOETargetSelector.cs" />
+    <Compile Include="ModularSkills\TargetSelector\EnemyTargetSelector.cs" />
+    <Compile Include="ModularSkills\TargetSelector\IMaxTargetLimited.cs" />
     <Compile Include="ModularSkills\TargetSelector\ITargetSelector.cs" />
     <Compile Include="ModularSkills\ModularSkill.cs" />
     <Compile Include="ModularSkills\SkillComponent.cs" />

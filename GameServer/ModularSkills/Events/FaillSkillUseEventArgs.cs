@@ -31,5 +31,6 @@ namespace DOL.GS.ModularSkills
         AlreadyUsingAnotherSkill,
         InterruptedByMoving,
         InterruptedByAttack,
+        CancelPulsingSkill,
     }
 }

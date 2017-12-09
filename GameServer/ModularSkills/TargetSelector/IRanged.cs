@@ -1,4 +1,4 @@
-﻿namespace DOL.GS.ModularSkills.TargetSelector
+﻿namespace DOL.GS.ModularSkills
 {
     /// <summary>
     /// Target selector has a maximum range for target selection
