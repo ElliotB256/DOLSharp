@@ -27,8 +27,10 @@ namespace DOL.GS.ModularSkills
             if (p != null)
             {
                 p.Out.SendMessage("You gain the modular skill " + m_spell.Name + "!", GS.PacketHandler.eChatType.CT_Spell, GS.PacketHandler.eChatLoc.CL_SystemWindow);
-                Owner = p;
             }
+
+            GameLiving l = owner as GameLiving;
+            if (l != null) Owner = l;
         }
 
         public bool IsValid(ITalentOwner owner)

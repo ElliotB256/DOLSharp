@@ -20,6 +20,16 @@ namespace DOL.Talents
         private ThreadSafeList<ITalent> m_talents;
 
         /// <summary>
+        /// A talent was added to the set
+        /// </summary>
+        public event EventHandler<TalentAddedEventArgs> TalentAdded;
+
+        /// <summary>
+        /// A talent was removed from the set
+        /// </summary>
+        public event EventHandler<TalentRemovedEventArgs> TalentRemoved;
+
+        /// <summary>
         /// Owner of this TalentSet
         /// </summary>
         public ITalentOwner Owner
@@ -38,14 +48,19 @@ namespace DOL.Talents
                 return false;
 
             m_talents.Add(talent);
+            var e = TalentAdded;
+            e?.Invoke(this, new TalentAddedEventArgs(talent));
             talent.Apply(Owner);
             return true;
         }
 
         public virtual bool Remove(ITalent talent)
         {
-            if (m_talents.Remove(talent))
+            bool removed = m_talents.Remove(talent);
+            if (removed)
             {
+                var e = TalentRemoved;
+                e?.Invoke(this, new TalentRemovedEventArgs(talent));
                 talent.Remove(Owner);
                 return true;
             }

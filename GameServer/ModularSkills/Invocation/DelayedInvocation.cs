@@ -15,6 +15,7 @@ namespace DOL.GS.ModularSkills
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event EventHandler<SkillInvokedEventArgs> Completed;
+        public event EventHandler<FailSkillUseEventArgs> FailInvocation;
 
         public ModularSkill Skill { get; private set; }
 
@@ -70,6 +71,16 @@ namespace DOL.GS.ModularSkills
         {
             UnregisterHandlers(invoker);
             Completed(this, new SkillInvokedEventArgs(invoker, target));
+            DelayedAction = null;
+        }
+
+        /// <summary>
+        /// Is this invocation current being invoked?
+        /// </summary>
+        public bool IsBeingInvoked()
+        {
+            var d = DelayedAction;
+            return d != null && d.IsAlive;
         }
 
         /// <summary>
@@ -126,6 +137,10 @@ namespace DOL.GS.ModularSkills
                 return;
             }
 
+            var handler = FailInvocation;
+            FailSkillUseReason reason = (e == GameLivingEvent.Moving) ? FailSkillUseReason.InterruptedByMoving : FailSkillUseReason.InterruptedByAttack;
+            handler?.Invoke(this, new FailSkillUseEventArgs(reason));
+
             Interrupt(invoker);
         }
 
@@ -141,7 +156,10 @@ namespace DOL.GS.ModularSkills
                 DelayedAction.Stop();
                 DelayedAction = null;
             }
-        }      
+        }
 
+        public virtual void HandleUseOtherSkill(object sender, TryUsingSkillEventArgs e)
+        {
+        }
     }
 }

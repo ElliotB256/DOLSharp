@@ -32,6 +32,7 @@ using DOL.GS.PacketHandler;
 using DOL.GS.PropertyCalc;
 using DOL.GS.Spells;
 using DOL.GS.Styles;
+using DOL.GS.ModularSkills;
 using DOL.Language;
 
 using DOL.Talents;
@@ -5466,8 +5467,60 @@ namespace DOL.GS
 
         protected ITalentSet m_talents = null;
 
+        /// <summary>
+        /// Talents of this living
+        /// </summary>
         public ITalentSet Talents
-        { get { return m_talents; } }
+        {   get { return m_talents; }
+            protected set
+            {
+                if (m_talents != null)
+                {
+                    m_talents.TalentAdded -= OnTalentAdded;
+                    m_talents.TalentRemoved -= OnTalentRemoved;
+                }
+                m_talents = value;
+                if (m_talents != null)
+                {
+                    m_talents.TalentAdded += OnTalentAdded;
+                    m_talents.TalentRemoved += OnTalentRemoved;
+                }
+            }
+        }
+
+        /// <summary>
+        /// A talent is added to the living's talent set.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void OnTalentAdded(object sender, TalentAddedEventArgs e)
+        {
+            var mst = e.Talent as ModularSkillTalent;
+            if (mst != null)
+                mst.TryUseSkill += OnTryUseModularSkill;
+        }
+
+        /// <summary>
+        /// A talent is removed from the living's talent set
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void OnTalentRemoved(object sender, TalentRemovedEventArgs e)
+        {
+            var mst = e.Talent as ModularSkillTalent;
+            if (mst != null)
+                mst.TryUseSkill -= OnTryUseModularSkill;
+        }
+
+        /// <summary>
+        /// A skill owned by the living is used
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnTryUseModularSkill(object sender, TryUsingSkillEventArgs e)
+        {
+            Talents.GetAllTalents().OfType<ModularSkillTalent>().ForEach(mst => mst.HandleTryUsingOtherSkill(sender, e));
+        }
 
         #endregion
 
@@ -6015,7 +6068,7 @@ namespace DOL.GS
 			m_mana = 1;
 			m_endurance = 1;
 			m_maxEndurance = 1;
-            m_talents = new TalentSet(this);
+            Talents = new TalentSet(this);
         }
 	}
 }

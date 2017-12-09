@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DOL.Talents
 {
@@ -28,5 +29,15 @@ namespace DOL.Talents
         /// Owner of the ITalentSet
         /// </summary>
         ITalentOwner Owner { get; }
+
+        /// <summary>
+        /// A talent was added to the set
+        /// </summary>
+        event EventHandler<TalentAddedEventArgs> TalentAdded;
+
+        /// <summary>
+        /// A talent was removed from the set
+        /// </summary>
+        event EventHandler<TalentRemovedEventArgs> TalentRemoved;
     }
 }

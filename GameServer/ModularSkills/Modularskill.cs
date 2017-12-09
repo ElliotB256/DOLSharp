@@ -36,6 +36,11 @@ namespace DOL.GS.ModularSkills
         private bool m_firstTimeUse = true;
 
         /// <summary>
+        /// An invoker tries to use the skill
+        /// </summary>
+        public event EventHandler<TryUsingSkillEventArgs> TryUseSkill;
+
+        /// <summary>
         /// Owner of the skill tries to use it
         /// </summary>
         public void TryUse()
@@ -46,16 +51,28 @@ namespace DOL.GS.ModularSkills
                 return;
             }
 
+            var args = new TryUsingSkillEventArgs(Owner, this);
+            TryUseSkill(this, args);
+            if (!args.ShouldContinue)
+            {
+                FailSkillUse(this, new FailSkillUseEventArgs(args.StopReason));
+                return;
+            }
+
             // Connect up required event chains
             if (m_firstTimeUse)
             {
-                Components.ForEach(sc => sc.Applicator.Applied += OnApplicatorApplied);
+                Components.ForEach(sc => sc.Applicator.Applied += HandleApplicatorApplied);
                 m_firstTimeUse = false;
             }
             Log.Debug(string.Format("TryUse() of ModularSkill, user={0}", Owner));
             Invocation.Start(Owner);
         }
 
+        /// <summary>
+        /// The Modular skill could not be invoked because requirements were not met
+        /// </summary>
+        public event EventHandler<FailSkillUseEventArgs> FailSkillUse;
 
         #region Invocation
 
@@ -70,10 +87,20 @@ namespace DOL.GS.ModularSkills
             set
             {
                 if (m_invocation != null)
-                    m_invocation.Completed -= OnInvoked;
+                {
+                    m_invocation.Completed -= HandleInvoked;
+                    m_invocation.FailInvocation -= HandleInvocationFailed;
+                }
                 m_invocation = value;
-                m_invocation.Completed += OnInvoked;
+                m_invocation.Completed += HandleInvoked;
+                m_invocation.FailInvocation += HandleInvocationFailed;
             }
+        }
+
+        protected void HandleInvocationFailed(object sender, FailSkillUseEventArgs e)
+        {
+            var h = FailSkillUse;
+            h?.Invoke(this, e);
         }
 
         /// <summary>
@@ -82,14 +109,9 @@ namespace DOL.GS.ModularSkills
         public event EventHandler<SkillInvokedEventArgs> Invoked;
 
         /// <summary>
-        /// The Modular skill could not be invoked because target requirements were not met
-        /// </summary>
-        public event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirement;
-
-        /// <summary>
         /// Invoked when skill has successfully been cast.
         /// </summary>
-        protected void OnInvoked(object sender, SkillInvokedEventArgs e)
+        protected void HandleInvoked(object sender, SkillInvokedEventArgs e)
         {
             GameObject target = e.Target;
             GameObject invoker = e.Invoker;
@@ -116,6 +138,16 @@ namespace DOL.GS.ModularSkills
             eh?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Owner attempts to use another skill
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void HandleTryUsingOtherSkill(object sender, TryUsingSkillEventArgs e)
+        {
+            Invocation.HandleUseOtherSkill(sender, e);
+        }
+
         #endregion
 
         /// <summary>
@@ -124,7 +156,7 @@ namespace DOL.GS.ModularSkills
         /// </summary>
         /// <param name="target"></param>
         /// <param name="sc"></param>
-        protected void OnApplicatorApplied(object sender, SkillApplicatorAppliedEventArgs e)
+        protected void HandleApplicatorApplied(object sender, SkillApplicatorAppliedEventArgs e)
         {
             Log.Debug(string.Format("ISkillApplicator applied! Applying skill effect chain to recipient={0}.", e.Recipient));
             foreach (ISkillEffect effect in e.SkillComponent.SkillEffectChain)

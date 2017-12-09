@@ -345,13 +345,14 @@
     <Compile Include="ModularSkills\Effect\HealEffect.cs" />
     <Compile Include="ModularSkills\Events\SkillApplicatorAppliedEventArgs.cs" />
     <Compile Include="ModularSkills\Events\ApplySkillEffectEventArgs.cs" />
+    <Compile Include="ModularSkills\Events\TryUsingSkillEventArgs.cs" />
     <Compile Include="ModularSkills\Invocation\DelayedInvocation.cs" />
     <Compile Include="ModularSkills\Invocation\GesturedInvocation.cs" />
     <Compile Include="ModularSkills\Invocation\IInterruptible.cs" />
     <Compile Include="ModularSkills\Invocation\IInvocationDuration.cs" />
     <Compile Include="ModularSkills\Modifiers\IEfficacious.cs" />
     <Compile Include="ModularSkills\Events\InvokingSkillEventArgs.cs" />
-    <Compile Include="ModularSkills\Events\FailSkillTargetRequirementEventArgs.cs" />
+    <Compile Include="ModularSkills\Events\FaillSkillUseEventArgs.cs" />
     <Compile Include="ModularSkills\Events\SkillInvokedEventArgs.cs" />
     <Compile Include="ModularSkills\Invocation\InstantInvocation.cs" />
     <Compile Include="ModularSkills\Applicators\ISkillApplicator.cs" />
@@ -1552,6 +1553,8 @@
     <Compile Include="Talents\ITalentOwner.cs" />
     <Compile Include="Talents\ITalentSet.cs" />
     <Compile Include="Talents\Passives\PassiveTalent.cs" />
+    <Compile Include="Talents\TalentRemovedEventArgs.cs" />
+    <Compile Include="Talents\TalentAddedEventArgs.cs" />
     <Compile Include="Talents\Testing\TestAbility.cs" />
     <Compile Include="Talents\Testing\TestStyle.cs" />
     <Compile Include="Talents\Testing\TestSpell.cs" />

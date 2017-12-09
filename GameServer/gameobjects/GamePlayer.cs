@@ -43,6 +43,8 @@ using DOL.GS.Utils;
 using DOL.Language;
 using log4net;
 using DOL.Talents.Clientside;
+using DOL.Talents;
+using DOL.GS.ModularSkills;
 
 namespace DOL.GS
 {
@@ -13653,14 +13655,61 @@ namespace DOL.GS
 			UpdatePlayerStatus();
 		}
 
-		#endregion
+        #endregion
 
-		#region Constructors
-		/// <summary>
-		/// Returns the string representation of the GamePlayer
-		/// </summary>
-		/// <returns></returns>
-		public override string ToString()
+        #region Talents
+
+        protected override void OnTalentAdded(object sender, TalentAddedEventArgs e)
+        {
+            var mst = e.Talent as ModularSkillTalent;
+            if (mst != null)
+                mst.FailSkillUse += OnSkillUseFailed;
+            base.OnTalentAdded(sender, e);
+        }
+
+
+        private void OnSkillUseFailed(object sender, FailSkillUseEventArgs e)
+        {
+            //todo: this could be moved into a snazzy subclass and combined with localisation/translations.
+            switch (e.Reason)
+            {
+                default:
+                    Out.SendMessage("You failed to use the skill.", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+                case FailSkillUseReason.AlreadyUsingAnotherSkill:
+                    Out.SendMessage("You are already using a skill.", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+                case FailSkillUseReason.InvalidTarget:
+                    Out.SendMessage("You need a valid target for this skill.", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+                case FailSkillUseReason.TargetTooFar:
+                    Out.SendMessage("Your target is too far away!", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+                case FailSkillUseReason.InterruptedByAttack:
+                    Out.SendMessage("An attack interrupts your focus!", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+                case FailSkillUseReason.InterruptedByMoving:
+                    Out.SendMessage("You move and stop using your skill.", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                    break;
+            }
+        }
+
+        protected override void OnTalentRemoved(object sender, TalentRemovedEventArgs e)
+        {
+            var mst = e.Talent as ModularSkillTalent;
+            if (mst != null)
+                mst.FailSkillUse -= OnSkillUseFailed;
+            base.OnTalentRemoved(sender, e);
+        }
+
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Returns the string representation of the GamePlayer
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
 		{
 			return new StringBuilder(base.ToString())
 				.Append(" class=").Append(CharacterClass.Name)

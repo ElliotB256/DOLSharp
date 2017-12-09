@@ -12,7 +12,7 @@ namespace DOL.GS.ModularSkills
         {
         }
 
-        public event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
+        public event EventHandler<FailSkillUseEventArgs> FailSkillTargetRequirements;
 
         public bool CheckRequirementsForUse(GameObject target)
         {

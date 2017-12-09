@@ -12,6 +12,7 @@ namespace DOL.GS.ModularSkills
     public class InstantInvocation : ISkillInvocation
     {
         public event EventHandler<SkillInvokedEventArgs> Completed;
+        public event EventHandler<FailSkillUseEventArgs> FailInvocation;
 
         public ModularSkill Skill { get; private set; }
 
@@ -32,6 +33,10 @@ namespace DOL.GS.ModularSkills
 
             //Invocation successful
             Completed(this, new SkillInvokedEventArgs(invoker, target));
+        }
+
+        public void HandleUseOtherSkill(object sender, TryUsingSkillEventArgs e)
+        {
         }
     }
 }

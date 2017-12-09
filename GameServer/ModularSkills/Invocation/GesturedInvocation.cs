@@ -23,5 +23,13 @@ namespace DOL.GS.ModularSkills
             invoker.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE).OfType<GamePlayer>()
                 .ForEach(p => p.Out.SendSpellCastAnimation(invoker, SpellAnimation, gameTime));
         }
+
+        public override void HandleUseOtherSkill(object sender, TryUsingSkillEventArgs e)
+        {
+            base.HandleUseOtherSkill(sender, e);
+
+            if (IsBeingInvoked() && e.Skill.Invocation is GesturedInvocation)
+                e.Stop(FailSkillUseReason.AlreadyUsingAnotherSkill);
+        }
     }
 }

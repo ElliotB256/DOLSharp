@@ -22,6 +22,6 @@ namespace DOL.GS.ModularSkills
         /// <summary>
         /// Raised when the requirements to use the skill are not met
         /// </summary>
-        event EventHandler<FailSkillTargetRequirementsEventArgs> FailSkillTargetRequirements;
+        event EventHandler<FailSkillUseEventArgs> FailSkillTargetRequirements;
     }
 }
