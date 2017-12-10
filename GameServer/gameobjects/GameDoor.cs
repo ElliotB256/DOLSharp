@@ -363,49 +363,6 @@ namespace DOL.GS
 			m_healthregentimer -= 10;
 		}
 
-		public override void TakeDamage ( GameObject source, eDamageType damageType, int damageAmount, int criticalAmount )
-		{
-			
-			if( !m_openDead && this.Realm != eRealm.Door )
-			{
-				base.TakeDamage(source, damageType, damageAmount, criticalAmount);
-
-				double damageDealt = damageAmount + criticalAmount;
-			}
-				
-			GamePlayer attackerPlayer = source as GamePlayer;
-			if( attackerPlayer != null)
-			{
-				if( !m_openDead && this.Realm != eRealm.Door )
-				{
-                    attackerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(attackerPlayer.Client.Account.Language, "GameDoor.NowOpen", Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-
-				}
-				if( !m_openDead && this.Realm != eRealm.Door )
-				{
-					Health -= damageAmount + criticalAmount;
-			
-					if( !IsAlive )
-					{
-                        attackerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(attackerPlayer.Client.Account.Language, "GameDoor.NowOpen", Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-						Die(source);
-						m_openDead = true;
-						RegenDoorHealth();
-						if( Locked == 0 )
-							Open( );
-								
-						Group attackerGroup = attackerPlayer.Group;
-						if( attackerGroup != null )
-						{
-							foreach( GameLiving living in attackerGroup.GetMembersInTheGroup( ) )
-							{
-                                ((GamePlayer)living).Out.SendMessage(LanguageMgr.GetTranslation(attackerPlayer.Client.Account.Language, "GameDoor.NowOpen", Name), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							}
-						}
-					}
-				}
-			}
-		}
 		/// <summary>
 		/// The action that closes the door after specified duration
 		/// </summary>

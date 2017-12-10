@@ -60,7 +60,7 @@ namespace DOL.GS.Keeps
 		/// <summary>
 		/// The Guard Types that make up the Patrol
 		/// </summary>
-		public static Type[] GuardTypes = new Type[] { typeof(GuardFighter), typeof(GuardArcher), typeof(GuardHealer), typeof(GuardFighter), typeof(GuardArcher), typeof(GuardFighter) };
+		public static Type[] GuardTypes = new Type[] { typeof(GameKeepGuard) };
 
 		/// <summary>
 		/// A list of all the Guards

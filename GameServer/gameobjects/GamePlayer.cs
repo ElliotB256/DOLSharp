@@ -2098,7 +2098,7 @@ namespace DOL.GS
 		public override int Health
 		{
 			get { return DBCharacter != null ? DBCharacter.Health : base.Health; }
-			set
+			protected set
 			{
 				value = value.Clamp(0, MaxHealth);
 				//If it is already set, don't do anything
@@ -2321,7 +2321,7 @@ namespace DOL.GS
 				Endurance -= MaxEndurance * fallDamagePercent / 100;
 				double damage = (0.01 * fallDamagePercent * (MaxHealth - 1));
 
-				TakeDamage(null, eDamageType.Falling, (int)damage, 0);
+                ReceiveAttack(new DamageAttack((int)damage, eDamageType.Falling));
 
 				//Update the player's health to all other players around
 				foreach (GamePlayer player in GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))

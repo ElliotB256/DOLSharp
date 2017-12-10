@@ -289,19 +289,6 @@ namespace DOL.GS.Keeps
 		}
 
 		/// <summary>
-		/// Procs don't normally fire on game keep components
-		/// </summary>
-		/// <param name="ad"></param>
-		/// <param name="weapon"></param>
-		/// <returns></returns>
-		public override bool AllowWeaponMagicalEffect(Attack ad, InventoryItem weapon, Spell weaponSpell)
-		{
-			if (weapon.Flags == 10) //Bruiser or any other item needs Itemtemplate "Flags" set to 10 to proc on keep components
-				return true;
-			else return false;
-		}
-
-		/// <summary>
 		/// do not regen
 		/// </summary>
 		public override void StartHealthRegeneration()
@@ -574,85 +561,6 @@ namespace DOL.GS.Keeps
 			}
 			base.SaveIntoDatabase();
 		}
-
-		public override void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
-		{
-			if (damageAmount > 0)
-			{
-				this.AbstractKeep.LastAttackedByEnemyTick = this.CurrentRegion.Time;
-				base.TakeDamage(source, damageType, damageAmount, criticalAmount);
-
-				//only on hp change
-				if (m_oldHealthPercent != HealthPercent)
-				{
-					m_oldHealthPercent = HealthPercent;
-					foreach (GameClient client in WorldMgr.GetClientsOfRegion(CurrentRegionID))
-					{
-						client.Out.SendObjectUpdate(this);
-						client.Out.SendKeepComponentDetailUpdate(this); // I knwo this works, not sure if ObjectUpdate is needed - Tolakram
-					}
-				}
-			}
-		}
-
-
-		public override void ModifyAttack(Attack attackData)
-		{
-			// Allow a GM to use commands to damage components, regardless of toughness setting
-			if (attackData.DamageType == eDamageType.GM)
-				return;
-
-			int toughness = ServerProperties.Properties.SET_STRUCTURES_TOUGHNESS;
-			int baseDamage = attackData.Damage;
-			int styleDamage = attackData.StyleDamage;
-			int criticalDamage = 0;
-
-			GameLiving source = attackData.Attacker;
-
-			if (source is GamePlayer)
-			{
-				baseDamage = (baseDamage - (baseDamage * 5 * this.AbstractKeep.Level / 100)) * toughness / 100;
-				styleDamage = (styleDamage - (styleDamage * 5 * this.AbstractKeep.Level / 100)) * toughness / 100;
-			}
-			else if (source is GameNPC)
-			{
-				if (!ServerProperties.Properties.STRUCTURES_ALLOWPETATTACK)
-				{
-					baseDamage = 0;
-					styleDamage = 0;
-					attackData.AttackResult = eAttackResult.NotAllowed_ServerRules;
-				}
-				else
-				{
-					baseDamage = (baseDamage - (baseDamage * 5 * this.AbstractKeep.Level / 100)) * toughness / 100;
-					styleDamage = (styleDamage - (styleDamage * 5 * this.AbstractKeep.Level / 100)) * toughness / 100;
-
-					if (((GameNPC)source).Brain is DOL.AI.Brain.IControlledBrain)
-					{
-						GamePlayer player = (((DOL.AI.Brain.IControlledBrain)((GameNPC)source).Brain).Owner as GamePlayer);
-						if (player != null)
-						{
-							// special considerations for pet spam classes
-							if (player.CharacterClass.ID == (int)eCharacterClass.Theurgist || player.CharacterClass.ID == (int)eCharacterClass.Animist)
-							{
-								baseDamage = (int)(baseDamage * ServerProperties.Properties.PET_SPAM_DAMAGE_MULTIPLIER);
-								styleDamage = (int)(styleDamage * ServerProperties.Properties.PET_SPAM_DAMAGE_MULTIPLIER);
-							}
-							else
-							{
-								baseDamage = (int)(baseDamage * ServerProperties.Properties.PET_DAMAGE_MULTIPLIER);
-								styleDamage = (int)(styleDamage * ServerProperties.Properties.PET_DAMAGE_MULTIPLIER);
-							}
-						}
-					}
-				}
-			}
-
-			attackData.Damage = baseDamage;
-			attackData.StyleDamage = styleDamage;
-			attackData.CriticalDamage = criticalDamage;
-		}
-
 
 		public override void Die(GameObject killer)
 		{

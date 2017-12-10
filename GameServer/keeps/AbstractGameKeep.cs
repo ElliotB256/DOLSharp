@@ -954,12 +954,6 @@ namespace DOL.GS.Keeps
 
 		public virtual void SetGuardLevel(GameKeepGuard guard)
 		{
-			if (guard is FrontierHastener)
-			{
-				guard.Level = 1;
-			}
-			else
-			{
 				int bonusLevel = 0;
 				double multiplier = ServerProperties.Properties.KEEP_GUARD_LEVEL_MULTIPLIER;
 
@@ -973,7 +967,6 @@ namespace DOL.GS.Keeps
 				}
 
 				guard.Level = (byte)(GetBaseLevel(guard) + (bonusLevel * multiplier));
-			}
 		}
 
 

@@ -547,11 +547,6 @@ namespace DOL.GS
                 {
                     m_health = 0;
                 }
-
-                /*    if (IsAlive && m_health < maxhealth)
-                    {
-                        StartHealthRegeneration();
-                    }*/
             }
         }
 
@@ -1084,32 +1079,6 @@ namespace DOL.GS
 			}
 
 			return true;
-		}
-
-		#endregion
-
-		#region Combat
-
-		/// <summary>
-		/// This living takes damage
-		/// </summary>
-		/// <param name="ad">AttackData containing damage details</param>
-		public virtual void TakeDamage(Attack ad)
-		{
-			TakeDamage(ad.Attacker, ad.DamageType, ad.Damage, ad.CriticalDamage);
-		}
-
-		/// <summary>
-		/// This method is called whenever this living 
-		/// should take damage from some source
-		/// </summary>
-		/// <param name="source">the damage source</param>
-		/// <param name="damageType">the damage type</param>
-		/// <param name="damageAmount">the amount of damage</param>
-		/// <param name="criticalAmount">the amount of critical damage</param>
-		public virtual void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
-		{
-			Notify(GameObjectEvent.TakeDamage, this, new TakeDamageEventArgs(source, damageType, damageAmount, criticalAmount));
 		}
 
 		#endregion

@@ -146,6 +146,7 @@ namespace DOL.GS.Keeps
 				m_size = 255;
 				m_model = 0x783;
 				m_maxSpeedBase = 0;
+                m_health = m_maxHealth;
 			}
 		}
 
@@ -162,7 +163,6 @@ namespace DOL.GS.Keeps
 			mob.Y = this.Y;
 			mob.Z = this.Z;
 			mob.Heading = this.Heading;
-			mob.Health = mob.MaxHealth;
 			mob.MaxSpeedBase = 0;
 			if (mob.AddToWorld())
 				sfx = mob;

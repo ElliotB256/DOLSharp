@@ -3605,7 +3605,7 @@ namespace DOL.GS
 			{
 				return base.Health;
 			}
-			set
+			protected set
 			{
 				base.Health = value;
 				//Slow mobs down when they are hurt!

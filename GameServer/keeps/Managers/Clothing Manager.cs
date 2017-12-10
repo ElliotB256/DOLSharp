@@ -454,110 +454,9 @@ namespace DOL.GS.Keeps
 			{
 				return;
 			}
-            if (guard is FrontierHastener)
-            {
-                switch (guard.Realm)
-                {
-                    case eRealm.None:
-                    case eRealm.Albion:
-                    case eRealm.Hibernia:
-                    case eRealm.Midgard:
-                        {
-                            guard.Inventory = ClothingMgr.Midgard_Hastener.CloneTemplate();
-                            break;
-                        }
-                }
-            }
 
-			switch (guard.ModelRealm)
-			{
-				case eRealm.None:
-				case eRealm.Albion:
-					{
-						if (guard is GuardFighter)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Albion_FighterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Albion_Fighter.CloneTemplate();
-						}
-						else if (guard is GuardLord || guard is MissionMaster)
-							guard.Inventory = ClothingMgr.Albion_Lord.CloneTemplate();
-						else if (guard is GuardHealer)
-							guard.Inventory = ClothingMgr.Albion_Healer.CloneTemplate();
-						else if (guard is GuardArcher)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Albion_ArcherPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Albion_Archer.CloneTemplate();
-						}
-						else if (guard is GuardCaster)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Albion_CasterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Albion_Caster.CloneTemplate();
-						}
-						else if (guard is GuardStealther)
-							guard.Inventory = ClothingMgr.Albion_Stealther.CloneTemplate();
-						break;
-					}
-				case eRealm.Midgard:
-					{
-						if (guard is GuardFighter)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Midgard_FighterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Midgard_Fighter.CloneTemplate();
-						}
-						else if (guard is GuardLord || guard is MissionMaster)
-							guard.Inventory = ClothingMgr.Midgard_Lord.CloneTemplate();
-						else if (guard is GuardHealer)
-							guard.Inventory = ClothingMgr.Midgard_Healer.CloneTemplate();
-						else if (guard is GuardArcher)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Midgard_ArcherPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Midgard_Archer.CloneTemplate();
-						}
-						else if (guard is GuardCaster)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Midgard_CasterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Midgard_Caster.CloneTemplate();
-						}
-						else if (guard is GuardStealther)
-							guard.Inventory = ClothingMgr.Midgard_Stealther.CloneTemplate();
-						break;
-					}
-				case eRealm.Hibernia:
-					{
-						if (guard is GuardFighter)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Hibernia_FighterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Hibernia_Fighter.CloneTemplate();
-						}
-						else if (guard is GuardLord || guard is MissionMaster)
-							guard.Inventory = ClothingMgr.Hibernia_Lord.CloneTemplate();
-						else if (guard is GuardHealer)
-							guard.Inventory = ClothingMgr.Hibernia_Healer.CloneTemplate();
-						else if (guard is GuardArcher)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Hibernia_ArcherPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Hibernia_Archer.CloneTemplate();
-						}
-						else if (guard is GuardCaster)
-						{
-							if (guard.IsPortalKeepGuard)
-								guard.Inventory = ClothingMgr.Hibernia_CasterPK.CloneTemplate();
-							else guard.Inventory = ClothingMgr.Hibernia_Caster.CloneTemplate();
-						}
-						else if (guard is GuardStealther)
-							guard.Inventory = ClothingMgr.Hibernia_Stealther.CloneTemplate();
-						break;
-					}
-			}
-			if (guard.Inventory == null)
+            guard.Inventory = ClothingMgr.Midgard_Fighter.CloneTemplate();
+            if (guard.Inventory == null)
 			{
 				GameServer.KeepManager.Log.Warn("Clothing Manager: Guard Inventory is null for " + guard.GetType().ToString());
 				return;
@@ -633,16 +532,6 @@ namespace DOL.GS.Keeps
 					item.Color = renegadeArmorColor;
 				}
 			}
-
-			// set the active slot
-			// casters use two handed weapons as default
-            // archers use distance weapons as default
-			if (guard is GuardCaster)
-				guard.SwitchWeapon(GameLiving.eActiveWeaponSlot.TwoHanded);
-			else if (guard is GuardArcher)
-				guard.SwitchWeapon(GameLiving.eActiveWeaponSlot.Distance);
-			else if ((guard is GuardFighter || guard is GuardLord) && Util.Chance(50))
-				guard.SwitchWeapon(GameLiving.eActiveWeaponSlot.TwoHanded);
 			else guard.SwitchWeapon(GameLiving.eActiveWeaponSlot.Standard);
 		}
 

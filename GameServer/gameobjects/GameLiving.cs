@@ -110,6 +110,26 @@ namespace DOL.GS
         public event EventHandler<AttackOutcome> BeenAttacked;
 
         /// <summary>
+        /// The living starts aiding a target
+        /// </summary>
+        public event EventHandler<Aid> Aiding;
+
+        /// <summary>
+        /// The living has aided a target
+        /// </summary>
+        public event EventHandler<AidOutcome> Aided;
+
+        /// <summary>
+        /// The living starts to receive aid from an aider
+        /// </summary>
+        public event EventHandler<Aid> BeingAided;
+
+        /// <summary>
+        /// The living has been aided
+        /// </summary>
+        public event EventHandler<AidOutcome> BeenAided;
+
+        /// <summary>
         /// Make an attack
         /// </summary>
         /// <param name="attack"></param>
@@ -132,6 +152,9 @@ namespace DOL.GS
         /// <param name="attack"></param>
         public AttackOutcome ReceiveAttack(Attack attack)
         {
+            bool wasAlive = IsAlive;
+            attack.Target = this;
+
             var handler = BeingAttacked;
             handler?.Invoke(this, attack);
 
@@ -140,10 +163,56 @@ namespace DOL.GS
             var baHandler = BeenAttacked;
             baHandler?.Invoke(this, outcome);
 
+            if (Health == 0 && wasAlive)
+                Die(attack.Attacker);
+
             return outcome;
         }
 
         #endregion
+
+        /// <summary>
+		/// Gets/sets the object health
+		/// </summary>
+		public override int Health
+        {
+            get { return m_health; }
+            set
+            {
+                m_health = Math.Min(Math.Max(m_health, 0), MaxHealth);
+            }
+        }
+
+        public override int MaxHealth
+        {
+            get { return GetModified(eProperty.MaxHealth); }
+        }
+
+        /// <summary>
+        /// Changes the health
+        /// </summary>
+        /// <param name="changeAmount">the change amount</param>
+        /// <returns>the amount really changed</returns>
+        public virtual int ChangeHealth(int changeAmount)
+        {
+            //TODO fire event that might increase or reduce the amount
+            int oldHealth = Health;
+            bool wasAlive = IsAlive;
+
+            Health += changeAmount;
+
+            if (IsAlive)
+            {
+                if (IsLowHealth)
+                    Notify(GameLivingEvent.LowHealth, this, null);
+                if (m_health < MaxHealth)
+                    StartHealthRegeneration();
+            }
+
+            int healthChanged = Health - oldHealth;
+            return healthChanged;
+        }
+
 
         #region enums
 
@@ -210,8 +279,7 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Holds all the ways this living can
-		/// be healed
+		/// Holds all the ways this livings health can change
 		/// </summary>
 		public enum eHealthChangeType : byte
 		{
@@ -394,25 +462,6 @@ namespace DOL.GS
 		{
 			get { return m_activeWeaponSlot; }
 		}
-
-		/// <summary>
-		/// Create a pet for this living
-		/// </summary>
-		/// <param name="template"></param>
-		/// <returns></returns>
-		public virtual GamePet CreateGamePet(INpcTemplate template)
-		{
-			return new GamePet(template);
-		}
-
-		/// <summary>
-		/// A new pet has been summoned, do we do anything?
-		/// </summary>
-		/// <param name="pet"></param>
-		public virtual void OnPetSummoned(GamePet pet)
-		{
-		}
-
 
 		/// <summary>
 		/// last attack tick in either pve or pvp
@@ -1088,49 +1137,6 @@ namespace DOL.GS
 			{
 				return m_ObjectState == eObjectState.Active;
 			}
-		}
-
-		/// <summary>
-		/// This method is called whenever this living
-		/// should take damage from some source
-		/// </summary>
-		/// <param name="source">the damage source</param>
-		/// <param name="damageType">the damage type</param>
-		/// <param name="damageAmount">the amount of damage</param>
-		/// <param name="criticalAmount">the amount of critical damage</param>
-		public override void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
-		{
-			base.TakeDamage(source, damageType, damageAmount, criticalAmount);
-			bool wasAlive = IsAlive;
-
-			Health -= damageAmount + criticalAmount;
-
-			if (!IsAlive)
-			{
-				if (wasAlive)
-					Die(source);
-			}
-			else
-			{
-				if (IsLowHealth)
-					Notify(GameLivingEvent.LowHealth, this, null);
-			}
-		}
-
-		/// <summary>
-		/// Changes the health
-		/// </summary>
-		/// <param name="changeSource">the source that inited the changes</param>
-		/// <param name="healthChangeType">the change type</param>
-		/// <param name="changeAmount">the change amount</param>
-		/// <returns>the amount really changed</returns>
-		public virtual int ChangeHealth(GameObject changeSource, eHealthChangeType healthChangeType, int changeAmount)
-		{
-			//TODO fire event that might increase or reduce the amount
-			int oldHealth = Health;
-			Health += changeAmount;
-			int healthChanged = Health - oldHealth;
-			return healthChanged;
 		}
 
 		/// <summary>
@@ -2001,41 +2007,6 @@ namespace DOL.GS
 		/// Maximum value that can be in m_endurance
 		/// </summary>
 		protected int m_maxEndurance;
-
-		/// <summary>
-		/// Gets/sets the object health
-		/// </summary>
-		public override int Health
-		{
-			get { return m_health; }
-			set
-			{
-
-				int maxhealth = MaxHealth;
-				if (value >= maxhealth)
-				{
-					m_health = maxhealth;
-				}
-				else if (value > 0)
-				{
-					m_health = value;
-				}
-				else
-				{
-					m_health = 0;
-				}
-
-				if (IsAlive && m_health < maxhealth)
-				{
-					StartHealthRegeneration();
-				}
-			}
-		}
-
-		public override int MaxHealth
-		{
-			get {	return GetModified(eProperty.MaxHealth); }
-		}
 
 		public virtual int Mana
 		{
