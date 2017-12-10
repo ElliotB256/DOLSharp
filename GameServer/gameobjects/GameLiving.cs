@@ -130,43 +130,82 @@ namespace DOL.GS
         public event EventHandler<AidOutcome> BeenAided;
 
         /// <summary>
-        /// Make an attack
+        /// GameLiving performs the attack
         /// </summary>
-        /// <param name="attack"></param>
-        public void MakeAttack(GameLiving target, Attack attack)
+        public void ProvideAid(GameLiving target, Attack attack)
         {
-            attack.Attacker = this;
             attack.Target = target;
-
-            var handler = Attacking;
-            handler?.Invoke(this, attack);
-
-            var outcome = target?.ReceiveAttack(attack);
-            var attackedHandler = Attacked;
-            attackedHandler?.Invoke(this, outcome);
+            TakeAction(attack, Attacking, Attacked, target.ReceiveAttack);
         }
 
         /// <summary>
-        /// An attack starts on this living
+        /// GameLiving provides aid
         /// </summary>
-        /// <param name="attack"></param>
+        /// <param name="aid"></param>
+        public void ProvideAid(GameLiving target, Aid aid)
+        {
+            aid.Target = target;
+            TakeAction(aid, Aiding, Aided, target.ReceiveAid);
+        }
+
+        /// <summary>
+        /// This living receives an attack
+        /// </summary>
         public AttackOutcome ReceiveAttack(Attack attack)
         {
-            bool wasAlive = IsAlive;
-            attack.Target = this;
+            return ReceiveAction(attack, BeingAttacked, BeenAttacked);
+        }
 
-            var handler = BeingAttacked;
-            handler?.Invoke(this, attack);
+        /// <summary>
+        /// This living receives aid
+        /// </summary>
+        /// <param name="aid"></param>
+        /// <returns></returns>
+        public AidOutcome ReceiveAid(Aid aid)
+        {
+            return ReceiveAction(aid, BeingAided, BeenAided);
+        }
 
-            var outcome = attack.DetermineResult();
+        /// <summary>
+        /// Living is recipient of an action
+        /// </summary>
+        /// <param name="attack"></param>
+        protected TOutcome ReceiveAction<TIntention,TOutcome>(TIntention intention, EventHandler<TIntention> preEvent, EventHandler<TOutcome> postEvent) where TIntention : ActionIntention where TOutcome : ActionOutcome 
+        {
+            intention.Target = this;
 
-            var baHandler = BeenAttacked;
-            baHandler?.Invoke(this, outcome);
+            preEvent?.Invoke(this, intention);
 
-            if (Health == 0 && wasAlive)
-                Die(attack.Attacker);
+            //Will throw exception if outcome is not of type Tpost.
+            var outcome = (TOutcome)intention.DetermineResult();
+
+            postEvent?.Invoke(this, outcome);
+
+            outcome.Enact();
 
             return outcome;
+        }
+
+        /// <summary>
+        /// GameLiving takes an action
+        /// </summary>
+        /// <param name="aid"></param>
+        protected void TakeAction<TIntention, TOutcome>(TIntention intention, EventHandler<TIntention> preEvent, EventHandler<TOutcome> postEvent, Func<TIntention, TOutcome> targetReceiveMethod) where TIntention : ActionIntention where TOutcome : ActionOutcome
+        {
+            if (intention.Target != this)
+            {
+                //lets throw an exception here in time. But for now I just want this bloody thing working.
+                //This sounds more like something that could be checked at compile time with better implementation/pattern?
+                log.Warn(String.Format("Intention does not have this living as actor. intention={0} for living={1}", intention, Name));
+                return;
+            }
+
+            preEvent?.Invoke(this, intention);
+
+            TOutcome outcome = targetReceiveMethod(intention);
+
+            if (outcome != null)
+                postEvent?.Invoke(this, outcome);
         }
 
         #endregion
@@ -195,7 +234,6 @@ namespace DOL.GS
         /// <returns>the amount really changed</returns>
         public virtual int ChangeHealth(int changeAmount)
         {
-            //TODO fire event that might increase or reduce the amount
             int oldHealth = Health;
             bool wasAlive = IsAlive;
 
@@ -208,6 +246,8 @@ namespace DOL.GS
                 if (m_health < MaxHealth)
                     StartHealthRegeneration();
             }
+            else if (wasAlive)
+                Die();
 
             int healthChanged = Health - oldHealth;
             return healthChanged;
