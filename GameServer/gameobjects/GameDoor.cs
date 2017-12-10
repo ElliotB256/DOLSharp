@@ -276,11 +276,6 @@ namespace DOL.GS
 				if( value >= maxhealth )
 				{
 					m_health = maxhealth;
-
-					lock( m_xpGainers.SyncRoot )
-					{
-						m_xpGainers.Clear( );
-					}
 				}
 				else if( value > 0 )
 				{

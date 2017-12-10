@@ -53,27 +53,6 @@ namespace DOL.GS
 		}
 
 		/// <summary>
-		/// Training Dummies never attack
-		/// </summary>
-		/// <param name="ad"></param>
-		public override void OnAttackedByEnemy(AttackData ad)
-		{
-			if (ad.IsHit && ad.CausesCombat)
-			{
-				if (ad.Attacker.Realm == 0 || this.Realm == 0)
-				{
-					LastAttackedByEnemyTickPvE = CurrentRegion.Time;
-					ad.Attacker.LastAttackTickPvE = CurrentRegion.Time;
-				}
-				else
-				{
-					LastAttackedByEnemyTickPvP = CurrentRegion.Time;
-					ad.Attacker.LastAttackTickPvP = CurrentRegion.Time;
-				}
-			}
-		}
-
-		/// <summary>
 		/// Interacting with a training dummy does nothing
 		/// </summary>
 		/// <param name="player"></param>

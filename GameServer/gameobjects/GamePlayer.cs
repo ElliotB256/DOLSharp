@@ -847,7 +847,6 @@ namespace DOL.GS
 		/// </summary>
 		protected virtual void CleanupOnDisconnect()
 		{
-			StopAttack();
 			// remove all stealth handlers
 			Stealth(false);
 			if (IsOnHorse)
@@ -2018,13 +2017,6 @@ namespace DOL.GS
 
 				#endregion PVP DAMAGE
 
-				//We clean all damagedealers if we are fully healed,
-				//no special XP calculations need to be done
-				lock (m_xpGainers.SyncRoot)
-				{
-					m_xpGainers.Clear();
-				}
-
 				return 0;
 			}
 
@@ -2937,96 +2929,6 @@ namespace DOL.GS
 				return CharacterClass.CanUseLefthandedWeapon;
 			}
 		}
-
-		/// <summary>
-		/// Calculates how many times left hand swings
-		/// </summary>
-		public override int CalculateLeftHandSwingCount()
-		{
-			if (CanUseLefthandedWeapon == false)
-				return 0;
-
-			if (GetBaseSpecLevel(Specs.Left_Axe) > 0)
-				return 1; // always use left axe
-
-			int specLevel = Math.Max(GetModifiedSpecLevel(Specs.Celtic_Dual), GetModifiedSpecLevel(Specs.Dual_Wield));
-			specLevel = Math.Max(specLevel, GetModifiedSpecLevel(Specs.Fist_Wraps));
-			if (specLevel > 0)
-			{
-				return Util.Chance(25 + (specLevel - 1) * 68 / 100) ? 1 : 0;
-			}
-
-			// HtH chance
-			specLevel = GetModifiedSpecLevel(Specs.HandToHand);
-			InventoryItem attackWeapon = AttackWeapon;
-			InventoryItem leftWeapon = (Inventory == null) ? null : Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			if (specLevel > 0 && ActiveWeaponSlot == eActiveWeaponSlot.Standard
-			    && attackWeapon != null && attackWeapon.Object_Type == (int)eObjectType.HandToHand &&
-			    leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.HandToHand)
-			{
-				specLevel--;
-				int randomChance = Util.Random(99);
-				int hitChance = specLevel >> 1;
-				if (randomChance < hitChance)
-					return 1; // 1 hit = spec/2
-
-				hitChance += specLevel >> 2;
-				if (randomChance < hitChance)
-					return 2; // 2 hits = spec/4
-
-				hitChance += specLevel >> 4;
-				if (randomChance < hitChance)
-					return 3; // 3 hits = spec/16
-
-				return 0;
-			}
-
-			return 0;
-		}
-
-		/// <summary>
-		/// Returns a multiplier to adjust left hand damage
-		/// </summary>
-		/// <returns></returns>
-		public override double CalculateLeftHandEffectiveness(InventoryItem mainWeapon, InventoryItem leftWeapon)
-		{
-			double effectiveness = 1.0;
-
-			if (CanUseLefthandedWeapon && leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.LeftAxe && mainWeapon != null &&
-			    (mainWeapon.Item_Type == Slot.RIGHTHAND || mainWeapon.Item_Type == Slot.LEFTHAND))
-			{
-				int LASpec = GetModifiedSpecLevel(Specs.Left_Axe);
-				if (LASpec > 0)
-				{
-					effectiveness = 0.625 + 0.0034 * LASpec;
-				}
-			}
-
-			return effectiveness;
-		}
-
-		/// <summary>
-		/// Returns a multiplier to adjust right hand damage
-		/// </summary>
-		/// <param name="leftWeapon"></param>
-		/// <returns></returns>
-		public override double CalculateMainHandEffectiveness(InventoryItem mainWeapon, InventoryItem leftWeapon)
-		{
-			double effectiveness = 1.0;
-
-			if (CanUseLefthandedWeapon && leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.LeftAxe && mainWeapon != null &&
-			    (mainWeapon.Item_Type == Slot.RIGHTHAND || mainWeapon.Item_Type == Slot.LEFTHAND))
-			{
-				int LASpec = GetModifiedSpecLevel(Specs.Left_Axe);
-				if (LASpec > 0)
-				{
-					effectiveness = 0.625 + 0.0034 * LASpec;
-				}
-			}
-
-			return effectiveness;
-		}
-
 
 		/// <summary>
 		/// returns the level of a specialization
@@ -4772,253 +4674,75 @@ namespace DOL.GS
 			set { if (DBCharacter != null) DBCharacter.SafetyFlag = value; }
 		}
 
-		/// <summary>
-		/// Switches the active weapon to another one
-		/// </summary>
-		/// <param name="slot">the new eActiveWeaponSlot</param>
-		public override void SwitchWeapon(eActiveWeaponSlot slot)
-		{
-			//When switching weapons, attackmode is removed!
-			if (AttackState)
-				StopAttack();
+        /// <summary>
+        /// Switches the active weapon to another one
+        /// </summary>
+        /// <param name="slot">the new eActiveWeaponSlot</param>
+        public override void SwitchWeapon(eActiveWeaponSlot slot)
+        {
 
-			if (CurrentSpellHandler != null)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchWeapon.SpellCancelled"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
-				StopCurrentSpellcast();
-			}
+            if (CurrentSpellHandler != null)
+            {
+                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchWeapon.SpellCancelled"), eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
+                StopCurrentSpellcast();
+            }
 
-			InventoryItem[] oldActiveSlots = new InventoryItem[4];
-			InventoryItem[] newActiveSlots = new InventoryItem[4];
-			InventoryItem rightHandSlot = Inventory.GetItem(eInventorySlot.RightHandWeapon);
-			InventoryItem leftHandSlot = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			InventoryItem twoHandSlot = Inventory.GetItem(eInventorySlot.TwoHandWeapon);
-			InventoryItem distanceSlot = Inventory.GetItem(eInventorySlot.DistanceWeapon);
+            InventoryItem[] oldActiveSlots = new InventoryItem[4];
+            InventoryItem[] newActiveSlots = new InventoryItem[4];
+            InventoryItem rightHandSlot = Inventory.GetItem(eInventorySlot.RightHandWeapon);
+            InventoryItem leftHandSlot = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
+            InventoryItem twoHandSlot = Inventory.GetItem(eInventorySlot.TwoHandWeapon);
+            InventoryItem distanceSlot = Inventory.GetItem(eInventorySlot.DistanceWeapon);
 
-			// save old active weapons
-			// simple active slot logic:
-			// 0=right hand, 1=left hand, 2=two-hand, 3=range, F=none
-			switch (VisibleActiveWeaponSlots & 0x0F)
-			{
-					case 0: oldActiveSlots[0] = rightHandSlot; break;
-					case 2: oldActiveSlots[2] = twoHandSlot; break;
-					case 3: oldActiveSlots[3] = distanceSlot; break;
-			}
-			if ((VisibleActiveWeaponSlots & 0xF0) == 0x10) oldActiveSlots[1] = leftHandSlot;
+            // save old active weapons
+            // simple active slot logic:
+            // 0=right hand, 1=left hand, 2=two-hand, 3=range, F=none
+            switch (VisibleActiveWeaponSlots & 0x0F)
+            {
+                case 0: oldActiveSlots[0] = rightHandSlot; break;
+                case 2: oldActiveSlots[2] = twoHandSlot; break;
+                case 3: oldActiveSlots[3] = distanceSlot; break;
+            }
+            if ((VisibleActiveWeaponSlots & 0xF0) == 0x10) oldActiveSlots[1] = leftHandSlot;
 
 
-			base.SwitchWeapon(slot);
+            base.SwitchWeapon(slot);
 
 
-			// save new active slots
-			switch (VisibleActiveWeaponSlots & 0x0F)
-			{
-					case 0: newActiveSlots[0] = rightHandSlot; break;
-					case 2: newActiveSlots[2] = twoHandSlot; break;
-					case 3: newActiveSlots[3] = distanceSlot; break;
-			}
-			if ((VisibleActiveWeaponSlots & 0xF0) == 0x10) newActiveSlots[1] = leftHandSlot;
+            // save new active slots
+            switch (VisibleActiveWeaponSlots & 0x0F)
+            {
+                case 0: newActiveSlots[0] = rightHandSlot; break;
+                case 2: newActiveSlots[2] = twoHandSlot; break;
+                case 3: newActiveSlots[3] = distanceSlot; break;
+            }
+            if ((VisibleActiveWeaponSlots & 0xF0) == 0x10) newActiveSlots[1] = leftHandSlot;
 
-			// unequip changed items
-			for (int i = 0; i < 4; i++)
-			{
-				if (oldActiveSlots[i] != null && newActiveSlots[i] == null)
-					Notify(PlayerInventoryEvent.ItemUnequipped, Inventory, new ItemUnequippedArgs(oldActiveSlots[i], oldActiveSlots[i].SlotPosition));
-			}
+            // unequip changed items
+            for (int i = 0; i < 4; i++)
+            {
+                if (oldActiveSlots[i] != null && newActiveSlots[i] == null)
+                    Notify(PlayerInventoryEvent.ItemUnequipped, Inventory, new ItemUnequippedArgs(oldActiveSlots[i], oldActiveSlots[i].SlotPosition));
+            }
 
-			// equip new active items
-			for (int i = 0; i < 4; i++)
-			{
-				if (newActiveSlots[i] != null && oldActiveSlots[i] == null)
-					Notify(PlayerInventoryEvent.ItemEquipped, Inventory, new ItemEquippedArgs(newActiveSlots[i], newActiveSlots[i].SlotPosition));
-			}
+            // equip new active items
+            for (int i = 0; i < 4; i++)
+            {
+                if (newActiveSlots[i] != null && oldActiveSlots[i] == null)
+                    Notify(PlayerInventoryEvent.ItemEquipped, Inventory, new ItemEquippedArgs(newActiveSlots[i], newActiveSlots[i].SlotPosition));
+            }
 
-			if (ObjectState == eObjectState.Active)
-			{
-				//Send new wield info, no items updated
-				Out.SendInventorySlotsUpdate(null);
-				// Update active weapon appearence (has to be done with all
-				// equipment in the packet else player is naked)
-				UpdateEquipmentAppearance();
-				//Send new weapon stats
-				Out.SendUpdateWeaponAndArmorStats();
-			}
-		}
-
-		/// <summary>
-		/// Starts a melee attack with this player
-		/// </summary>
-		/// <param name="attackTarget">the target to attack</param>
-		public override void StartAttack(GameObject attackTarget)
-		{
-			if (CharacterClass.StartAttack(attackTarget) == false)
-			{
-				return;
-			}
-
-			if (!IsAlive)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.YouCantCombat"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			if (IsStunned)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantAttackStunned"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-			if (IsMezzed)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantAttackmesmerized"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			if (IsOnHorse)
-				IsOnHorse = false;
-
-			if (IsDisarmed)
-			{
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CantDisarmed"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			if (IsSitting)
-			{
-				Sit(false);
-			}
-			if (AttackWeapon == null)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CannotWithoutWeapon"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-
-				if (attackTarget == null)
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatNoTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				else
-                    if (attackTarget is GameNPC)
-                    {
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget",
-                            attackTarget.GetName(0, false, Client.Account.Language, (attackTarget as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                    }
-                    else
-                    {
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.StartAttack.CombatTarget", attackTarget.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                    }
-
-			base.StartAttack(attackTarget);
-
-			if (ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-			{
-				Out.SendAttackMode(AttackState);
-			}
-		}
-
-		/// <summary>
-		/// Stops all attacks this player is making
-		/// </summary>
-		/// <param name="forced">Is this a forced stop or is the client suggesting we stop?</param>
-		public override void StopAttack(bool forced)
-		{
-			base.StopAttack(forced);
-			if (IsAlive)
-			{
-				Out.SendAttackMode(AttackState);
-			}
-		}
-
-
-		/// <summary>
-		/// Switches the active quiver slot to another one
-		/// </summary>
-		/// <param name="slot"></param>
-		/// <param name="forced"></param>
-		public virtual void SwitchQuiver(eActiveQuiverSlot slot, bool forced)
-		{
-			if (slot != eActiveQuiverSlot.None)
-			{
-				eInventorySlot updatedSlot = eInventorySlot.Invalid;
-				if ((slot & eActiveQuiverSlot.Fourth) > 0)
-					updatedSlot = eInventorySlot.FourthQuiver;
-				else if ((slot & eActiveQuiverSlot.Third) > 0)
-					updatedSlot = eInventorySlot.ThirdQuiver;
-				else if ((slot & eActiveQuiverSlot.Second) > 0)
-					updatedSlot = eInventorySlot.SecondQuiver;
-				else if ((slot & eActiveQuiverSlot.First) > 0)
-					updatedSlot = eInventorySlot.FirstQuiver;
-
-				if (Inventory.GetItem(updatedSlot) != null && (ActiveQuiverSlot != slot || forced))
-				{
-					ActiveQuiverSlot = slot;
-					//GamePlayer.SwitchQuiver.ShootWith:		You will shoot with: {0}.
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchQuiver.ShootWith", Inventory.GetItem(updatedSlot).GetName(0, false)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else
-				{
-					ActiveQuiverSlot = eActiveQuiverSlot.None;
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchQuiver.NoMoreAmmo"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-
-				Out.SendInventorySlotsUpdate(new int[] { (int)updatedSlot });
-			}
-			else
-			{
-				if (Inventory.GetItem(eInventorySlot.FirstQuiver) != null)
-					SwitchQuiver(eActiveQuiverSlot.First, true);
-				else if (Inventory.GetItem(eInventorySlot.SecondQuiver) != null)
-					SwitchQuiver(eActiveQuiverSlot.Second, true);
-				else if (Inventory.GetItem(eInventorySlot.ThirdQuiver) != null)
-					SwitchQuiver(eActiveQuiverSlot.Third, true);
-				else if (Inventory.GetItem(eInventorySlot.FourthQuiver) != null)
-					SwitchQuiver(eActiveQuiverSlot.Fourth, true);
-				else
-				{
-					ActiveQuiverSlot = eActiveQuiverSlot.None;
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.SwitchQuiver.NotUseQuiver"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				Out.SendInventorySlotsUpdate(null);
-			}
-		}
-
-		/// <summary>
-		/// Check the selected range ammo and decides if it's compatible with select weapon
-		/// </summary>
-		/// <returns>True if compatible, false if not</returns>
-		protected virtual bool CheckRangedAmmoCompatibilityWithActiveWeapon()
-		{
-			InventoryItem weapon = AttackWeapon;
-			if (weapon != null)
-			{
-				switch ((eObjectType)weapon.Object_Type)
-				{
-					case eObjectType.Crossbow:
-					case eObjectType.Longbow:
-					case eObjectType.CompositeBow:
-					case eObjectType.RecurvedBow:
-					case eObjectType.Fired:
-						{
-							if (ActiveQuiverSlot != eActiveQuiverSlot.None)
-							{
-								InventoryItem ammo = null;
-								switch (ActiveQuiverSlot)
-								{
-										case eActiveQuiverSlot.Fourth: ammo = Inventory.GetItem(eInventorySlot.FourthQuiver); break;
-										case eActiveQuiverSlot.Third: ammo = Inventory.GetItem(eInventorySlot.ThirdQuiver); break;
-										case eActiveQuiverSlot.Second: ammo = Inventory.GetItem(eInventorySlot.SecondQuiver); break;
-										case eActiveQuiverSlot.First: ammo = Inventory.GetItem(eInventorySlot.FirstQuiver); break;
-								}
-
-								if (ammo == null) return false;
-
-								if (weapon.Object_Type == (int)eObjectType.Crossbow)
-									return ammo.Object_Type == (int)eObjectType.Bolt;
-								return ammo.Object_Type == (int)eObjectType.Arrow;
-							}
-						} break;
-				}
-			}
-			return true;
-		}
+            if (ObjectState == eObjectState.Active)
+            {
+                //Send new wield info, no items updated
+                Out.SendInventorySlotsUpdate(null);
+                // Update active weapon appearence (has to be done with all
+                // equipment in the packet else player is naked)
+                UpdateEquipmentAppearance();
+                //Send new weapon stats
+                Out.SendUpdateWeaponAndArmorStats();
+            }
+        }
 
 		/// <summary>
 		/// Holds the arrows for next range attack
@@ -5026,511 +4750,9 @@ namespace DOL.GS
 		protected WeakReference m_rangeAttackAmmo;
 
 		/// <summary>
-		/// Gets/Sets the item that is used for ranged attack
-		/// </summary>
-		/// <returns>Item that will be used for range/accuracy/damage modifications</returns>
-		protected override InventoryItem RangeAttackAmmo
-		{
-			get
-			{
-				//TODO: ammo should be saved on start of every range attack and used here
-				InventoryItem ammo = null;//(InventoryItem)m_rangeAttackArrows.Target;
-
-				InventoryItem weapon = AttackWeapon;
-				if (weapon != null)
-				{
-					switch (weapon.Object_Type)
-					{
-							case (int)eObjectType.Thrown: ammo = Inventory.GetItem(eInventorySlot.DistanceWeapon); break;
-						case (int)eObjectType.Crossbow:
-						case (int)eObjectType.Longbow:
-						case (int)eObjectType.CompositeBow:
-						case (int)eObjectType.RecurvedBow:
-						case (int)eObjectType.Fired:
-							{
-								switch (ActiveQuiverSlot)
-								{
-										case eActiveQuiverSlot.First: ammo = Inventory.GetItem(eInventorySlot.FirstQuiver); break;
-										case eActiveQuiverSlot.Second: ammo = Inventory.GetItem(eInventorySlot.SecondQuiver); break;
-										case eActiveQuiverSlot.Third: ammo = Inventory.GetItem(eInventorySlot.ThirdQuiver); break;
-										case eActiveQuiverSlot.Fourth: ammo = Inventory.GetItem(eInventorySlot.FourthQuiver); break;
-									case eActiveQuiverSlot.None:
-										eObjectType findType = eObjectType.Arrow;
-										if (weapon.Object_Type == (int)eObjectType.Crossbow)
-											findType = eObjectType.Bolt;
-
-										ammo = Inventory.GetFirstItemByObjectType((int)findType, eInventorySlot.FirstBackpack, eInventorySlot.LastBackpack);
-
-										break;
-								}
-							} break;
-					}
-				}
-
-				return ammo;
-			}
-			set { m_rangeAttackAmmo.Target = value; }
-		}
-
-		/// <summary>
 		/// Holds the target for next range attack
 		/// </summary>
 		protected WeakReference m_rangeAttackTarget;
-
-		/// <summary>
-		/// Gets/Sets the target for current ranged attack
-		/// </summary>
-		/// <returns></returns>
-		protected override GameObject RangeAttackTarget
-		{
-			get
-			{
-				GameObject target = (GameObject)m_rangeAttackTarget.Target;
-				if (target == null || target.ObjectState != eObjectState.Active)
-					target = TargetObject;
-				return target;
-			}
-			set { m_rangeAttackTarget.Target = value; }
-		}
-
-		/// <summary>
-		/// Check the range attack state and decides what to do
-		/// Called inside the AttackTimerCallback
-		/// </summary>
-		/// <returns></returns>
-		protected override eCheckRangeAttackStateResult CheckRangeAttackState(GameObject target)
-		{
-			long holdStart = TempProperties.getProperty<long>(RANGE_ATTACK_HOLD_START);
-			if (holdStart == 0)
-			{
-				holdStart = CurrentRegion.Time;
-				TempProperties.setProperty(RANGE_ATTACK_HOLD_START, holdStart);
-			}
-			//DOLConsole.WriteLine("Holding.... ("+holdStart+") "+(Environment.TickCount - holdStart));
-			if ((CurrentRegion.Time - holdStart) > 15000 && AttackWeapon.Object_Type != (int)eObjectType.Crossbow)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.TooTired"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return eCheckRangeAttackStateResult.Stop; //Stop the attack
-			}
-
-			//This state is set when the player wants to fire!
-			if (RangedAttackState == eRangedAttackState.Fire
-			    || RangedAttackState == eRangedAttackState.AimFire
-			    || RangedAttackState == eRangedAttackState.AimFireReload)
-			{
-				RangeAttackTarget = null; // clean the RangeAttackTarget at the first shot try even if failed
-
-				if (target == null || !(target is GameLiving))
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "System.MustSelectTarget"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else if (!this.IsWithinRadius(target, AttackRange))
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.TooFarAway", target.GetName(0, true)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else if (!TargetInView)  // TODO : wrong, must be checked with the target parameter and not with the targetObject
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.CantSeeTarget"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else if (!IsObjectInFront(target, 90))
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.NotInView", target.GetName(0, true)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				}
-				else if (RangeAttackAmmo == null)
-				{
-					//another check for ammo just before firing
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.MustSelectQuiver"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				}
-				else if (!CheckRangedAmmoCompatibilityWithActiveWeapon())
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.CantUseQuiver"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				}
-				else if (GameServer.ServerRules.IsAllowedToAttack(this, (GameLiving)target, false))
-				{
-					GameLiving living = target as GameLiving;
-					if (RangedAttackType == eRangedAttackType.Critical && living != null
-					    && (living.CurrentSpeed > 90 //walk speed == 85, hope that's what they mean
-					        || (living.AttackState && living.InCombat) //maybe not 100% correct
-					        || SpellHandler.FindEffectOnTarget(living, "Mesmerize") != null
-					       ))
-					{
-						/*
-						 * http://rothwellhome.org/guides/archery.htm
-						 * Please note that critical shot will work against targets that are:
-						 * sitting, standing still (which includes standing in combat mode but
-						 * not actively swinging at something), walking, moving backwards,
-						 * strafing, or casting a spell. Critical shot will not work against
-						 * targets that are: running, in active combat (swinging at something),
-						 * or mezzed. Stunned targets may be critical shot once any timers from
-						 * active combat have expired if they are not yet free to act; i.e.:
-						 * they may not be critical shot until their weapon delay timer has run
-						 * out after their last attack, they may be critical shot during the
-						 * period between the weapon delay running out and the stun wearing off,
-						 * and they may not be critical shot once they have begun swinging again.
-						 * If the target was in melee with an archer, the critical shot may not
-						 * be drawn against them until after their weapon delay has run out or it
-						 * will be interrupted.  This means that the scout's shield stun is much
-						 * less effective against large weapon wielders (who have longer weapon
-						 * delays) than against fast piercing/thrusting weapon wielders.
-						 */
-
-						// TODO: more checks?
-						Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.CantCritical"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-						RangedAttackType = eRangedAttackType.Normal;
-					}
-					return eCheckRangeAttackStateResult.Fire;
-				}
-
-				RangedAttackState = eRangedAttackState.ReadyToFire;
-				return eCheckRangeAttackStateResult.Hold;
-			}
-
-			//Player is aiming
-			if (RangedAttackState == eRangedAttackState.Aim)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.ReadyToFire"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				RangedAttackState = eRangedAttackState.ReadyToFire;
-				return eCheckRangeAttackStateResult.Hold;
-			}
-			else if (RangedAttackState == eRangedAttackState.ReadyToFire)
-			{
-				return eCheckRangeAttackStateResult.Hold; //Hold the shot
-			}
-			return eCheckRangeAttackStateResult.Fire;
-		}
-
-		/// <summary>
-		/// Send the messages to the GamePlayer
-		/// </summary>
-		/// <param name="ad"></param>
-		protected override void SendAttackingCombatMessages(AttackData ad)
-		{
-			base.SendAttackingCombatMessages(ad);
-			GameObject target = ad.Target;
-			InventoryItem weapon = ad.Weapon;
-            if (ad.Target is GameNPC)
-            {
-                switch (ad.AttackResult)
-                {
-                    case eAttackResult.TargetNotVisible: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.NotInView",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.OutOfRange: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.TooFarAway",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.TargetDead: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.AlreadyDead",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Blocked: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Blocked",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Parried: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Parried",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Evaded: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Evaded",
-                        ad.Target.GetName(0, true, Client.Account.Language, (ad.Target as GameNPC))), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.NoTarget: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.NeedTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.NoValidTarget: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.CantBeAttacked"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Missed: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Miss"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Fumbled: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Fumble"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.HitStyle:
-                    case eAttackResult.HitUnstyled:
-                        string modmessage = "";
-                        if (ad.Modifier > 0) modmessage = " (+" + ad.Modifier + ")";
-                        if (ad.Modifier < 0) modmessage = " (" + ad.Modifier + ")";
-
-                        string hitWeapon = "";
-
-                        switch (Client.Account.Language)
-                        {
-                            case "DE":
-                                if (weapon != null)
-                                    hitWeapon = weapon.Name;
-                                break;
-                            default:
-                                if (weapon != null)
-                                    hitWeapon = GlobalConstants.NameToShortName(weapon.Name);
-                                break;
-                        }
-
-                        if (hitWeapon.Length > 0)
-                            hitWeapon = " " + LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.WithYour") + " " + hitWeapon;
-
-                        string attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.YouAttack");
-                        if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-                            attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.YouShot");
-
-                        // intercept messages
-                        if (target != null && target != ad.Target)
-                        {
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Intercepted", ad.Target.GetName(0, true), target.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterceptedHit", attackTypeMsg, target.GetName(0, false), hitWeapon, ad.Target.GetName(0, false), ad.Damage, modmessage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                        }
-                        else
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterceptHit", attackTypeMsg,
-                                ad.Target.GetName(0, false, Client.Account.Language, (ad.Target as GameNPC)), hitWeapon, ad.Damage, modmessage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-
-                        // critical hit
-                        if (ad.CriticalDamage > 0)
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Critical",
-                                ad.Target.GetName(0, false, Client.Account.Language, (ad.Target as GameNPC)), ad.CriticalDamage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                        break;
-                }
-            }
-            else
-            {
-                switch (ad.AttackResult)
-                {
-                    case eAttackResult.TargetNotVisible: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.NotInView", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.OutOfRange: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.TooFarAway", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.TargetDead: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.AlreadyDead", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Blocked: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Blocked", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Parried: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Parried", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Evaded: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Evaded", ad.Target.GetName(0, true)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.NoTarget: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.NeedTarget"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.NoValidTarget: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.CantBeAttacked"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Missed: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Miss"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.Fumbled: Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Fumble"), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow); break;
-                    case eAttackResult.HitStyle:
-                    case eAttackResult.HitUnstyled:
-                        string modmessage = "";
-                        if (ad.Modifier > 0) modmessage = " (+" + ad.Modifier + ")";
-                        if (ad.Modifier < 0) modmessage = " (" + ad.Modifier + ")";
-
-                        string hitWeapon = "";
-
-                        switch (Client.Account.Language)
-                        {
-                            case "DE":
-                                if (weapon != null)
-                                    hitWeapon = weapon.Name;
-                                break;
-                            default:
-                                if (weapon != null)
-                                    hitWeapon = GlobalConstants.NameToShortName(weapon.Name);
-                                break;
-                        }
-
-                        if (hitWeapon.Length > 0)
-                            hitWeapon = " " + LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.WithYour") + " " + hitWeapon;
-
-                        string attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.YouAttack");
-                        if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-                            attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.YouShot");
-
-                        // intercept messages
-                        if (target != null && target != ad.Target)
-                        {
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Intercepted", ad.Target.GetName(0, true), target.GetName(0, false)), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterceptedHit", attackTypeMsg, target.GetName(0, false), hitWeapon, ad.Target.GetName(0, false), ad.Damage, modmessage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                        }
-                        else
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterceptHit", attackTypeMsg, ad.Target.GetName(0, false), hitWeapon, ad.Damage, modmessage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-
-                        // critical hit
-                        if (ad.CriticalDamage > 0)
-                            Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Critical", ad.Target.GetName(0, false), ad.CriticalDamage), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                        break;
-                }
-            }
-		}
-
-		/// <summary>
-		/// Called whenever a single attack strike is made
-		/// </summary>
-		/// <param name="target"></param>
-		/// <param name="weapon"></param>
-		/// <param name="style"></param>
-		/// <param name="effectiveness"></param>
-		/// <param name="interruptDuration"></param>
-		/// <param name="dualWield"></param>
-		/// <returns></returns>
-		protected override AttackData MakeAttack(GameObject target, InventoryItem weapon, Style style, double effectiveness, int interruptDuration, bool dualWield)
-		{
-			if (IsCrafting)
-			{
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterruptedCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				CraftTimer.Stop();
-				CraftTimer = null;
-				Out.SendCloseTimerWindow();
-			}
-
-			AttackData ad = base.MakeAttack(target, weapon, style, effectiveness * Effectiveness, interruptDuration, dualWield);
-
-			switch (ad.AttackResult)
-			{
-				case eAttackResult.Blocked:
-				case eAttackResult.Fumbled:
-				case eAttackResult.HitStyle:
-				case eAttackResult.HitUnstyled:
-				case eAttackResult.Missed:
-				case eAttackResult.Parried:
-					//Condition percent can reach 70%
-					//durability percent can reach zero
-					// if item durability reachs 0, item is useless and become broken item
-
-					if (weapon != null && weapon is GameInventoryItem)
-					{
-						(weapon as GameInventoryItem).OnStrikeTarget(this, target);
-					}
-					break;
-			}
-			return ad;
-		}
-
-		/// <summary>
-		/// Calculates melee critical damage of this player
-		/// </summary>
-		/// <param name="ad">The attack data</param>
-		/// <param name="weapon">The weapon used</param>
-		/// <returns>The amount of critical damage</returns>
-		public override int GetMeleeCriticalDamage(AttackData ad, InventoryItem weapon)
-		{
-			if (Util.Chance(AttackCriticalChance(weapon)))
-			{
-				int critMin = (int)(0.01 * ad.Damage);
-				int	critMax = ad.Damage;
-
-				critMin = Math.Max(critMin, 0);
-				critMax = Math.Max(critMin, critMax);
-
-				return Util.Random(critMin, critMax);
-			}
-			return 0;
-		}
-
-		/// <summary>
-		/// This method is called at the end of the attack sequence to
-		/// notify objects if they have been attacked/hit by an attack
-		/// </summary>
-		/// <param name="ad">information about the attack</param>
-		public override void OnAttackedByEnemy(AttackData ad)
-		{
-			if (IsOnHorse && ad.IsHit)
-				IsOnHorse = false;
-			base.OnAttackedByEnemy(ad);
-
-			switch (ad.AttackResult)
-			{
-				// is done in game living because of guard
-				//case eAttackResult.Blocked : Out.SendMessage(ad.Attacker.GetName(0, true) + " attacks you and you block the blow!", eChatType.CT_Missed, eChatLoc.CL_SystemWindow); break;
-				case eAttackResult.Parried:
-                    if (ad.Attacker is GameNPC)
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Parry", ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC))), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    else
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Parry", ad.Attacker.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    break;
-				case eAttackResult.Evaded:
-                    if (ad.Attacker is GameNPC)
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Evade", ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC))), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    else
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Evade", ad.Attacker.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    break;
-				case eAttackResult.Fumbled:
-                    if (ad.Attacker is GameNPC)                    
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Fumbled", ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC))), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    else
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Fumbled", ad.Attacker.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    break;
-				case eAttackResult.Missed:
-					if (ad.AttackType == AttackData.eAttackType.Spell)
-						break;
-                    if (ad.Attacker is GameNPC)
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Missed", ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC))), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-                    else
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Missed", ad.Attacker.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
-					break;
-				case eAttackResult.HitStyle:
-				case eAttackResult.HitUnstyled:
-					{
-						if (ad.Damage == -1)
-							break;
-
-						#region Messages
-
-						string hitLocName = null;
-						switch (ad.ArmorHitLocation)
-						{
-								//GamePlayer.Attack.Location.Feet:	feet
-								// LanguageMgr.GetTranslation(Client.Account.Language, "", ad.Attacker.GetName(0, true))
-								case eArmorSlot.TORSO: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Torso"); break;
-								case eArmorSlot.ARMS: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Arm"); break;
-								case eArmorSlot.HEAD: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Head"); break;
-								case eArmorSlot.LEGS: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Leg"); break;
-								case eArmorSlot.HAND: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Hand"); break;
-								case eArmorSlot.FEET: hitLocName = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Location.Foot"); break;
-						}
-						string modmessage = "";
-						if (ad.Attacker is GamePlayer == false) // if attacked by player, don't show resists (?)
-						{
-							if (ad.Modifier > 0) modmessage = " (+" + ad.Modifier + ")";
-							if (ad.Modifier < 0) modmessage = " (" + ad.Modifier + ")";
-						}
-
-                        if (ad.Attacker is GameNPC)
-                        {
-                            if (hitLocName != null)
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYour",
-                                    ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC)), hitLocName, ad.Damage, modmessage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-                            else
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYou",
-                                    ad.Attacker.IsAlive ? ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC)) : "A dead enemy", ad.Damage, modmessage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-
-                            if (ad.CriticalDamage > 0)
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYouCritical",
-                                    ad.Attacker.GetName(0, true, Client.Account.Language, (ad.Attacker as GameNPC)), ad.CriticalDamage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-                        }
-                        else
-                        {
-                            if (hitLocName != null)
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYour", ad.Attacker.GetName(0, true), hitLocName, ad.Damage, modmessage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-                            else
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYou", ad.Attacker.IsAlive ? ad.Attacker.GetName(0, true) : "A dead enemy", ad.Damage, modmessage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-
-                            if (ad.CriticalDamage > 0)
-                                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.HitsYouCritical", ad.Attacker.GetName(0, true), ad.CriticalDamage), eChatType.CT_Damaged, eChatLoc.CL_SystemWindow);
-                        }
-
-
-						#endregion
-
-						// decrease condition of hitted armor piece
-						if (ad.ArmorHitLocation != eArmorSlot.NOTSET)
-						{
-							InventoryItem item = Inventory.GetItem((eInventorySlot)ad.ArmorHitLocation);
-
-							if (item != null)
-							{
-								TryReactiveEffect(item, ad.Attacker);
-
-								if (item is GameInventoryItem)
-								{
-									(item as GameInventoryItem).OnStruckByEnemy(this, ad.Attacker);
-								}
-							}
-						}
-						break;
-					}
-				case eAttackResult.Blocked:
-					{
-						InventoryItem reactiveItem = Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-						if (reactiveItem != null && reactiveItem.Object_Type == (int)eObjectType.Shield)
-						{
-							TryReactiveEffect(reactiveItem, ad.Attacker);
-
-							if (reactiveItem is GameInventoryItem)
-							{
-								(reactiveItem as GameInventoryItem).OnStruckByEnemy(this, ad.Attacker);
-							}
-						}
-						break;
-					}
-			}
-
-			if (IsCrafting)
-			{
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.InterruptedCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				CraftTimer.Stop();
-				CraftTimer = null;
-				Out.SendCloseTimerWindow();
-			}
-		}
-
 
 		/// <summary>
 		/// Launch any reactive effect on an item
@@ -5590,197 +4812,7 @@ namespace DOL.GS
 				}
 			}
 		}
-
-		/// <summary>
-		/// Does needed interrupt checks and interrupts if needed
-		/// </summary>
-		/// <param name="attacker">the attacker that is interrupting</param>
-		/// <param name="attackType">The attack type</param>
-		/// <returns>true if interrupted successfully</returns>
-		protected override bool OnInterruptTick(GameLiving attacker, AttackData.eAttackType attackType)
-		{
-			if (base.OnInterruptTick(attacker, attackType))
-			{
-				if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-				{
-					string attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Type.Shot");
-					if (AttackWeapon != null && AttackWeapon.Object_Type == (int)eObjectType.Thrown)
-						attackTypeMsg = LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Type.Throw");
-                    if (attacker is GameNPC)
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Interrupted", attacker.GetName(0, true, Client.Account.Language, (attacker as GameNPC)), attackTypeMsg), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-                    else
-                        Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Attack.Interrupted", attacker.GetName(0, true), attackTypeMsg), eChatType.CT_YouHit, eChatLoc.CL_SystemWindow);
-				}
-				return true;
-			}
-			return false;
-		}
-
-		public override void TakeDamage(GameObject source, eDamageType damageType, int damageAmount, int criticalAmount)
-		{
-			base.TakeDamage(source, damageType, damageAmount, criticalAmount);
-		}
-
-		/// <summary>
-		/// Gets the effective AF of this living.  This is used for the overall AF display
-		/// on the character but not used in any damage equations.
-		/// </summary>
-		public override int EffectiveOverallAF
-		{
-			get
-			{
-				int eaf = 0;
-				int abs = 0;
-				foreach (InventoryItem item in Inventory.VisibleItems)
-				{
-					double factor = 0;
-					switch (item.Item_Type)
-					{
-						case Slot.TORSO:
-							factor = 2.2;
-							break;
-						case Slot.LEGS:
-							factor = 1.3;
-							break;
-						case Slot.ARMS:
-							factor = 0.75;
-							break;
-						case Slot.HELM:
-							factor = 0.5;
-							break;
-						case Slot.HANDS:
-							factor = 0.25;
-							break;
-						case Slot.FEET:
-							factor = 0.25;
-							break;
-					}
-
-					int itemAFCap = Level << 1;
-					if (RealmLevel > 39)
-						itemAFCap += 2;
-					switch ((eObjectType)item.Object_Type)
-					{
-						case eObjectType.Cloth:
-							abs = 0;
-							itemAFCap >>= 1;
-							break;
-						case eObjectType.Leather:
-							abs = 10;
-							break;
-						case eObjectType.Reinforced:
-							abs = 19;
-							break;
-						case eObjectType.Studded:
-							abs = 19;
-							break;
-						case eObjectType.Scale:
-							abs = 27;
-							break;
-						case eObjectType.Chain:
-							abs = 27;
-							break;
-						case eObjectType.Plate:
-							abs = 34;
-							break;
-					}
-
-					if (factor > 0)
-					{
-						int af = item.DPS_AF;
-						if (af > itemAFCap)
-							af = itemAFCap;
-						double piece_eaf = af * item.Quality / 100.0 * item.ConditionPercent / 100.0 * (1 + abs / 100.0);
-						eaf += (int)(piece_eaf * factor);
-					}
-				}
-
-				// Overall AF CAP = 10 * level * (1 + abs%/100)
-				int bestLevel = -1;
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.AlbArmor));
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.HibArmor));
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.MidArmor));
-				switch (bestLevel)
-				{
-						default: abs = 0; break; // cloth etc
-						case ArmorLevel.Leather: abs = 10; break;
-						case ArmorLevel.Studded: abs = 19; break;
-						case ArmorLevel.Chain: abs = 27; break;
-						case ArmorLevel.Plate: abs = 34; break;
-				}
-
-				eaf += BaseBuffBonusCategory[(int)eProperty.ArmorFactor]; // base buff before cap
-				int eafcap = (int)(10 * Level * (1 + abs * 0.01));
-				if (eaf > eafcap)
-					eaf = eafcap;
-				eaf += (int)Math.Min(Level * 1.875, SpecBuffBonusCategory[(int)eProperty.ArmorFactor])
-					- DebuffCategory[(int)eProperty.ArmorFactor]
-					+ BuffBonusCategory4[(int)eProperty.ArmorFactor]
-					+ Math.Min(Level, ItemBonus[(int)eProperty.ArmorFactor]);
-
-				eaf = (int)(eaf * BuffBonusMultCategory1.Get((int)eProperty.ArmorFactor));
-
-				return eaf;
-			}
-		}
-		/// <summary>
-		/// Calc Armor hit location when player is hit by enemy
-		/// </summary>
-		/// <returns>slotnumber where enemy hits</returns>
-		/// attackdata(ad) changed
-		public virtual eArmorSlot CalculateArmorHitLocation(AttackData ad)
-		{
-			if (ad.Style != null)
-			{
-				if (ad.Style.ArmorHitLocation != eArmorSlot.NOTSET)
-					return ad.Style.ArmorHitLocation;
-			}
-			int chancehit = Util.Random(1, 100);
-			if (chancehit <= 40)
-			{
-				return eArmorSlot.TORSO;
-			}
-			else if (chancehit <= 65)
-			{
-				return eArmorSlot.LEGS;
-			}
-			else if (chancehit <= 80)
-			{
-				return eArmorSlot.ARMS;
-			}
-			else if (chancehit <= 90)
-			{
-				return eArmorSlot.HEAD;
-			}
-			else if (chancehit <= 95)
-			{
-				return eArmorSlot.HAND;
-			}
-			else
-			{
-				return eArmorSlot.FEET;
-			}
-		}
-
-		/// <summary>
-		/// determines current weaponspeclevel
-		/// </summary>
-		public override int WeaponSpecLevel(InventoryItem weapon)
-		{
-			if (weapon == null)
-				return 0;
-			// use axe spec if left hand axe is not in the left hand slot
-			if (weapon.Object_Type == (int)eObjectType.LeftAxe && weapon.SlotPosition != Slot.LEFTHAND)
-				return GameServer.ServerRules.GetObjectSpecLevel(this, eObjectType.Axe);
-			// use left axe spec if axe is in the left hand slot
-			if (weapon.SlotPosition == Slot.LEFTHAND
-			    && (weapon.Object_Type == (int)eObjectType.Axe
-			        || weapon.Object_Type == (int)eObjectType.Sword
-			        || weapon.Object_Type == (int)eObjectType.Hammer))
-				return GameServer.ServerRules.GetObjectSpecLevel(this, eObjectType.LeftAxe);
-			return GameServer.ServerRules.GetObjectSpecLevel(this, (eObjectType)weapon.Object_Type);
-		}
-
+       
 		public virtual String GetWeaponSpec(InventoryItem weapon)
 		{
 			if (weapon == null)
@@ -5814,63 +4846,6 @@ namespace DOL.GS
 			        || weapon.Object_Type == (int)eObjectType.Hammer))
 				return GameServer.ServerRules.GetBaseObjectSpecLevel(this, eObjectType.LeftAxe);
 			return GameServer.ServerRules.GetBaseObjectSpecLevel(this, (eObjectType)weapon.Object_Type);
-		}
-
-		/// <summary>
-		/// Gets the weaponskill of weapon
-		/// </summary>
-		/// <param name="weapon"></param>
-		public override double GetWeaponSkill(InventoryItem weapon)
-		{
-			if (weapon == null)
-			{
-				return 0;
-			}
-			double classbase =
-				(weapon.SlotPosition == (int)eInventorySlot.DistanceWeapon
-				 ? CharacterClass.WeaponSkillRangedBase
-				 : CharacterClass.WeaponSkillBase);
-
-			//added for WS Poisons
-			double preBuff = ((Level * classbase * 0.02 * (1 + (GetWeaponStat(weapon) - 50) * 0.005)) * Effectiveness);
-
-			//return ((Level * classbase * 0.02 * (1 + (GetWeaponStat(weapon) - 50) * 0.005)) * PlayerEffectiveness);
-			return Math.Max(0, preBuff * GetModified(eProperty.WeaponSkill) * 0.01);
-		}
-
-		/// <summary>
-		/// calculates weapon stat
-		/// </summary>
-		/// <param name="weapon"></param>
-		/// <returns></returns>
-		public override int GetWeaponStat(InventoryItem weapon)
-		{
-			if (weapon != null)
-			{
-				switch ((eObjectType)weapon.Object_Type)
-				{
-						// DEX modifier
-					case eObjectType.Staff:
-					case eObjectType.Fired:
-					case eObjectType.Longbow:
-					case eObjectType.Crossbow:
-					case eObjectType.CompositeBow:
-					case eObjectType.RecurvedBow:
-					case eObjectType.Thrown:
-					case eObjectType.Shield:
-						return GetModified(eProperty.Dexterity);
-
-						// STR+DEX modifier
-					case eObjectType.ThrustWeapon:
-					case eObjectType.Piercing:
-					case eObjectType.Spear:
-					case eObjectType.Flexible:
-					case eObjectType.HandToHand:
-						return (GetModified(eProperty.Strength) + GetModified(eProperty.Dexterity)) >> 1;
-				}
-			}
-			// STR modifier for others
-			return GetModified(eProperty.Strength);
 		}
 
 		/// <summary>
@@ -5922,363 +4897,6 @@ namespace DOL.GS
 			// vampiir random armor debuff change ~
 			double eaf = (item.SPD_ABS + GetModified(eProperty.ArmorAbsorption)) * 0.01;
 			return eaf;
-		}
-
-		/// <summary>
-		/// Weaponskill thats shown to the player
-		/// </summary>
-		public virtual int DisplayedWeaponSkill
-		{
-			get
-			{
-				int itemBonus = WeaponSpecLevel(AttackWeapon) - WeaponBaseSpecLevel(AttackWeapon) - RealmLevel / 10;
-				double m = 0.56 + itemBonus / 70.0;
-				double weaponSpec = WeaponSpecLevel(AttackWeapon) + itemBonus * m;
-				return (int)(GetWeaponSkill(AttackWeapon) * (1.00 + weaponSpec * 0.01));
-			}
-		}
-
-		/// <summary>
-		/// Gets the weapondamage of currently used weapon
-		/// Used to display weapon damage in stats, 16.5dps = 1650
-		/// </summary>
-		/// <param name="weapon">the weapon used for attack</param>
-		public override double WeaponDamage(InventoryItem weapon)
-		{
-			if (weapon != null)
-			{
-				//TODO if attackweapon is ranged -> attackdamage is arrow damage
-				int DPS = weapon.DPS_AF;
-
-				// apply relic bonus prior to cap
-				DPS = (int)((double)DPS * (1.0 + RelicMgr.GetRelicBonusModifier(Realm, eRelicType.Strength)));
-
-				// apply damage cap before quality
-				// http://www.classesofcamelot.com/faq.asp?mode=view&cat=10
-				int cap = 12 + 3 * Level;
-				if (RealmLevel > 39)
-					cap += 3;
-
-				if (DPS > cap)
-				{
-					DPS = cap;
-				}
-				//(1.0 + BuffBonusCategory1[(int)eProperty.DPS]/100.0 - BuffBonusCategory3[(int)eProperty.DPS]/100.0)
-				DPS = (int)(DPS * (1 + (GetModified(eProperty.DPS) * 0.01)));
-				// beware to use always ConditionPercent, because Condition is abolute value
-				//				return (int) ((DPS/10.0)*(weapon.Quality/100.0)*(weapon.Condition/(double)weapon.MaxCondition)*100.0);
-				double wdamage = (0.001 * DPS * weapon.Quality * weapon.Condition) / weapon.MaxCondition;
-				return wdamage;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
-		/// <summary>
-		/// Max. Damage possible without style
-		/// </summary>
-		/// <param name="weapon">attack weapon</param>
-		public override double UnstyledDamageCap(InventoryItem weapon)
-		{
-			if (weapon != null)
-			{
-				int DPS = weapon.DPS_AF;
-				int cap = 12 + 3 * Level;
-				if (RealmLevel > 39)
-					cap += 3;
-				if (DPS > cap)
-					DPS = cap;
-
-				double result = DPS * weapon.SPD_ABS * 0.03 * (0.94 + 0.003 * weapon.SPD_ABS);
-
-				if (weapon.Hand == 1) //2h
-				{
-					result *= 1.1 + (WeaponSpecLevel(weapon) - 1) * 0.005;
-					if (weapon.Item_Type == Slot.RANGED)
-					{
-						// http://home.comcast.net/~shadowspawn3/bowdmg.html
-						//ammo damage bonus
-						double ammoDamageBonus = 1;
-						if (RangeAttackAmmo != null)
-						{
-							switch ((RangeAttackAmmo.SPD_ABS) & 0x3)
-							{
-									case 0: ammoDamageBonus = 0.85; break; 	//Blunt       (light) -15%
-									case 1: ammoDamageBonus = 1; break; 	//Bodkin     (medium)   0%
-									case 2: ammoDamageBonus = 1.15; break; 	//doesn't exist on live
-									case 3: ammoDamageBonus = 1.25; break; 	//Broadhead (X-heavy) +25%
-							}
-						}
-						result *= ammoDamageBonus;
-					}
-				}
-				
-				if (weapon.Item_Type == Slot.RANGED && (weapon.Object_Type == (int)eObjectType.Longbow || weapon.Object_Type == (int)eObjectType.RecurvedBow || weapon.Object_Type == (int)eObjectType.CompositeBow))
-				{
-					if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == true)
-					{
-						result += GetModified(eProperty.RangedDamage) * 0.01;
-					}
-					else if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == false)
-					{
-						result += GetModified(eProperty.SpellDamage) * 0.01;
-						result += GetModified(eProperty.RangedDamage) * 0.01;
-					}
-				}
-				else if (weapon.Item_Type == Slot.RANGED)
-				{
-					//Ranged damage buff,debuff,Relic,RA
-					result += GetModified(eProperty.RangedDamage) * 0.01;
-				}
-				else if (weapon.Item_Type == Slot.RIGHTHAND || weapon.Item_Type == Slot.LEFTHAND || weapon.Item_Type == Slot.TWOHAND)
-				{
-					result += GetModified(eProperty.MeleeDamage) * 0.01;
-				}
-				
-				return result;
-			}
-			else
-			{ // TODO: whats the damage cap without weapon?
-				return AttackDamage(weapon) * 3 * (1 + (AttackSpeed(weapon) * 0.001 - 2) * .03);
-			}
-		}
-
-		/// <summary>
-		/// Can this player cast the given spell while in combat?
-		/// </summary>
-		/// <param name="spell"></param>
-		/// <returns></returns>
-		public override bool CanCastInCombat(Spell spell)
-		{
-			return true;
-		}
-
-		/// <summary>
-		/// The chance for a critical hit
-		/// </summary>
-		/// <param name="weapon">attack weapon</param>
-		public override int AttackCriticalChance(InventoryItem weapon)
-		{
-			if (weapon != null && weapon.Item_Type == Slot.RANGED && RangedAttackType == eRangedAttackType.Critical)
-				return 0; // no crit damage for crit shots
-
-			// check for melee attack
-			if (weapon != null && weapon.Item_Type != Slot.RANGED)
-			{
-				return GetModified(eProperty.CriticalMeleeHitChance);
-			}
-
-			// check for ranged attack
-			if (weapon != null && weapon.Item_Type == Slot.RANGED)
-			{
-				return GetModified(eProperty.CriticalArcheryHitChance);
-			}
-
-			// base 10% chance of critical for all with melee weapons
-			return 10;
-		}
-
-		/// <summary>
-		/// Returns the damage type of the current attack
-		/// </summary>
-		/// <param name="weapon">attack weapon</param>
-		public override eDamageType AttackDamageType(InventoryItem weapon)
-		{
-			if (weapon == null)
-				return eDamageType.Natural;
-			switch ((eObjectType)weapon.Object_Type)
-			{
-				case eObjectType.Crossbow:
-				case eObjectType.Longbow:
-				case eObjectType.CompositeBow:
-				case eObjectType.RecurvedBow:
-				case eObjectType.Fired:
-					InventoryItem ammo = RangeAttackAmmo;
-					if (ammo == null)
-						return (eDamageType)weapon.Type_Damage;
-					return (eDamageType)ammo.Type_Damage;
-				case eObjectType.Shield:
-					return eDamageType.Crush; // TODO: shields do crush damage (!) best is if Type_Damage is used properly
-				default:
-					return (eDamageType)weapon.Type_Damage;
-			}
-		}
-
-		/// <summary>
-		/// Returns the AttackRange of this living
-		/// </summary>
-		public override int AttackRange
-		{
-			/* tested with:
-			staff					= 125-130
-			sword			   		= 126-128.06
-			shield (Numb style)		= 127-129
-			polearm	(Impale style)	= 127-130
-			mace (Daze style)		= 127.5-128.7
-
-			Think it's safe to say that it never changes; different with mobs. */
-
-			get
-			{
-				GameLiving livingTarget = TargetObject as GameLiving;
-
-				//TODO change to real distance of bows!
-				if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-				{
-					InventoryItem weapon = AttackWeapon;
-					if (weapon == null)
-						return 0;
-
-					double range;
-					InventoryItem ammo = RangeAttackAmmo;
-
-					switch ((eObjectType)weapon.Object_Type)
-					{
-							case eObjectType.Longbow: range = 1760; break;
-							case eObjectType.RecurvedBow: range = 1680; break;
-							case eObjectType.CompositeBow: range = 1600; break;
-							default: range = 1200; break; // shortbow, xbow, throwing
-					}
-
-					range = Math.Max(32, range * GetModified(eProperty.ArcheryRange) * 0.01);
-
-					if (ammo != null)
-						switch ((ammo.SPD_ABS >> 2) & 0x3)
-					{
-							case 0: range *= 0.85; break; //Clout -15%
-							//						case 1:                break; //(none) 0%
-							case 2: range *= 1.15; break; //doesn't exist on live
-							case 3: range *= 1.25; break; //Flight +25%
-					}
-					if (livingTarget != null) range += Math.Min((Z - livingTarget.Z) / 2.0, 500);
-					if (range < 32) range = 32;
-
-					return (int)(range);
-				}
-
-				int meleerange = 128;
-				GameKeepComponent keepcomponent = livingTarget as GameKeepComponent; // TODO better component melee attack range check
-				if (keepcomponent != null)
-					meleerange += 150;
-				else
-				{
-					if (livingTarget != null && livingTarget.IsMoving)
-						meleerange += 32;
-					if (IsMoving)
-						meleerange += 32;
-				}
-				return meleerange;
-			}
-			set { }
-		}
-
-		/// <summary>
-		/// Gets the current attackspeed of this living in milliseconds
-		/// </summary>
-		/// <param name="weapons">attack weapons</param>
-		/// <returns>effective speed of the attack. average if more than one weapon.</returns>
-		public override int AttackSpeed(params InventoryItem[] weapons)
-		{
-			if (weapons == null || weapons.Length < 1)
-				return 0;
-
-			int count = 0;
-			double speed = 0;
-			bool bowWeapon = true;
-
-			for (int i = 0; i < weapons.Length; i++)
-			{
-				if (weapons[i] != null)
-				{
-					speed += weapons[i].SPD_ABS;
-					count++;
-
-					switch (weapons[i].Object_Type)
-					{
-						case (int)eObjectType.Fired:
-						case (int)eObjectType.Longbow:
-						case (int)eObjectType.Crossbow:
-						case (int)eObjectType.RecurvedBow:
-						case (int)eObjectType.CompositeBow:
-							break;
-						default:
-							bowWeapon = false;
-							break;
-					}
-				}
-			}
-
-			if (count < 1)
-				return 0;
-
-			speed /= count;
-
-			int qui = Math.Min(250, Quickness); //250 soft cap on quickness
-
-			if (bowWeapon)
-			{
-				speed *= (1.0 - (qui - 60) * 0.002);
-			}
-			else
-			{
-				// TODO use haste
-				//Weapon Speed*(1-(Quickness-60)/500]*(1-Haste)
-				speed *= (1.0 - (qui - 60) * 0.002) * 0.01 * GetModified(eProperty.MeleeSpeed);
-			}
-
-			// apply speed cap
-			if (speed < 15)
-			{
-				speed = 15;
-			}
-			return (int)(speed * 100);
-		}
-
-		/// <summary>
-		/// Gets the attack damage
-		/// </summary>
-		/// <param name="weapon">the weapon used for attack</param>
-		/// <returns>the weapon damage</returns>
-		public override double AttackDamage(InventoryItem weapon)
-		{
-			if (weapon == null)
-				return 0;
-
-			double effectiveness = 1.00;
-			double damage = WeaponDamage(weapon) * weapon.SPD_ABS * 0.1;
-
-			if (weapon.Hand == 1) // two-hand
-			{
-				// twohanded used weapons get 2H-Bonus = 10% + (Skill / 2)%
-				int spec = WeaponSpecLevel(weapon) - 1;
-				damage *= 1.1 + spec * 0.005;
-			}
-
-			if (weapon.Item_Type == Slot.RANGED)
-			{
-				//ammo damage bonus
-				if (RangeAttackAmmo != null)
-				{
-					switch ((RangeAttackAmmo.SPD_ABS) & 0x3)
-					{
-							case 0: damage *= 0.85; break; //Blunt       (light) -15%
-							//case 1: damage *= 1;	break; //Bodkin     (medium)   0%
-							case 2: damage *= 1.15; break; //doesn't exist on live
-							case 3: damage *= 1.25; break; //Broadhead (X-heavy) +25%
-					}
-				}
-				//Ranged damage buff,debuff,Relic,RA
-				effectiveness += GetModified(eProperty.RangedDamage) * 0.01;
-			}
-			else if (weapon.Item_Type == Slot.RIGHTHAND || weapon.Item_Type == Slot.LEFTHAND || weapon.Item_Type == Slot.TWOHAND)
-			{
-				//Melee damage buff,debuff,Relic,RA
-				effectiveness += GetModified(eProperty.MeleeDamage) * 0.01;
-			}
-			damage *= effectiveness;
-			return damage;
 		}
 
 		/// <summary>
@@ -6523,34 +5141,6 @@ namespace DOL.GS
 			IsSwimming = false;
 		}
 
-		public override void EnemyKilled(GameLiving enemy)
-		{
-			if (Group != null)
-			{
-				foreach (GamePlayer player in Group.GetPlayersInTheGroup())
-				{
-					if (player == this) continue;
-					if (enemy.Attackers.Contains(player)) continue;
-					if (this.IsWithinRadius(player, WorldMgr.MAX_EXPFORKILL_DISTANCE))
-					{
-						Notify(GameLivingEvent.EnemyKilled, player, new EnemyKilledEventArgs(enemy));
-					}
-
-					if (player.Attackers.Contains(enemy))
-						player.RemoveAttacker(enemy);
-
-					if (player.ControlledBrain != null && player.ControlledBrain.Body.Attackers.Contains(enemy))
-						player.ControlledBrain.Body.RemoveAttacker(enemy);
-				}
-			}
-
-			if (ControlledBrain != null && ControlledBrain.Body.Attackers.Contains(enemy))
-				ControlledBrain.Body.RemoveAttacker(enemy);
-
-			base.EnemyKilled(enemy);
-		}
-
-
 		/// <summary>
 		/// Check this flag to see wether this living is involved in combat
 		/// </summary>
@@ -6784,12 +5374,6 @@ namespace DOL.GS
                 return;
             }
 
-            if (IsSilenced)
-            {
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.CastSpell.CantCastFumblingWords"), eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-                return;
-            }
-
             double fumbleChance = GetModified(eProperty.SpellFumbleChance);
             fumbleChance *= 0.01;
             if (fumbleChance > 0)
@@ -6874,34 +5458,6 @@ namespace DOL.GS
 				Out.SendMessage(ab.Spell.Name + " not implemented yet (" + ab.Spell.SpellType + ")", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 		}
-
-		/// <summary>
-		/// Calculate how fast this player can cast a given spell
-		/// </summary>
-		/// <param name="spell"></param>
-		/// <returns></returns>
-		public override int CalculateCastingTime(SpellLine line, Spell spell)
-		{
-			int ticks = spell.CastTime;
-
-			if (spell.InstrumentRequirement != 0 ||
-			    line.KeyName == GlobalSpellsLines.Item_Spells ||
-			    line.KeyName.StartsWith(GlobalSpellsLines.Champion_Lines_StartWith))
-			{
-				return ticks;
-			}
-
-			double percent = DexterityCastTimeReduction;
-
-			percent *= 1.0 - GetModified(eProperty.CastingSpeed) * 0.01;
-
-			ticks = (int)(ticks * Math.Max(CastingSpeedReductionCap, percent));
-			if (ticks < MinimumCastingSpeed)
-				ticks = MinimumCastingSpeed;
-
-			return ticks;
-		}
-
 
 		#endregion
 
@@ -7329,69 +5885,8 @@ namespace DOL.GS
 						return;
 
 					case Slot.RANGED:
-						bool newAttack = false;
-						if (ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-						{
-							SwitchWeapon(eActiveWeaponSlot.Distance);
-						}
-						else if (!AttackState)
-						{
-							StopCurrentSpellcast();
-							StartAttack(TargetObject);
-							newAttack = true;
-						}
-
-						//Clean up range attack state/type if we are not in combat mode
-						//anymore
-						if (!AttackState)
-						{
-							RangedAttackState = eRangedAttackState.None;
-							RangedAttackType = eRangedAttackType.Normal;
-						}
-						if (!newAttack && RangedAttackState != eRangedAttackState.None)
-						{
-							if (RangedAttackState == eRangedAttackState.ReadyToFire)
-							{
-								RangedAttackState = eRangedAttackState.Fire;
-								StopCurrentSpellcast();
-								m_attackAction.Start(1);
-							}
-							else if (RangedAttackState == eRangedAttackState.Aim)
-							{
-								if (!TargetInView)
-								{
-									// Don't store last target if it's not visible
-									Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.CantSeeTarget"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								}
-								else
-								{
-									if (m_rangeAttackTarget.Target == null)
-									{
-										//set new target only if there was no target before
-										RangeAttackTarget = TargetObject;
-									}
-
-									RangedAttackState = eRangedAttackState.AimFire;
-									Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.AutoReleaseShot"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								}
-							}
-							else if (RangedAttackState == eRangedAttackState.AimFire)
-							{
-								RangedAttackState = eRangedAttackState.AimFireReload;
-								Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.AutoReleaseShotReload"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							}
-							else if (RangedAttackState == eRangedAttackState.AimFireReload)
-							{
-								RangedAttackState = eRangedAttackState.Aim;
-								Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.UseSlot.NoAutoReleaseShotReload"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-							}
-						}
 						break;
-						case Slot.FIRSTQUIVER: SwitchQuiver(eActiveQuiverSlot.First, false); break;
-						case Slot.SECONDQUIVER: SwitchQuiver(eActiveQuiverSlot.Second, false); break;
-						case Slot.THIRDQUIVER: SwitchQuiver(eActiveQuiverSlot.Third, false); break;
-						case Slot.FOURTHQUIVER: SwitchQuiver(eActiveQuiverSlot.Fourth, false); break;
-				}
+                }
 
 				#endregion
 
@@ -9114,19 +7609,6 @@ namespace DOL.GS
 			{
 				base.Heading = value;
 				if (DBCharacter != null) DBCharacter.Direction = value;
-
-				if (AttackState && ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-				{
-					AttackData ad = TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as AttackData;
-					if (ad != null && ad.IsMeleeAttack && (ad.AttackResult == eAttackResult.TargetNotVisible || ad.AttackResult == eAttackResult.OutOfRange))
-					{
-						//Does the target can be attacked ?
-						if (ad.Target != null && IsObjectInFront(ad.Target, 120) && this.IsWithinRadius(ad.Target, AttackRange) && m_attackAction != null)
-						{
-							m_attackAction.Start(1);
-						}
-					}
-				}
 			}
 		}
 
@@ -9347,19 +7829,6 @@ namespace DOL.GS
 			set
 			{
 				m_sitting = value;
-				if (value)
-				{
-					if (IsCasting)
-						m_runningSpellHandler.CasterMoves();
-					if (AttackState && ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-					{
-						string attackTypeMsg = "shot";
-						if (AttackWeapon.Object_Type == (int)eObjectType.Thrown)
-							attackTypeMsg = "throw";
-						Out.SendMessage("You move and interrupt your " + attackTypeMsg + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-						StopAttack();
-					}
-				}
 			}
 		}
 
@@ -9466,49 +7935,10 @@ namespace DOL.GS
 			{
 				Sit(false);
 			}
-			if (IsCasting)
-			{
-				m_runningSpellHandler.CasterMoves();
-			}
-			if (IsCastingRealmAbility)
-			{
-				Out.SendInterruptAnimation(this);
-                Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "SpellHandler.CasterMove"), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-				RealmAbilityCastTimer.Stop();
-				RealmAbilityCastTimer = null;
-			}
-			if (IsCrafting)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnPlayerMove.InterruptCrafting"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				CraftTimer.Stop();
-				CraftTimer = null;
-				Out.SendCloseTimerWindow();
-			}
 			if (IsSummoningMount)
 			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnPlayerMove.CannotCallMount"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
 				StopWhistleTimers();
-			}
-			if (AttackState)
-			{
-				if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-				{
-					string attackTypeMsg = (AttackWeapon.Object_Type == (int)eObjectType.Thrown ? "throw" : "shot");
-					Out.SendMessage("You move and interrupt your " + attackTypeMsg + "!", eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-					StopAttack();
-				}
-				else
-				{
-					AttackData ad = TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as AttackData;
-					if (ad != null && ad.IsMeleeAttack && (ad.AttackResult == eAttackResult.TargetNotVisible || ad.AttackResult == eAttackResult.OutOfRange))
-					{
-						//Does the target can be attacked ?
-						if (ad.Target != null && IsObjectInFront(ad.Target, 120) && this.IsWithinRadius(ad.Target, AttackRange) && m_attackAction != null)
-						{
-							m_attackAction.Start(1);
-						}
-					}
-				}
 			}
 			//Notify the GameEventMgr of the moving player
 			GameEventMgr.Notify(GamePlayerEvent.Moving, this);
@@ -9572,12 +8002,6 @@ namespace DOL.GS
 			else
 			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Sit.YouStandUp"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-			}
-
-			//Stop attack if you sit down while attacking
-			if (sit && AttackState)
-			{
-				StopAttack();
 			}
 
 			if (!sit)
@@ -11102,7 +9526,6 @@ namespace DOL.GS
 
 			m_inventory.LoadFromDatabase(InternalID);
 
-			SwitchQuiver((eActiveQuiverSlot)(DBCharacter.ActiveWeaponSlot & 0xF0), false);
 			SwitchWeapon((eActiveWeaponSlot)(DBCharacter.ActiveWeaponSlot & 0x0F));
 
 			Health = DBCharacter.Health;
@@ -11197,7 +9620,7 @@ namespace DOL.GS
 				DBCharacter.PlayedTime = PlayedTime;  //We have to set the PlayedTime on the character before setting the LastPlayed
 				DBCharacter.LastPlayed = DateTime.Now;
 
-				DBCharacter.ActiveWeaponSlot = (byte)((byte)ActiveWeaponSlot | (byte)ActiveQuiverSlot);
+				DBCharacter.ActiveWeaponSlot = (byte)((byte)ActiveWeaponSlot | (byte)0);
 				if (m_stuckFlag)
 				{
 					lock (m_lastUniqueLocations)
@@ -11453,9 +9876,6 @@ namespace DOL.GS
 			AttackedByEnemyEventArgs atkArgs = args as AttackedByEnemyEventArgs;
 			GamePlayer player = sender as GamePlayer;
 			if (player == null || atkArgs == null) return;
-			if (atkArgs.AttackData.AttackResult != eAttackResult.HitUnstyled && atkArgs.AttackData.AttackResult != eAttackResult.HitStyle) return;
-			if (atkArgs.AttackData.Damage == -1) return;
-
 			player.Stealth(false);
 		}
 		/// <summary>

@@ -319,156 +319,21 @@ namespace DOL.GS.Commands
                                     NoValidTarget(client, targetPlayer);
                                     return;
                                 }
-                                        
-                                if(client.Player.TargetObject is GameNPC)
+
+                                var npc = client.Player.TargetObject as GameNPC;
+                                if (npc != null)
                                 {
-                                    if(client.Player.TargetObject is GamePet)
-                                    {
-                                        GamePet targetPet = client.Player.TargetObject as GamePet;
-
-                                        if(targetPet.Owner is GamePlayer)
-                                        {
-                                            GamePlayer targetPlayer = targetPet.Owner as GamePlayer;
-
-                                            //Lets check if the client and it's targeted pets owner are in the same alliance.
-											if (client.Player.Guild != null && client.Player.Guild.alliance != null && client.Player.Guild.alliance.Contains(targetPlayer.Guild))
-											{
-												//We cannot assist our target when it has no target
-												if (!HasTarget(client, targetPet))
-													return;
-
-												YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-												return;
-											}
-
-											//They are no alliance members, maybe guild members?
-											if (client.Player.Guild != null && client.Player.Guild.GetOnlineMemberByID(targetPlayer.InternalID) != null)
-                                            {
-                                                //We cannot assist our target when it has no target
-                                                if (!HasTarget(client, targetPet))
-                                                    return;
-
-                                                YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-                                                return;
-                                            }
-
-                                            //They are no alliance or guild members - maybe group members?
-											if (client.Player.Group != null && client.Player.Group.IsInTheGroup(targetPlayer))
-                                            {
-                                                //We cannot assist our target when it has no target
-                                                if (!HasTarget(client, targetPet))
-                                                    return;
-
-                                                YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-                                                return;
-                                            }
-
-                                            //Ok, they are not in the same alliance, guild or group - maybe in the same battle group?
-                                            BattleGroup clientBattleGroup = client.Player.TempProperties.getProperty<BattleGroup>(BattleGroup.BATTLEGROUP_PROPERTY, null);
-                                            if(clientBattleGroup != null)
-                                            {
-                                                if(clientBattleGroup.Members.Contains(targetPlayer))
-                                                {
-                                                    //We cannot assist our target when it has no target
-                                                    if (!HasTarget(client, targetPet))
-                                                        return;
-
-                                                    YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-                                                    return;
-                                                }
-                                            }
-                                            
-                                            //Ok, they are not in the same alliance, guild, group or battle group - maybe in the same chat group?
-											ChatGroup clientChatGroup = client.Player.TempProperties.getProperty<ChatGroup>(ChatGroup.CHATGROUP_PROPERTY, null);
-                                            if(clientChatGroup != null)
-                                            {
-                                                if(clientChatGroup.Members.Contains(targetPlayer))
-                                                {
-                                                    //We cannot assist our target when it has no target
-                                                    if (!HasTarget(client, targetPet))
-                                                        return;
-
-                                                    YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-                                                    return;
-                                                }
-                                            }
-
-                                            //They are not in the same alliance, guild, group, battle group or chat group. And now? Well, they are enemies!
-                                            NoValidTarget(client, targetPet);
-                                            return;
-                                        }
-
-                                        if(targetPet.Owner is GameNPC)
-                                        {
-                                            if (!SameRealm(client, (targetPet.Owner as GameNPC), true))
-                                                return;
-                                            else
-                                            {
-                                                //We cannot assist our target when it has no target
-                                                if (!HasTarget(client, targetPet))
-                                                    return;
-
-                                                YouAssist(client, targetPet.GetName(0, false), targetPet.TargetObject);
-                                                return;
-                                            }
-                                        }
-                                    }
-
-                                    if(client.Player.TargetObject is GameKeepGuard)
-                                    {
-                                        //Note:
-                                        //We do not check if the targeted guard is attacking us, because this can be a bug!
-
-                                        GameKeepGuard targetGuard = client.Player.TargetObject as GameKeepGuard;
-                                        Guild targetedGuardGuild = GuildMgr.GetGuildByName(targetGuard.GuildName);
-
-                                        //We can assist guards of an unclaimed keep!
-                                        if(targetedGuardGuild == null)
-                                        {
-                                            //We cannot assist our target when it has no target
-                                            if (!HasTarget(client, targetGuard))
-                                                return;
-
-                                            YouAssist(client, targetGuard.GetName(0, false), targetGuard.TargetObject);
-                                            return;
-                                        }
-
-                                        //Is the guard of our guild?
-                                        if(client.Player.Guild == targetedGuardGuild)
-                                        {
-                                            //We cannot assist our target when it has no target
-                                            if (!HasTarget(client, targetGuard))
-                                                return;
-
-                                            YouAssist(client, targetGuard.GetName(0, false), targetGuard.TargetObject);
-                                            return;
-                                        }
-
-                                        //Is the guard of one of our alliance guilds?
-                                        if(client.Player.Guild.alliance.Contains(targetedGuardGuild))
-                                        {
-                                            //We cannot assist our target when it has no target
-                                            if (!HasTarget(client, targetGuard))
-                                                return;
-
-                                            YouAssist(client, targetGuard.GetName(0, false), targetGuard.TargetObject);
-                                            return;
-                                        }
-
-                                        //The guard is not of one of our alliance guilds and our guild. And now? Well, he is an enemy and we cannot assist enemies!
-                                        NoValidTarget(client, targetGuard);
-                                        return;
-                                    }
+                                    
 
                                     //We cannot assist npc's of an enemy realm.
-                                    if (!SameRealm(client, client.Player.TargetObject as GameNPC, true))
+                                    if (!SameRealm(client, npc, true))
                                         return;
 
                                     //We cannot assist our target when it has no target
-                                    if (!HasTarget(client, (client.Player.TargetObject as GameNPC)))
+                                    if (!HasTarget(client, npc))
                                         return;
 
-                                    YouAssist(client, (client.Player.TargetObject as GameNPC).GetName(0, false), (client.Player.TargetObject as GameNPC).TargetObject);
+                                    YouAssist(client, npc.GetName(0, false), (client.Player.TargetObject as GameNPC).TargetObject);
                                     return;
                                 }
                             } break;

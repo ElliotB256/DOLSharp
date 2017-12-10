@@ -288,7 +288,7 @@ namespace DOL.GS.Keeps
 		/// <param name="ad"></param>
 		/// <param name="weapon"></param>
 		/// <returns></returns>
-		public override bool AllowWeaponMagicalEffect(AttackData ad, InventoryItem weapon, Spell weaponSpell)
+		public override bool AllowWeaponMagicalEffect(Attack ad, InventoryItem weapon, Spell weaponSpell)
 		{
 			if (weapon.Flags == 10) //Bruiser or any other item needs Itemtemplate "Flags" set to 10 to proc on keep components
 				return true;
@@ -316,7 +316,7 @@ namespace DOL.GS.Keeps
 		}
 
 
-		public override void ModifyAttack(AttackData attackData)
+		public override void ModifyAttack(Attack attackData)
 		{
 			// Allow a GM to use commands to damage components, regardless of toughness setting
 			if (attackData.DamageType == eDamageType.GM)

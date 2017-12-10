@@ -483,7 +483,7 @@ namespace DOL.GS.Keeps
 		/// Static archers attack with melee the closest if being engaged in melee
 		/// </summary>
 		/// <param name="ad"></param>
-		public override void OnAttackedByEnemy(AttackData ad)
+		public override void OnAttackedByEnemy(Attack ad)
 		{
 			//this is for static archers only
 			if (MaxSpeedBase == 0)

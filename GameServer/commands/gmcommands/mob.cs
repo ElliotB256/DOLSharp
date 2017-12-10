@@ -210,7 +210,6 @@ namespace DOL.GS.Commands
 						case "kill": kill(client, targetMob, args); break;
 						case "flags": flags(client, targetMob, args); break;
 						case "heal": heal(client, targetMob, args); break;
-						case "attack": attack(client, targetMob, args); break;
 						case "info": info(client, targetMob, args); break;
 						case "stats": stats(client, targetMob, args); break;
 						case "state": state(client, targetMob); break;
@@ -1042,8 +1041,6 @@ namespace DOL.GS.Commands
 		{
 			string mobName = targetMob.Name;
 
-			targetMob.StopAttack();
-			targetMob.StopCurrentSpellcast();
 			targetMob.DeleteFromDatabase();
 			targetMob.Delete();
 
@@ -1168,10 +1165,7 @@ namespace DOL.GS.Commands
 		{
 			try
 			{
-				targetMob.AddAttacker(client.Player);
-				targetMob.AddXPGainer(client.Player, targetMob.Health);
 				targetMob.Die(client.Player);
-				targetMob.XPGainers.Clear();
 				client.Out.SendMessage("Mob '" + targetMob.Name + "' killed", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
 			catch (Exception e)
@@ -1192,19 +1186,6 @@ namespace DOL.GS.Commands
 			catch (Exception e)
 			{
 				client.Out.SendMessage(e.ToString(), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-			}
-		}
-
-		private void attack(GameClient client, GameNPC targetMob, string[] args)
-		{
-
-			foreach (GamePlayer player in targetMob.GetPlayersInRadius(3000))
-			{
-				if (player.Name == args[2])
-				{
-					targetMob.StartAttack(player);
-					break;
-				}
 			}
 		}
 
@@ -1302,20 +1283,10 @@ namespace DOL.GS.Commands
 			info.Add(" + INT  /  EMP  /  PIE  /  CHR");
 			info.Add(" + " + targetMob.Intelligence + "  /  " + targetMob.Empathy + "  /  " + targetMob.Piety + "  /  " + targetMob.Charisma);
 			info.Add(" + Block / Parry / Evade %:  " + targetMob.BlockChance + " / " + targetMob.ParryChance + " / " + targetMob.EvadeChance);
-			info.Add(" + Attack Speed (Melee Speed Increase %):  " + targetMob.AttackSpeed(targetMob.AttackWeapon) + " (" + (100 - targetMob.GetModified(eProperty.MeleeSpeed)) + ")");
 			info.Add(" + Casting Speed Increase %:  " + targetMob.GetModified(eProperty.CastingSpeed));
 
 			if (targetMob.LeftHandSwingChance > 0)
 				info.Add(" + Left Swing %: " + targetMob.LeftHandSwingChance);
-
-			if (targetMob.Abilities != null && targetMob.Abilities.Count > 0)
-				info.Add(" + Abilities: " + targetMob.Abilities.Count);
-
-			if (targetMob.Spells != null && targetMob.Spells.Count > 0)
-				info.Add(" + Spells: " + targetMob.Spells.Count);
-
-			if (targetMob.Styles != null && targetMob.Styles.Count > 0)
-				info.Add(" + Styles: " + targetMob.Styles.Count);
 
 			info.Add(" ");
 
@@ -2118,9 +2089,6 @@ namespace DOL.GS.Commands
 				// generated loots go in inventory
 				if (args.Length > 3 && args[3] == "inv")
 				{
-					targetMob.AddXPGainer(client.Player, 1);
-					targetMob.DropLoot(client.Player);
-					targetMob.RemoveAttacker(client.Player);
 					return;
 				}
 
@@ -2341,7 +2309,6 @@ namespace DOL.GS.Commands
 				return;
 			}
 
-			targetMob.StopAttack();
 			targetMob.StopCurrentSpellcast();
 
 			mob.X = targetMob.X;
@@ -3081,44 +3048,6 @@ namespace DOL.GS.Commands
 			{
 				text.Add("TargetObject: " + targetMob.TargetObject.Name);
 				text.Add("InView: " + targetMob.TargetInView);
-			}
-
-			if (targetMob.Brain != null && targetMob.Brain is StandardMobBrain)
-			{
-				Dictionary<GameLiving, long> aggroList = (targetMob.Brain as StandardMobBrain).AggroTable;
-
-				if (aggroList.Count > 0)
-				{
-					text.Add("");
-					text.Add("Aggro List:");
-
-					foreach (GameLiving living in aggroList.Keys)
-					{
-						text.Add(living.Name + ": " + aggroList[living]);
-					}
-				}
-			}
-
-			if (targetMob.Attackers != null && targetMob.Attackers.Count > 0)
-			{
-				text.Add("");
-				text.Add("Attacker List:");
-
-				foreach (GameLiving attacker in targetMob.Attackers)
-				{
-					text.Add(attacker.Name);
-				}
-			}
-
-			if (targetMob.EffectList.Count > 0)
-			{
-				text.Add("");
-				text.Add("Effect List:");
-
-				foreach (IGameEffect effect in targetMob.EffectList)
-				{
-					text.Add(effect.Name + " remaining " + effect.RemainingTime);
-				}
 			}
 
 			client.Out.SendCustomTextWindow("Mob State", text);

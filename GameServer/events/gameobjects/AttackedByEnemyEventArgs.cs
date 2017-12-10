@@ -29,12 +29,12 @@ namespace DOL.Events
 		/// <summary>
 		/// The attack data
 		/// </summary>
-		private AttackData m_attackData;
+		private Attack m_attackData;
 
 		/// <summary>
 		/// Constructs a new AttackedByEnemy
 		/// </summary>
-		public AttackedByEnemyEventArgs(AttackData attackData)
+		public AttackedByEnemyEventArgs(Attack attackData)
 		{
 			this.m_attackData=attackData;
 		}
@@ -42,7 +42,7 @@ namespace DOL.Events
 		/// <summary>
 		/// Gets the attack data
 		/// </summary>
-		public AttackData AttackData
+		public Attack AttackData
 		{
 			get { return m_attackData; }
 		}

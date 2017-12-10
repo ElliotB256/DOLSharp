@@ -111,14 +111,6 @@ namespace DOL.GS.Keeps
 
 		private static void SetGuardAggression(GameKeepGuard guard)
 		{
-			if (guard is GuardStaticCaster)
-			{
-				(guard.Brain as KeepGuardBrain).SetAggression(99, 1850);
-			}
-			else if (guard is GuardStaticArcher)
-			{
-				(guard.Brain as KeepGuardBrain).SetAggression(99, 2100);
-			}
 		}
 
 		public static void SetGuardLevel(GameKeepGuard guard)
@@ -942,24 +934,6 @@ namespace DOL.GS.Keeps
 		/// <param name="guard">The guard object</param>
 		public static void SetGuardBrain(GameKeepGuard guard)
 		{
-			if (guard.Brain is KeepGuardBrain == false)
-			{
-				KeepGuardBrain brain = new KeepGuardBrain();
-				if (guard is GuardCaster)
-					brain = new CasterBrain();
-				else if (guard is GuardHealer)
-					brain = new HealerBrain();
-				else if (guard is GuardLord)
-					brain = new LordBrain();
-
-				guard.AddBrain(brain);
-				brain.guard = guard;
-			}
-
-			if (guard is MissionMaster)
-			{
-				(guard.Brain as KeepGuardBrain).SetAggression(90, 400);
-			}
 		}
 
 		/// <summary>

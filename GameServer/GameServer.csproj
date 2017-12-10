@@ -110,17 +110,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ai\brain\BlankBrain.cs" />
-    <Compile Include="ai\brain\ControlledNpcBrain.cs" />
-    <Compile Include="ai\brain\controlled\FollowOwnerBrain.cs" />
-    <Compile Include="ai\brain\NoveltyPetBrain.cs" />
     <Compile Include="ai\brain\Npcs\AggressiveBrain.cs" />
     <Compile Include="ai\brain\GuardBrain.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ai\brain\Guards\Caster.cs" />
-    <Compile Include="ai\brain\Guards\KeepGuardBrain.cs" />
-    <Compile Include="ai\brain\Guards\Healer.cs" />
-    <Compile Include="ai\brain\Guards\Lord.cs" />
     <Compile Include="ai\brain\IOldAggressiveBrain.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -132,11 +125,6 @@
     <Compile Include="ai\brain\Npcs\MeleeBehaviour.cs" />
     <Compile Include="ai\brain\Npcs\SocialBrain.cs" />
     <Compile Include="ai\brain\Npcs\PassiveBehaviour.cs" />
-    <Compile Include="ai\brain\ProcPetBrain.cs" />
-    <Compile Include="ai\brain\RoundsBrain.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ai\brain\ScoutMobBrain.cs" />
     <Compile Include="ai\brain\StandardMobBrain.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -725,7 +713,6 @@
     <Compile Include="gameobjects\CustomNPC\Recharger.cs" />
     <Compile Include="gameobjects\CustomNPC\TaskMaster.cs" />
     <Compile Include="gameobjects\CustomNPC\VaultKeeper.cs" />
-    <Compile Include="gameobjects\GamePet.cs" />
     <Compile Include="gameobjects\GameTeleporter.cs" />
     <Compile Include="gameobjects\WorldInventoryItem.cs" />
     <Compile Include="gameutils\AppealMgr.cs" />
@@ -1061,7 +1048,6 @@
     <Compile Include="quests\Missions\TaskDungeonMission.cs" />
     <Compile Include="behaviour\Actions\AttackAction.cs" />
     <Compile Include="behaviour\Actions\MonsterSpawnAction.cs" />
-    <Compile Include="behaviour\Actions\SetMonsterPathAction.cs" />
     <Compile Include="behaviour\Actions\WalkToSpawnAction.cs" />
     <Compile Include="behaviour\Actions\MonsterUnspawnAction.cs" />
     <Compile Include="behaviour\Actions\MoveToAction.cs" />
@@ -1521,9 +1507,7 @@
     <Compile Include="spells\ConcentrationList.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="spells\ConfusionSpellHandler.cs" />
     <Compile Include="spells\ISpellHandler.cs" />
-    <Compile Include="spells\SingleStatBuff.cs" />
     <Compile Include="spells\SpellHelpers\SpellHelper.cs" />
     <Compile Include="spells\SpellHelpers\SpellMessagesHelper.cs" />
     <Compile Include="spells\SpellHelpers\StatsSpellHelper.cs" />
@@ -1533,12 +1517,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="spells\RemoveSpellEffectHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="spells\ResurrectSpellHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="spells\SingleStatDebuff.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="spells\Spell.cs">
@@ -1551,9 +1529,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="styles\Style.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="styles\StyleProcessor.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Talents\ITalentOwner.cs" />

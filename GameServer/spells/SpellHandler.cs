@@ -129,11 +129,11 @@ namespace DOL.GS.Spells
 		/// <summary>
 		/// AttackData result for this spell, if any
 		/// </summary>
-		protected AttackData m_lastAttackData = null;
+		protected Attack m_lastAttackData = null;
 		/// <summary>
 		/// AttackData result for this spell, if any
 		/// </summary>
-		public AttackData LastAttackData
+		public Attack LastAttackData
 		{
 			get { return m_lastAttackData; }
 		}
@@ -534,18 +534,6 @@ namespace DOL.GS.Spells
 		/// <returns>true if casting was interrupted</returns>
 		public virtual bool CasterIsAttacked(GameLiving attacker)
 		{
-			if (Spell.Uninterruptible)
-				return false;
-			if (IsCasting && Stage < 2)
-			{
-				if (Caster.ChanceSpellInterrupt(attacker))
-				{
-					Caster.LastInterruptMessage = attacker.GetName(0, true) + " attacks you and your spell is interrupted!";
-					MessageToLiving(Caster, Caster.LastInterruptMessage, eChatType.CT_SpellResisted);
-					InterruptCasting(); // always interrupt at the moment
-					return true;
-				}
-			}
 			return false;
 		}
 
@@ -616,20 +604,10 @@ namespace DOL.GS.Spells
 
 			if (m_caster.AttackState && m_spell.CastTime != 0)
 			{
-				if (m_caster.CanCastInCombat(Spell) == false)
-				{
-					m_caster.StopAttack();
-					return false;
-				}
 			}
 
 			if (!m_spell.Uninterruptible && m_spell.CastTime > 0 && m_caster is GamePlayer)
 			{
-				if (Caster.InterruptAction > 0 && Caster.InterruptAction + Caster.SpellInterruptRecastTime > Caster.CurrentRegion.Time)
-				{
-					if (!quiet) MessageToCaster("You must wait " + (((Caster.InterruptAction + Caster.SpellInterruptRecastTime) - Caster.CurrentRegion.Time) / 1000 + 1).ToString() + " seconds to cast a spell!", eChatType.CT_SpellResisted);
-					return false;
-				}
 			}
 
 			if (m_spell.RecastDelay > 0)
@@ -1021,15 +999,6 @@ namespace DOL.GS.Spells
 
 			if (!m_spell.Uninterruptible && m_spell.CastTime > 0 && m_caster is GamePlayer)
 			{
-				if(Caster.InterruptTime > 0 && Caster.InterruptTime > m_started)
-				{
-					if (!quiet)
-					{
-						if (Caster.LastInterruptMessage != "") MessageToCaster(Caster.LastInterruptMessage, eChatType.CT_SpellResisted);
-						else MessageToCaster("You are interrupted and must wait " + ((Caster.InterruptTime - m_started) / 1000 + 1).ToString() + " seconds to cast a spell!", eChatType.CT_SpellResisted);
-					}
-					return false;
-				}
 			}
 
 			if (m_caster.ObjectState != GameLiving.eObjectState.Active)
@@ -1224,16 +1193,6 @@ namespace DOL.GS.Spells
 
 			if (!m_spell.Uninterruptible && m_spell.CastTime > 0 && m_caster is GamePlayer)
 			{
-				if (Caster.InterruptTime > 0 && Caster.InterruptTime > m_started)
-				{
-					if (!quiet)
-					{
-						if(Caster.LastInterruptMessage != "") MessageToCaster(Caster.LastInterruptMessage, eChatType.CT_SpellResisted);
-						else MessageToCaster("You are interrupted and must wait " + ((Caster.InterruptTime - m_started) / 1000 + 1).ToString() + " seconds to cast a spell!", eChatType.CT_SpellResisted);
-					}
-					Caster.InterruptAction = Caster.CurrentRegion.Time - Caster.SpellInterruptRecastAgain;
-					return false;
-				}
 			}
 
 			if (m_caster.ObjectState != GameLiving.eObjectState.Active)
@@ -1593,7 +1552,7 @@ namespace DOL.GS.Spells
 		/// <returns>effective casting time in milliseconds</returns>
 		public virtual int CalculateCastingTime()
 		{
-			return m_caster.CalculateCastingTime(m_spellLine, m_spell);
+            return 1000;
 		}
 
 
@@ -2339,19 +2298,6 @@ namespace DOL.GS.Spells
 			{
 				OnDirectEffect(target, effectiveness);
 			}
-
-			if (!HasPositiveEffect)
-			{
-				AttackData ad = new AttackData();
-				ad.Attacker = Caster;
-				ad.Target = target;
-				ad.AttackType = AttackData.eAttackType.Spell;
-				ad.SpellHandler = this;
-				ad.AttackResult = GameLiving.eAttackResult.HitUnstyled;
-				ad.IsSpellResisted = false;
-
-				m_lastAttackData = ad;
-			}
 		}
 
 		/// <summary>
@@ -2724,19 +2670,7 @@ namespace DOL.GS.Spells
 		/// </summary>
 		/// <param name="target"></param>
 		public virtual void SendSpellResistNotification(GameLiving target)
-		{
-			// Report resisted spell attack data to any type of living object, no need
-			// to decide here what to do. For example, NPCs will use their brain.
-			// "Just the facts, ma'am, just the facts."
-			AttackData ad = new AttackData();
-			ad.Attacker = Caster;
-			ad.Target = target;
-			ad.AttackType = AttackData.eAttackType.Spell;
-			ad.SpellHandler = this;
-			ad.AttackResult = GameLiving.eAttackResult.Missed;
-			ad.IsSpellResisted = true;
-			target.OnAttackedByEnemy(ad);
-			
+		{			
 		}
 		
 		/// <summary>
@@ -2744,11 +2678,7 @@ namespace DOL.GS.Spells
 		/// </summary>
 		/// <param name="target"></param>
 		public virtual void StartSpellResistInterruptTimer(GameLiving target)
-		{
-			// Spells that would have caused damage or are not instant will still
-			// interrupt a casting player.
-			if(!(Spell.SpellType.IndexOf("debuff", StringComparison.OrdinalIgnoreCase) >= 0 && Spell.CastTime == 0))
-				target.StartInterruptTimer(target.SpellInterruptDuration, AttackData.eAttackType.Spell, Caster);			
+		{		
 		}
 		
 		/// <summary>
@@ -3174,12 +3104,7 @@ namespace DOL.GS.Spells
 
 			int speclevel = 1;
 
-			if (m_caster is GamePet)
-			{
-				IControlledBrain brain = (m_caster as GameNPC).Brain as IControlledBrain;
-				speclevel = brain.GetLivingOwner().Level;
-			}
-			else if (m_caster is GamePlayer)
+            if (m_caster is GamePlayer)
 			{
 				speclevel = ((GamePlayer)m_caster).GetModifiedSpecLevel(m_spellLine.Spec);
 			}
@@ -3284,16 +3209,8 @@ namespace DOL.GS.Spells
 
 			if (player != null)
 			{
-                if (Caster is GamePet)
-				{
-					spellDamage = CapPetSpellDamage(spellDamage, player);
-				}
-
 				if (SpellLine.KeyName == GlobalSpellsLines.Combat_Styles_Effect)
 				{
-					double WeaponSkill = player.GetWeaponSkill(player.AttackWeapon);
-					WeaponSkill /= 5;
-					spellDamage *= (WeaponSkill + 200) / 275.0;
 				}
 
 				if (player.CharacterClass.ManaStat != eStat.UNDEFINED
@@ -3333,9 +3250,9 @@ namespace DOL.GS.Spells
 			int spellLevel = Spell.Level;
 
 			GameLiving caster = null;
-			if (m_caster is GameNPC && (m_caster as GameNPC).Brain is ControlledNpcBrain)
+			if (m_caster is GameNPC && (m_caster as GameNPC).Brain is IControlledBrain)
 			{
-				caster = ((ControlledNpcBrain)((GameNPC)m_caster).Brain).Owner;
+				caster = ((IControlledBrain)((GameNPC)m_caster).Brain).Owner;
 			}
 			else
 			{
@@ -3381,13 +3298,6 @@ namespace DOL.GS.Spells
 			 */
 
 			int hitchance = 85 + ((spellLevel - target.Level) / 2) + bonustohit;
-
-			if (!(caster is GamePlayer && target is GamePlayer))
-			{
-				hitchance -= (int)(m_caster.GetConLevel(target) * ServerProperties.Properties.PVE_SPELL_CONHITPERCENT);
-				hitchance += Math.Max(0, target.Attackers.Count - 1) * ServerProperties.Properties.MISSRATE_REDUCTION_PER_ATTACKERS;
-			}
-
 			return hitchance;
 		}
 
@@ -3396,7 +3306,7 @@ namespace DOL.GS.Spells
 		/// </summary>
 		/// <param name="target">spell target</param>
 		/// <returns>attack data</returns>
-		public AttackData CalculateDamageToTarget(GameLiving target)
+		public Attack CalculateDamageToTarget(GameLiving target)
 		{
 			return CalculateDamageToTarget(target, 1);
 		}
@@ -3427,143 +3337,11 @@ namespace DOL.GS.Spells
 		/// <param name="target">spell target</param>
 		/// <param name="effectiveness">value from 0..1 to modify damage</param>
 		/// <returns>attack data</returns>
-		public virtual AttackData CalculateDamageToTarget(GameLiving target, double effectiveness)
+		public virtual Attack CalculateDamageToTarget(GameLiving target, double effectiveness)
 		{
-			AttackData ad = new AttackData();
+			Attack ad = new Attack();
 			ad.Attacker = m_caster;
 			ad.Target = target;
-			ad.AttackType = AttackData.eAttackType.Spell;
-			ad.SpellHandler = this;
-			ad.AttackResult = GameLiving.eAttackResult.HitUnstyled;
-
-			double minVariance;
-			double maxVariance;
-
-			CalculateDamageVariance(target, out minVariance, out maxVariance);
-			double spellDamage = CalculateDamageBase(target);
-
-			if (m_caster is GamePlayer)
-			{
-				effectiveness += m_caster.GetModified(eProperty.SpellDamage) * 0.01;
-
-				// Relic bonus applied to damage, does not alter effectiveness or increase cap
-				spellDamage *= (1.0 + RelicMgr.GetRelicBonusModifier(m_caster.Realm, eRelicType.Magic));
-
-			}
-
-			// Apply casters effectiveness
-			spellDamage *= m_caster.Effectiveness;
-
-			int finalDamage = Util.Random((int)(minVariance * spellDamage), (int)(maxVariance * spellDamage));
-
-			// Live testing done Summer 2009 by Bluraven, Tolakram  Levels 40, 45, 50, 55, 60, 65, 70
-			// Damage reduced by chance < 55, no extra damage increase noted with hitchance > 100
-			int hitChance = CalculateToHitChance(ad.Target);
-			finalDamage = AdjustDamageForHitChance(finalDamage, hitChance);
-
-			// apply spell effectiveness
-			finalDamage = (int)(finalDamage * effectiveness);
-
-			if ((m_caster is GamePlayer || (m_caster is GameNPC && (m_caster as GameNPC).Brain is IControlledBrain && m_caster.Realm != 0)))
-			{
-				if (target is GamePlayer)
-					finalDamage = (int)((double)finalDamage * ServerProperties.Properties.PVP_SPELL_DAMAGE);
-				else if (target is GameNPC)
-					finalDamage = (int)((double)finalDamage * ServerProperties.Properties.PVE_SPELL_DAMAGE);
-			}
-
-			int cdamage = 0;
-			if (finalDamage < 0)
-				finalDamage = 0;
-
-			eDamageType damageType = DetermineSpellDamageType();
-
-			#region Resists
-			eProperty property = target.GetResistTypeForDamage(damageType);
-			// The Daoc resistsystem is since 1.65 a 2category system.
-			// - First category are Item/Race/Buff/RvrBanners resists that are displayed in the characteroverview.
-			// - Second category are resists that are given through RAs like avoidance of magic, brilliance aura of deflection.
-			//   Those resist affect ONLY the spelldamage. Not the duration, not the effectiveness of debuffs.
-			// so calculation is (finaldamage * Category1Modification) * Category2Modification
-			// -> Remark for the future: VampirResistBuff is Category2 too.
-			// - avi
-
-			#region Primary Resists
-			int primaryResistModifier = ad.Target.GetResist(damageType);
-
-			/* Resist Pierce
-			 * Resipierce is a special bonus which has been introduced with TrialsOfAtlantis.
-			 * At the calculation of SpellDamage, it reduces the resistance that the victim recives
-			 * through ITEMBONUSES for the specified percentage.
-			 * http://de.daocpedia.eu/index.php/Resistenz_durchdringen (translated)
-			 */
-			int resiPierce = Caster.GetModified(eProperty.ResistPierce);
-			GamePlayer ply = Caster as GamePlayer;
-			if (resiPierce > 0 && Spell.SpellType != "Archery")
-			{
-				//substract max ItemBonus of property of target, but atleast 0.
-				primaryResistModifier -= Math.Max(0, Math.Min(ad.Target.ItemBonus[(int)property], resiPierce));
-			}
-			#endregion
-
-			#region Secondary Resists
-			//Using the resist BuffBonusCategory2 - its unused in ResistCalculator
-			int secondaryResistModifier = target.SpecBuffBonusCategory[(int)property];
-
-			if (secondaryResistModifier > 80)
-				secondaryResistModifier = 80;
-			#endregion
-
-			int resistModifier = 0;
-			//primary resists
-			resistModifier += (int)(finalDamage * (double)primaryResistModifier * -0.01);
-			//secondary resists
-			resistModifier += (int)((finalDamage + (double)resistModifier) * (double)secondaryResistModifier * -0.01);
-			//apply resists
-			finalDamage += resistModifier;
-
-			#endregion
-
-			// Apply damage cap (this can be raised by effectiveness)
-			if (finalDamage > DamageCap(effectiveness))
-			{
-				finalDamage = (int)DamageCap(effectiveness);
-			}
-
-			if (finalDamage < 0)
-				finalDamage = 0;
-
-			int criticalchance = (m_caster.SpellCriticalChance);
-			if (Util.Chance(Math.Min(50, criticalchance)) && (finalDamage >= 1))
-			{
-				int critmax = (ad.Target is GamePlayer) ? finalDamage / 2 : finalDamage;
-				cdamage = Util.Random(finalDamage / 10, critmax); //think min crit is 10% of damage
-			}
-			//Andraste
-			if(ad.Target is GamePlayer && ad.Target.GetModified(eProperty.Conversion)>0)
-			{
-				int manaconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.GetModified(eProperty.Conversion)/200);
-				//int enduconversion=(int)Math.Round((double)manaconversion*(double)ad.Target.MaxEndurance/(double)ad.Target.MaxMana);
-				int enduconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.GetModified(eProperty.Conversion)/200);
-				if(ad.Target.Mana+manaconversion>ad.Target.MaxMana) manaconversion=ad.Target.MaxMana-ad.Target.Mana;
-				if(ad.Target.Endurance+enduconversion>ad.Target.MaxEndurance) enduconversion=ad.Target.MaxEndurance-ad.Target.Endurance;
-				if(manaconversion<1) manaconversion=0;
-				if(enduconversion<1) enduconversion=0;
-				if(manaconversion>=1) (ad.Target as GamePlayer).Out.SendMessage("You gain "+manaconversion+" power points", eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-				if(enduconversion>=1) (ad.Target as GamePlayer).Out.SendMessage("You gain "+enduconversion+" endurance points", eChatType.CT_Spell, eChatLoc.CL_SystemWindow);
-				ad.Target.Endurance+=enduconversion; if(ad.Target.Endurance>ad.Target.MaxEndurance) ad.Target.Endurance=ad.Target.MaxEndurance;
-				ad.Target.Mana+=manaconversion; if(ad.Target.Mana>ad.Target.MaxMana) ad.Target.Mana=ad.Target.MaxMana;
-			}
-
-			ad.Damage = finalDamage;
-			ad.CriticalDamage = cdamage;
-			ad.DamageType = damageType;
-			ad.Modifier = resistModifier;
-
-			// Attacked living may modify the attack data.  Primarily used for keep doors and components.
-			ad.Target.ModifyAttack(ad);
-
-			m_lastAttackData = ad;
 			return ad;
 		}
 
@@ -3585,17 +3363,8 @@ namespace DOL.GS.Spells
 		/// Sends damage text messages but makes no damage
 		/// </summary>
 		/// <param name="ad"></param>
-		public virtual void SendDamageMessages(AttackData ad)
+		public virtual void SendDamageMessages(Attack ad)
 		{
-			string modmessage = "";
-			if (ad.Modifier > 0)
-				modmessage = " (+" + ad.Modifier + ")";
-			if (ad.Modifier < 0)
-				modmessage = " (" + ad.Modifier + ")";
-			if (Caster is GamePlayer)
-				MessageToCaster(string.Format("You hit {0} for {1}{2} damage!", ad.Target.GetName(0, false), ad.Damage, modmessage), eChatType.CT_YouHit);
-			if (ad.CriticalDamage > 0)
-				MessageToCaster("You critically hit for an additional " + ad.CriticalDamage + " damage!", eChatType.CT_YouHit);
 		}
 
 		/// <summary>
@@ -3603,7 +3372,7 @@ namespace DOL.GS.Spells
 		/// </summary>
 		/// <param name="ad"></param>
 		/// <param name="showEffectAnimation"></param>
-		public virtual void DamageTarget(AttackData ad, bool showEffectAnimation)
+		public virtual void DamageTarget(Attack ad, bool showEffectAnimation)
 		{
 			DamageTarget(ad, showEffectAnimation, 0x14); //spell damage attack result
 		}
@@ -3614,29 +3383,9 @@ namespace DOL.GS.Spells
 		/// <param name="ad"></param>
 		/// <param name="showEffectAnimation"></param>
 		/// <param name="attackResult"></param>
-		public virtual void DamageTarget(AttackData ad, bool showEffectAnimation, int attackResult)
+		public virtual void DamageTarget(Attack ad, bool showEffectAnimation, int attackResult)
 		{
-			ad.AttackResult = GameLiving.eAttackResult.HitUnstyled;
-			if (showEffectAnimation)
-			{
-				SendEffectAnimation(ad.Target, 0, false, 1);
-			}
-
-			if (ad.Damage > 0)
-				foreach (GamePlayer player in ad.Target.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-					player.Out.SendCombatAnimation(ad.Attacker, ad.Target, 0, 0, 0, 0, (byte)attackResult, ad.Target.HealthPercent);
-
-			// send animation before dealing damage else dead livings show no animation
-			ad.Target.OnAttackedByEnemy(ad);
-			ad.Attacker.DealDamage(ad);
-			if (ad.Damage == 0 && ad.Target is GameNPC)
-			{
-				IOldAggressiveBrain aggroBrain = ((GameNPC)ad.Target).Brain as IOldAggressiveBrain;
-				if (aggroBrain != null)
-					aggroBrain.AddToAggroList(Caster, 1);
-			}
-
-			m_lastAttackData = ad;
+			
 		}
 
 		#endregion

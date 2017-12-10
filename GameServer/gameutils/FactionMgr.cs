@@ -118,9 +118,6 @@ namespace DOL.GS
 			if(attacker == null || defender == null)
 				return false;
 			
-			if(attacker is GameNPC && defender is GameNPC)
-				return !(((GameNPC)attacker).IsFriend((GameNPC)defender));
-			
 			return true;//false;
 		}
 	}

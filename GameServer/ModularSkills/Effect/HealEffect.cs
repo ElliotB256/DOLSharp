@@ -20,8 +20,12 @@ namespace DOL.GS.ModularSkills
                 p.Out.SendSpellEffectAnimation(recipient, recipient, 2065, 0, false, 1);
             }
 
-
             return true;
+        }
+
+        public void BroadcastEffectAnimation(GameObject recipient)
+        {
+
         }
 
         public void Expire(GameObject recipient)

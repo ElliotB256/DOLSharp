@@ -104,11 +104,6 @@ namespace DOL.GS
 			GameEventMgr.RemoveHandler(Starter, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(DuelOnAttack));
 			GameEventMgr.RemoveHandler(Starter, GameLivingEvent.AttackFinished, new DOLEventHandler(DuelOnAttack));
 			
-			lock (Starter.XPGainers.SyncRoot)
-			{
-				Starter.XPGainers.Clear();
-			}
-			
 			Starter.Out.SendMessage(LanguageMgr.GetTranslation(Starter.Client, "GamePlayer.DuelStop.DuelEnds"), eChatType.CT_Emote, eChatLoc.CL_SystemWindow);
 		}
 
@@ -120,7 +115,7 @@ namespace DOL.GS
 		/// <param name="arguments"></param>
 		protected virtual void DuelOnAttack(DOLEvent e, object sender, EventArgs arguments)
 		{
-			AttackData ad = null;
+			Attack ad = null;
 			GameLiving target = null;
 			var afea = arguments as AttackFinishedEventArgs;
 			var abeea = arguments as AttackedByEnemyEventArgs;
@@ -148,12 +143,9 @@ namespace DOL.GS
 					target = brain.GetPlayerOwner();
 			}
 
-			// Duel should end if players join group and trys to attack
-			if (ad.Attacker.Group != null && ad.Attacker.Group.IsInTheGroup(ad.Target))
-				Stop();
-			
-			if (ad.IsHit && target != Target)
-				Stop();
+            // Duel should end if players join group and trys to attack
+            if ((ad.Attacker != Target && ad.Attacker != Starter) || (ad.Target != Target && ad.Target != Starter))
+                Stop();
 		}
 
 		/// <summary>

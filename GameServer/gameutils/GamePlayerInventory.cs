@@ -445,10 +445,6 @@ namespace DOL.GS
 					m_player.Notify(PlayerInventoryEvent.ItemUnequipped, this, new ItemUnequippedArgs(item, oldSlot));
 				}
 			}
-			else if (oldSlot >= eInventorySlot.FirstQuiver && oldSlot <= eInventorySlot.FourthQuiver)
-			{
-				m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.None, true);
-			}
 			else if (IsEquippedSlot(oldSlot))
 			{
 				m_player.Notify(PlayerInventoryEvent.ItemUnequipped, this, new ItemUnequippedArgs(item, oldSlot));
@@ -1100,7 +1096,6 @@ namespace DOL.GS
 					if ((updatedSlot >= eInventorySlot.RightHandWeapon && updatedSlot <= eInventorySlot.DistanceWeapon)
 					    || (updatedSlot >= eInventorySlot.FirstQuiver && updatedSlot <= eInventorySlot.FourthQuiver))
 					{
-						m_player.StopAttack();
 						break;
 					}
 				}
@@ -1132,16 +1127,12 @@ namespace DOL.GS
 						else m_player.SwitchWeapon(GameLiving.eActiveWeaponSlot.Standard);
 						break;
 					case eInventorySlot.FirstQuiver:
-						m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.First, true);
 						break;
 					case eInventorySlot.SecondQuiver:
-						m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.Second, true);
 						break;
 					case eInventorySlot.ThirdQuiver:
-						m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.Third, true);
 						break;
 					case eInventorySlot.FourthQuiver:
-						m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.Fourth, true);
 						break;
 
 
@@ -1167,11 +1158,6 @@ namespace DOL.GS
 						          m_player.ActiveWeaponSlot == GameLiving.eActiveWeaponSlot.Standard))
 						{
 							m_player.SwitchWeapon(m_player.ActiveWeaponSlot);
-						}
-
-						if (fromSlot >= eInventorySlot.FirstQuiver && fromSlot <= eInventorySlot.FourthQuiver)
-						{
-							m_player.SwitchQuiver(GameLiving.eActiveQuiverSlot.None, true);
 						}
 
 						break;

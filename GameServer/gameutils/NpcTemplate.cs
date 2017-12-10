@@ -125,57 +125,6 @@ namespace DOL.GS
 			m_abilities = new ArrayList();
 			m_spelllines = new ArrayList();
 			m_spells = new ArrayList();
-			//Adding the spells to an Arraylist here
-			if (data.Spells != null && data.Spells.Length > 0)
-			{
-				string[] spells = data.Spells.Split(';');
-				for (int k = 0; k < spells.Length; k++)
-				{
-					int id = int.Parse(spells[k]);
-					Spell sp = SkillBase.GetSpellByID(id);
-					if (sp != null)
-						m_spells.Add(sp);
-					else log.Error("Tried to load a null spell into NPC template " + m_templateId + " spell ID: " + id);
-				}
-			}
-
-			// Adding Style list to Template NPC
-			m_styles = new ArrayList();
-			if (data.Styles != null && data.Styles.Length > 0)
-			{
-				string[] styles = data.Styles.Split(';');
-				for (int i = 0; i < styles.Length; i++)
-				{
-					if (styles[i].Trim().Length == 0) continue;
-					string[] styleAndClass = styles[i].Split('|');
-					if (styleAndClass.Length != 2) continue;
-					string stylePart = styleAndClass[0].Trim();
-					string classPart = styleAndClass[1].Trim();
-					if (stylePart.Length == 0 || classPart.Length == 0) continue;
-					int styleID = int.Parse(stylePart);
-					int classID = int.Parse(classPart);
-					Style style = SkillBase.GetStyleByID(styleID, classID);
-					m_styles.Add(style);
-				}
-			}
-			//Adding Abilities to Template NPC.
-			//Certain Abilities have levels will need to fix that down the road. -Batlas
-
-			if (data.Abilities != null && data.Abilities.Length > 0)
-			{
-				foreach (string splitab in data.Abilities.SplitCSV())
-				{
-					string[] ab = splitab.Split('|');
-					if (splitab.Trim().Length == 0) continue;
-					int id = 1;
-					if (ab.Length>1)
-						id = int.Parse(ab[1]);
-					Ability abil = SkillBase.GetAbility(ab[0], id);
-					if (abil != null)
-						m_abilities.Add(abil);
-				}
-			}
-
 			m_flags = data.Flags;
 
 			m_meleeDamageType = (eDamageType)data.MeleeDamageType;
@@ -232,60 +181,6 @@ namespace DOL.GS
 			m_templateId = GetNextFreeTemplateId();
 			m_tetherRange = mob.TetherRange;
 			m_visibleActiveWeaponSlot = mob.VisibleActiveWeaponSlots;
-			
-			if ( mob.Abilities != null && mob.Abilities.Count > 0 )
-			{
-				try
-				{
-					if (m_abilities == null)
-						m_abilities = new ArrayList(mob.Abilities.Count);
-
-					foreach (Ability mobAbility in mob.Abilities.Values)
-					{
-						m_abilities.Add(mobAbility);
-					}
-				}
-				catch (Exception ex)
-				{
-					log.Error("Trapped Error: ", ex);
-				}
-			}
-
-			if ( mob.Spells != null && mob.Spells.Count > 0 )
-			{
-				try
-				{
-					if (m_spells == null)
-						m_spells = new ArrayList(mob.Spells.Count);
-
-					foreach (Spell mobSpell in mob.Spells)
-					{
-						m_spells.Add(mobSpell);
-					}
-				}
-				catch (Exception ex)
-				{
-					log.Error("Trapped Error: ", ex);
-				}
-			}
-
-			if ( mob.Styles != null && mob.Styles.Count > 0 )
-			{
-				try
-				{
-					if (m_styles == null)
-						m_styles = new ArrayList(mob.Styles.Count);
-
-					foreach (Style mobStyle in mob.Styles)
-					{
-						m_styles.Add(mobStyle);
-					}
-				}
-				catch (Exception ex)
-				{
-					log.Error("Trapped Error: ", ex);
-				}
-			}
 
 			AI.Brain.StandardMobBrain brain = mob.Brain as AI.Brain.StandardMobBrain;
 			if (brain != null)
@@ -709,54 +604,6 @@ namespace DOL.GS
 			tmp.Size = Size;
 			tmp.Strength = Strength;
 			tmp.TetherRange = TetherRange;
-
-			if( m_abilities != null && m_abilities.Count > 0 )
-			{
-				string serializedAbilities = "";
-
-				foreach ( Ability npcAbility in m_abilities )
-				{
-					if ( npcAbility != null )
-						if ( serializedAbilities.Length > 0 )
-							serializedAbilities += ";";
-
-					serializedAbilities += npcAbility.Name + "|" + npcAbility.Level;
-				}
-
-				tmp.Abilities = serializedAbilities;
-			}
-
-			if ( m_spells != null && m_spells.Count > 0 )
-			{
-				string serializedSpells = "";
-
-				foreach ( Spell npcSpell in m_spells )
-				{
-					if ( npcSpell != null )
-						if ( serializedSpells.Length > 0 )
-							serializedSpells += ";";
-
-					serializedSpells += npcSpell.ID;
-				}
-
-				tmp.Spells = serializedSpells;
-			}
-
-			if ( m_styles != null && m_styles.Count > 0 )
-			{
-				string serializedStyles = "";
-
-				foreach ( Style npcStyle in m_styles )
-				{
-					if ( npcStyle != null )
-						if ( serializedStyles.Length > 0 )
-							serializedStyles += ";";
-
-					serializedStyles += npcStyle.ID + "|" + npcStyle.ClassID;
-				}
-
-				tmp.Styles = serializedStyles;
-			}
 
 			if (add)
 				GameServer.Database.AddObject(tmp);

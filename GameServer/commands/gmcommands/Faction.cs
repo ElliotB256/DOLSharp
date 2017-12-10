@@ -113,8 +113,7 @@ namespace DOL.GS.Commands
 							client.Player.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "GMCommands.Faction.Assign.MustSelectMob"), eChatType.CT_Say, eChatLoc.CL_SystemWindow);
 							return;
 						}
-						npc.Faction = myfaction;
-						client.Player.Out.SendMessage(LanguageMgr.GetTranslation(client.Account.Language, "GMCommands.Faction.Assign.MobHasJoinedFact", npc.Name, myfaction.Name), eChatType.CT_Say, eChatLoc.CL_SystemWindow);
+                        client.Out.SendMessage("Not implemented!", eChatType.CT_SpellResisted, eChatLoc.CL_SystemWindow);
 					}
 					break;
 				#endregion Assign

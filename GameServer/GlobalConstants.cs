@@ -1037,29 +1037,7 @@ namespace DOL.GS
 	}
 
 	public static class GlobalConstants
-	{
-		private static readonly Dictionary<GameLiving.eAttackResult, byte> AttackResultByte = new Dictionary<GameLiving.eAttackResult, byte>()
-	    {
-			{GameLiving.eAttackResult.Missed, 0},
-			{GameLiving.eAttackResult.Parried, 1},
-			{GameLiving.eAttackResult.Blocked, 2},
-			{GameLiving.eAttackResult.Evaded, 3},
-			{GameLiving.eAttackResult.Fumbled, 4},
-			{GameLiving.eAttackResult.HitUnstyled, 10},
-			{GameLiving.eAttackResult.HitStyle, 11},
-			{GameLiving.eAttackResult.Any, 20},
-	    };
-		
-		public static byte GetAttackResultByte(GameLiving.eAttackResult attResult)
-		{
-			if (AttackResultByte.ContainsKey(attResult))
-			{
-				return AttackResultByte[attResult];
-			}
-			
-			return 0;
-		}
-		
+	{		
 		public static bool IsExpansionEnabled(int expansion)
 		{
 			bool enabled = true;

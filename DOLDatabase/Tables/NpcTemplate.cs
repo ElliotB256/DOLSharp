@@ -393,34 +393,6 @@ namespace DOL.Database
 			}
 		}
 
-		/// <summary>
-		/// Spells
-		/// </summary>
-		[DataElement(AllowDbNull = true)]
-		public string Spells
-		{
-			get { return m_spells; }
-			set
-			{
-				Dirty = true;
-				m_spells = value;
-			}
-		}
-
-		/// <summary>
-		/// Styles
-		/// </summary>
-		[DataElement(AllowDbNull = true)]
-		public string Styles
-		{
-			get { return m_styles; }
-			set
-			{
-				Dirty = true;
-				m_styles = value;
-			}
-		}
-
 		[DataElement(AllowDbNull = true)]
 		public int Strength
 		{
@@ -506,17 +478,6 @@ namespace DOL.Database
 			{
 				Dirty = true;
 				m_empathy = value;
-			}
-		}
-
-		[DataElement(AllowDbNull = true)]
-		public string Abilities
-		{
-			get { return m_abilities; }
-			set
-			{
-				Dirty = true;
-				m_abilities = value;
 			}
 		}
 

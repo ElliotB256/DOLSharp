@@ -245,7 +245,7 @@ namespace DOL.AI.Brain
         /// </summary>
         /// <param name="living"></param>
         /// <param name="attackData"></param>
-        protected virtual void OnAttacked(AttackData attackData)
+        protected virtual void OnAttacked(Attack attackData)
         {
             if (attackData == null)
                 return;
@@ -255,7 +255,7 @@ namespace DOL.AI.Brain
                 if (Body.IsReturningToSpawnPoint)
                     Body.CancelWalkToSpawn();
 
-                Aggression.Raise(attackData.Attacker, attackData.Damage);
+                // Aggression.Raise(attackData.Attacker, attackData.Damage);
 
                 // TODO: Process attack data and change the amount of aggro
                 //       accordingly.
@@ -359,7 +359,7 @@ namespace DOL.AI.Brain
             {
                 if (args is AttackedByEnemyEventArgs)
                 {
-                    AttackData attackData = (args as AttackedByEnemyEventArgs).AttackData;
+                    Attack attackData = (args as AttackedByEnemyEventArgs).AttackData;
                     OnAttacked(attackData);
                 }
 
