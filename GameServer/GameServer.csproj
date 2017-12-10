@@ -335,6 +335,8 @@
     <Compile Include="database\updaters\IDatabaseUpdater.cs" />
     <Compile Include="effects\SprintEffect.cs" />
     <Compile Include="effects\StealthEffect.cs" />
+    <Compile Include="gameutils\attacks\Attack.cs" />
+    <Compile Include="gameutils\attacks\AttackOutcome.cs" />
     <Compile Include="ItemSkills\DAoEPlayerInventory.cs" />
     <Compile Include="ItemSkills\EmptyArmorIcon.cs" />
     <Compile Include="ItemSkills\SocketedSkillGemClientRepresentation.cs" />
@@ -812,7 +814,6 @@
     <Compile Include="gameutils\Alliance.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="gameutils\AttackData.cs" />
     <Compile Include="gameutils\AuditMgr.cs" />
     <Compile Include="gameutils\BattleGroup.cs" />
     <Compile Include="gameutils\BoatMgr.cs" />
