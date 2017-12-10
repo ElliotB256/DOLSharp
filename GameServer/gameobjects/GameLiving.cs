@@ -47,106 +47,63 @@ namespace DOL.GS
 	{
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		#region Combat
-		/// <summary>
-		/// Holds the AttackData object of last attack
-		/// </summary>
-		public const string LAST_ATTACK_DATA = "LastAttackData";
+        #region Combat
 
-		protected string m_lastInterruptMessage;
-		public string LastInterruptMessage
-		{
-			get { return m_lastInterruptMessage; }
-			set { m_lastInterruptMessage = value; }
-		}
+        /// <summary>
+        /// The living starts an attack on a target
+        /// </summary>
+        public event EventHandler<Attack> Attacking;
 
-		/// <summary>
-		/// Holds the AttackData object of the last left-hand attack
-		/// </summary>
-		public const string LAST_ATTACK_DATA_LH = "LastAttackDataLH";
+        /// <summary>
+        /// The living has attacked a target
+        /// </summary>
+        public event EventHandler<AttackOutcome> Attacked;
 
-		/// <summary>
-		/// Holds the property for the result the last enemy
-		/// </summary>
-		public const string LAST_ENEMY_ATTACK_RESULT = "LastEnemyAttackResult";
+        /// <summary>
+        /// The living starts to receive an attack from an attacker
+        /// </summary>
+        public event EventHandler<Attack> BeingAttacked;
 
+        /// <summary>
+        /// The living has been attacked
+        /// </summary>
+        public event EventHandler<AttackOutcome> BeenAttacked;
+
+        /// <summary>
+        /// Make an attack
+        /// </summary>
+        /// <param name="attack"></param>
+        public void MakeAttack(GameLiving target, Attack attack)
+        {
+            attack.Attacker = this;
+            attack.Target = target;
+
+            var handler = Attacking;
+            handler?.Invoke(this, attack);
+
+            var outcome = target?.ReceiveAttack(attack);
+            var attackedHandler = Attacked;
+            attackedHandler?.Invoke(this, outcome);
+        }
+
+        /// <summary>
+        /// An attack starts on this living
+        /// </summary>
+        /// <param name="attack"></param>
+        public AttackOutcome ReceiveAttack(Attack attack)
+        {
+            var handler = BeingAttacked;
+            handler?.Invoke(this, attack);
+
+            var outcome = attack.DetermineResult();
+
+            var baHandler = BeenAttacked;
+            baHandler?.Invoke(this, outcome);
+
+            return outcome;
+        }
 
 		#region enums
-
-		/// <summary>
-		/// The result of an attack
-		/// </summary>
-		public enum eAttackResult : int
-		{
-			/// <summary>
-			/// No specific attack
-			/// </summary>
-			Any = 0,
-			/// <summary>
-			/// The attack was a hit
-			/// </summary>
-			HitUnstyled = 1,
-			/// <summary>
-			/// The attack was a hit
-			/// </summary>
-			HitStyle = 2,
-			/// <summary>
-			/// Attack was denied by server rules
-			/// </summary>
-			NotAllowed_ServerRules = 3,
-			/// <summary>
-			/// No target for the attack
-			/// </summary>
-			NoTarget = 5,
-			/// <summary>
-			/// Target is already dead
-			/// </summary>
-			TargetDead = 6,
-			/// <summary>
-			/// Target is out of range
-			/// </summary>
-			OutOfRange = 7,
-			/// <summary>
-			/// Attack missed
-			/// </summary>
-			Missed = 8,
-			/// <summary>
-			/// The attack was evaded
-			/// </summary>
-			Evaded = 9,
-			/// <summary>
-			/// The attack was blocked
-			/// </summary>
-			Blocked = 10,
-			/// <summary>
-			/// The attack was parried
-			/// </summary>
-			Parried = 11,
-			/// <summary>
-			/// The target is invalid
-			/// </summary>
-			NoValidTarget = 12,
-			/// <summary>
-			/// The target is not visible
-			/// </summary>
-			TargetNotVisible = 14,
-			/// <summary>
-			/// The attack was fumbled
-			/// </summary>
-			Fumbled = 15,
-			/// <summary>
-			/// The attack was Bodyguarded
-			/// </summary>
-			Bodyguarded = 16,
-			/// <summary>
-			/// The attack was Phaseshiftet
-			/// </summary>
-			Phaseshift = 17,
-			/// <summary>
-			/// The attack was Grappled
-			/// </summary>
-			Grappled = 18
-		}
 
 		/// <summary>
 		/// The possible states for a ranged attack
@@ -1555,15 +1512,15 @@ namespace DOL.GS
 		/// <param name="interruptDuration">the interrupt duration</param>
 		/// <param name="dualWield">indicates if both weapons are used for attack</param>
 		/// <returns>the object where we collect and modifiy all parameters about the attack</returns>
-		protected virtual AttackData MakeAttack(GameObject target, InventoryItem weapon, Style style, double effectiveness, int interruptDuration, bool dualWield)
+		protected virtual Attack MakeAttack(GameObject target, InventoryItem weapon, Style style, double effectiveness, int interruptDuration, bool dualWield)
 		{
 			return MakeAttack(target, weapon, style, effectiveness, interruptDuration, dualWield, false);
 		}
 
 
-		protected virtual AttackData MakeAttack(GameObject target, InventoryItem weapon, Style style, double effectiveness, int interruptDuration, bool dualWield, bool ignoreLOS)
+		protected virtual Attack MakeAttack(GameObject target, InventoryItem weapon, Style style, double effectiveness, int interruptDuration, bool dualWield, bool ignoreLOS)
 		{
-			AttackData ad = new AttackData();
+			Attack ad = new Attack();
 			ad.Attacker = this;
 			ad.Target = target as GameLiving;
 			ad.Damage = 0;
@@ -1577,16 +1534,16 @@ namespace DOL.GS
 
 
 			if (dualWield)
-				ad.AttackType = AttackData.eAttackType.MeleeDualWield;
+				ad.AttackType = Attack.eAttackType.MeleeDualWield;
 			else if (weapon == null)
-				ad.AttackType = AttackData.eAttackType.MeleeOneHand;
+				ad.AttackType = Attack.eAttackType.MeleeOneHand;
 			else switch (weapon.Item_Type)
 			{
 				default:
 				case Slot.RIGHTHAND:
-					case Slot.LEFTHAND: ad.AttackType = AttackData.eAttackType.MeleeOneHand; break;
-					case Slot.TWOHAND: ad.AttackType = AttackData.eAttackType.MeleeTwoHand; break;
-					case Slot.RANGED: ad.AttackType = AttackData.eAttackType.Ranged; break;
+					case Slot.LEFTHAND: ad.AttackType = Attack.eAttackType.MeleeOneHand; break;
+					case Slot.TWOHAND: ad.AttackType = Attack.eAttackType.MeleeTwoHand; break;
+					case Slot.RANGED: ad.AttackType = Attack.eAttackType.Ranged; break;
 			}
 
 			//No target, stop the attack
@@ -1604,7 +1561,7 @@ namespace DOL.GS
 			}
 
 			//Check if the target is in front of attacker
-			if (!ignoreLOS && ad.AttackType != AttackData.eAttackType.Ranged && this is GamePlayer &&
+			if (!ignoreLOS && ad.AttackType != Attack.eAttackType.Ranged && this is GamePlayer &&
 			    !(ad.Target is GameKeepComponent) && !(IsObjectInFront(ad.Target, 120, true) && TargetInView))
 			{
 				ad.AttackResult = eAttackResult.TargetNotVisible;
@@ -1855,7 +1812,7 @@ namespace DOL.GS
 								owner.Out.SendMessage(string.Format(LanguageMgr.GetTranslation(owner.Client.Account.Language, "GameLiving.AttackData.Fumbled"), ad.Attacker.GetName(0, true)), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
 								break;
 							case eAttackResult.Missed:
-								if (ad.AttackType != AttackData.eAttackType.Spell)
+								if (ad.AttackType != Attack.eAttackType.Spell)
 									owner.Out.SendMessage(string.Format(LanguageMgr.GetTranslation(owner.Client.Account.Language, "GameLiving.AttackData.Misses"), ad.Attacker.GetName(0, true), ad.Target.Name), eChatType.CT_Missed, eChatLoc.CL_SystemWindow);
 								break;
 							case eAttackResult.HitStyle:
@@ -1898,7 +1855,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="attack"></param>
 		/// <param name="duration"></param>
-		public virtual void StartInterruptTimer(AttackData attack, int duration)
+		public virtual void StartInterruptTimer(Attack attack, int duration)
 		{
 			if(attack != null)
 				StartInterruptTimer(duration, attack.AttackType, attack.Attacker);
@@ -1910,7 +1867,7 @@ namespace DOL.GS
 		/// <param name="duration"></param>
 		/// <param name="attackType"></param>
 		/// <param name="attacker"></param>
-		public virtual void StartInterruptTimer(int duration, AttackData.eAttackType attackType, GameLiving attacker)
+		public virtual void StartInterruptTimer(int duration, Attack.eAttackType attackType, GameLiving attacker)
 		{
 			if (!IsAlive || ObjectState != eObjectState.Active)
 			{
@@ -2009,15 +1966,15 @@ namespace DOL.GS
 		/// <param name="attacker">the attacker that is interrupting</param>
 		/// <param name="attackType">the attack type</param>
 		/// <returns>true if interrupted successfully</returns>
-		protected virtual bool OnInterruptTick(GameLiving attacker, AttackData.eAttackType attackType)
+		protected virtual bool OnInterruptTick(GameLiving attacker, Attack.eAttackType attackType)
 		{
 			if (AttackState && ActiveWeaponSlot == eActiveWeaponSlot.Distance)
 			{
 				if (RangedAttackType == eRangedAttackType.SureShot)
 				{
-					if (attackType != AttackData.eAttackType.MeleeOneHand
-					    && attackType != AttackData.eAttackType.MeleeTwoHand
-					    && attackType != AttackData.eAttackType.MeleeDualWield)
+					if (attackType != Attack.eAttackType.MeleeOneHand
+					    && attackType != Attack.eAttackType.MeleeTwoHand
+					    && attackType != Attack.eAttackType.MeleeDualWield)
 						return false;
 				}
 				double mod = GetConLevel(attacker);
@@ -2128,7 +2085,7 @@ namespace DOL.GS
 
 				if (!owner.AttackState)
 				{
-					AttackData ad = owner.TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as AttackData;
+					Attack ad = owner.TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as Attack;
 					owner.TempProperties.removeProperty(LAST_ATTACK_DATA);
 					if (ad != null && ad.Target != null)
 						ad.Target.RemoveAttacker(owner);
@@ -2226,7 +2183,7 @@ namespace DOL.GS
 						return;
 					}
 
-					AttackData ad = owner.TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as AttackData;
+					Attack ad = owner.TempProperties.getProperty<object>(LAST_ATTACK_DATA, null) as Attack;
 					if (ad != null && ad.AttackResult == eAttackResult.Fumbled)
 					{
 						Interval = owner.AttackSpeed(attackWeapon);
@@ -2394,8 +2351,8 @@ namespace DOL.GS
 				GameLiving owner = (GameLiving)m_actionSource;
 				Style style = m_combatStyle;
 				int leftHandSwingCount = 0;
-				AttackData mainHandAD = null;
-				AttackData leftHandAD = null;
+				Attack mainHandAD = null;
+				Attack leftHandAD = null;
 				InventoryItem mainWeapon = m_attackWeapon;
 				InventoryItem leftWeapon = m_leftWeapon;
 				double leftHandEffectiveness = m_effectiveness;
@@ -2490,7 +2447,7 @@ namespace DOL.GS
 				// 1.89:
 				// - Characters who are attacked by stealthed archers will now target the attacking archer if the attacked player does not already have a target.
 				if( mainHandAD.Attacker.IsStealthed
-				   && mainHandAD.AttackType == AttackData.eAttackType.Ranged
+				   && mainHandAD.AttackType == Attack.eAttackType.Ranged
 				   && ( mainHandAD.AttackResult == eAttackResult.HitUnstyled || mainHandAD.AttackResult == eAttackResult.HitStyle ) )
 				{
 					if( mainHandAD.Target.TargetObject == null )
@@ -2563,7 +2520,7 @@ namespace DOL.GS
 					}
 				}
 
-				if (mainHandAD.AttackType == AttackData.eAttackType.Ranged)
+				if (mainHandAD.AttackType == Attack.eAttackType.Ranged)
 					owner.RangedAttackFinished();
 
 				switch (mainHandAD.AttackResult)
@@ -2628,7 +2585,7 @@ namespace DOL.GS
 		/// Sends the proper combat messages depending on our attack data
 		/// </summary>
 		/// <param name="ad">result of the attack</param>
-		protected virtual void SendAttackingCombatMessages(AttackData ad)
+		protected virtual void SendAttackingCombatMessages(Attack ad)
 		{
 			//None for GameLiving - could be a GameNPC DO NOT ADD ANYTHING HERE
 		}
@@ -2639,7 +2596,7 @@ namespace DOL.GS
 		/// <param name="ad"></param>
 		/// <param name="weapon"></param>
 		/// <returns></returns>
-		public virtual bool AllowWeaponMagicalEffect(AttackData ad, InventoryItem weapon, Spell weaponSpell)
+		public virtual bool AllowWeaponMagicalEffect(Attack ad, InventoryItem weapon, Spell weaponSpell)
 		{
 			if (weapon.Flags == 10) //Itemtemplates with "Flags" set to 10 will not proc on living (ex. Bruiser)
 				return false;
@@ -2651,7 +2608,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="ad"></param>
 		/// <param name="weapon"></param>
-		public virtual void CheckWeaponMagicalEffect(AttackData ad, InventoryItem weapon)
+		public virtual void CheckWeaponMagicalEffect(Attack ad, InventoryItem weapon)
 		{
 			if (weapon == null)
 				return;
@@ -2707,7 +2664,7 @@ namespace DOL.GS
 		/// Will assume spell is in GlobalSpellsLines.Item_Effects even if it's not and use the weapons LevelRequirement
 		/// Item_Effects must be used here because various spell handlers recognize this line to alter variance and other spell parameters
 		/// </summary>
-		protected virtual void StartWeaponMagicalEffect(InventoryItem weapon, AttackData ad, SpellLine spellLine, int spellID, bool ignoreLevel)
+		protected virtual void StartWeaponMagicalEffect(InventoryItem weapon, Attack ad, SpellLine spellLine, int spellID, bool ignoreLevel)
 		{
 			if (weapon == null)
 				return;
@@ -2864,7 +2821,7 @@ namespace DOL.GS
 		/// <param name="ad">The attack data.</param>
 		/// <param name="weapon">The weapon used.</param>
 		/// <returns>The amount of critical damage.</returns>
-		public virtual int GetMeleeCriticalDamage(AttackData attackData, InventoryItem weapon)
+		public virtual int GetMeleeCriticalDamage(Attack attackData, InventoryItem weapon)
 		{
 			if (Util.Chance(AttackCriticalChance(weapon)))
 			{
@@ -2911,7 +2868,7 @@ namespace DOL.GS
 		/// <param name="ad">AttackData</param>
 		/// <param name="weapon">the weapon used for attack</param>
 		/// <returns>the result of the attack</returns>
-		public virtual eAttackResult CalculateEnemyAttackResult(AttackData ad, InventoryItem weapon)
+		public virtual eAttackResult CalculateEnemyAttackResult(Attack ad, InventoryItem weapon)
 		{
 			if (!IsValidTarget)
 				return eAttackResult.NoValidTarget;
@@ -2924,7 +2881,7 @@ namespace DOL.GS
 			//http://daoc.catacombs.com/forum.cfm?ThreadKey=511&DefMessage=681444&forum=DAOCMainForum#Defense
 
 
-			AttackData lastAD = TempProperties.getProperty<AttackData>(LAST_ATTACK_DATA, null);
+			Attack lastAD = TempProperties.getProperty<Attack>(LAST_ATTACK_DATA, null);
 			bool defenseDisabled = ad.Target.IsMezzed | ad.Target.IsStunned | ad.Target.IsSitting;
 
 			bool stealthStyle = false;
@@ -3059,7 +3016,7 @@ namespace DOL.GS
 			return eAttackResult.HitUnstyled;
 		}
 
-		protected virtual double CalculateEvadeChance( AttackData ad )
+		protected virtual double CalculateEvadeChance( Attack ad )
 		{
 			// Evade
 			// 1. A: It isn't possible to give a simple answer. The formula includes such elements
@@ -3091,7 +3048,7 @@ namespace DOL.GS
 			return evadeChance * 0.01;
 		}
 
-		protected virtual double CalculateParryChance( AttackData ad )
+		protected virtual double CalculateParryChance( Attack ad )
 		{
 			// Things like this should really be self-contained, without attackerConLevel. Surely this can be determined from AttackData?
 			double parryChance = 0;
@@ -3116,7 +3073,7 @@ namespace DOL.GS
             return true;
         }
 
-		protected virtual double CalculateBlockChance( AttackData ad )
+		protected virtual double CalculateBlockChance( Attack ad )
 		{
             //no dependence on shield size.
 
@@ -3142,7 +3099,7 @@ namespace DOL.GS
 		/// This method offers us a chance to modify the attack data prior to the living taking damage.
 		/// </summary>
 		/// <param name="attackData">The attack data for this attack</param>
-		public virtual void ModifyAttack(AttackData attackData)
+		public virtual void ModifyAttack(Attack attackData)
 		{
 		}
 
@@ -3219,7 +3176,7 @@ namespace DOL.GS
 		/// notify objects if they have been attacked/hit by an attack
 		/// </summary>
 		/// <param name="ad">information about the attack</param>
-		public virtual void OnAttackedByEnemy(AttackData ad)
+		public virtual void OnAttackedByEnemy(Attack ad)
 		{
 			if (ad.IsHit && ad.CausesCombat)
 			{
@@ -3248,7 +3205,7 @@ namespace DOL.GS
 		/// </summary>
 		/// <param name="ad">Infos about the attack</param>
 		/// <param name="weapon">The weapon used for attack</param>
-		public virtual void ShowAttackAnimation(AttackData ad, InventoryItem weapon)
+		public virtual void ShowAttackAnimation(Attack ad, InventoryItem weapon)
 		{
 			bool showAnim = false;
 			switch (ad.AttackResult)
@@ -3325,7 +3282,7 @@ namespace DOL.GS
 		/// damage to some object
 		/// </summary>
 		/// <param name="ad">AttackData</param>
-		public virtual void DealDamage(AttackData ad)
+		public virtual void DealDamage(Attack ad)
 		{
 			ad.Target.TakeDamage(ad);
 		}
