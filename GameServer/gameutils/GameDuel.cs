@@ -128,7 +128,7 @@ namespace DOL.GS
 			else if (abeea != null)
 			{
 				ad = abeea.AttackData;
-				target = ad.Attacker;
+				target = ad.Actor;
 			}
 
 			if (ad == null)
@@ -144,7 +144,7 @@ namespace DOL.GS
 			}
 
             // Duel should end if players join group and trys to attack
-            if ((ad.Attacker != Target && ad.Attacker != Starter) || (ad.Target != Target && ad.Target != Starter))
+            if ((ad.Actor != Target && ad.Actor != Starter) || (ad.Target != Target && ad.Target != Starter))
                 Stop();
 		}
 

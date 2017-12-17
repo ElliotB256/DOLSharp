@@ -562,15 +562,13 @@ namespace DOL.GS.Keeps
 			base.SaveIntoDatabase();
 		}
 
-		public override void Die(GameObject killer)
+		public override void Die()
 		{
-			base.Die(killer);
+			base.Die();
 			if (this.AbstractKeep is GameKeepTower && ServerProperties.Properties.CLIENT_VERSION_MIN >= (int)GameClient.eClientVersion.Version175)
 			{
 				if (IsRaized == false)
 				{
-					Notify(KeepEvent.TowerRaized, this.AbstractKeep, new KeepEventArgs(this.AbstractKeep, killer.Realm));
-					PlayerMgr.BroadcastRaize(this.AbstractKeep, killer.Realm);
 					IsRaized = true;
 
 					foreach (GameKeepGuard guard in this.AbstractKeep.Guards.Values)

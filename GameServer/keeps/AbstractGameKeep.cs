@@ -1151,7 +1151,7 @@ namespace DOL.GS.Keeps
 				foreach (GameKeepHookPoint hp in component.KeepHookPoints.Values)
 				{
 					if (hp.Object != null)
-						hp.Object.Die(null);
+						hp.Object.Die();
 				}
 			}
 			//change realm

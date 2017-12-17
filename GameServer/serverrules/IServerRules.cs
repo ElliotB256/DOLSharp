@@ -249,8 +249,7 @@ namespace DOL.GS.ServerRules
 		/// experience / rps if needed
 		/// </summary>
 		/// <param name="living">the living that died</param>
-		/// <param name="killer"></param>
-		void OnLivingKilled(GameLiving living, GameObject killer);
+		void OnLivingDied(GameLiving living);
 
 		/// <summary>
 		/// Invoked when a player teleports somewhere

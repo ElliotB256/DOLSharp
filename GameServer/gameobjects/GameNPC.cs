@@ -3670,41 +3670,30 @@ namespace DOL.GS
 			}
 		}
 
-		/// <summary>
-		/// Called when this living dies
-		/// </summary>
-		public override void Die(GameObject killer)
-		{
-			FireAmbientSentence(eAmbientTrigger.dieing, killer as GameLiving);
+        /// <summary>
+        /// Called when this living dies
+        /// </summary>
+        public override void Die()
+        {
+            if (ControlledBrain != null)
+                ControlledNPC_Release();
 
-			if (ControlledBrain != null)
-				ControlledNPC_Release();
+            Message.SystemToArea(this, GetName(0, true) + " dies!", eChatType.CT_PlayerDied);
 
-			if(killer!=null)
-			{
-				Message.SystemToArea(this, GetName(0, true) + " dies!", eChatType.CT_PlayerDied, killer);
-				if (killer is GamePlayer)
-					((GamePlayer)killer).Out.SendMessage(GetName(0, true) + " dies!", eChatType.CT_PlayerDied, eChatLoc.CL_SystemWindow);
-			}
-			StopFollowing();
+            StopFollowing();
 
-			if (Group != null)
-				Group.RemoveMember(this);
+            if (Group != null)
+                Group.RemoveMember(this);
 
-			if(killer != null)
-			{				
-				// deal out exp and realm points based on server rules
-				GameServer.ServerRules.OnNPCKilled(this, killer);
-				base.Die(killer);
-			}
+            base.Die();
 
-			Delete();
+            Delete();
 
-			// remove temp properties
-			TempProperties.removeAllProperties();
+            // remove temp properties
+            TempProperties.removeAllProperties();
 
-			StartRespawn();
-		}
+            StartRespawn();
+        }
 
 		/// <summary>
 		/// Stores the melee damage type of this NPC

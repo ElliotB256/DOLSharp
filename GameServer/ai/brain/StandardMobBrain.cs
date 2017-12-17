@@ -856,7 +856,7 @@ namespace DOL.AI.Brain
 		{
 			// Only add on players.
 
-			GameLiving attacker = attackData.Attacker;
+			GameLiving attacker = attackData.Actor;
 			if (attacker is GamePlayer)
 			{
 				BringCloseFriends(attackData);

@@ -206,7 +206,7 @@ namespace DOL.GS.Keeps
 					return 0;
 				return base.Health;
 			}
-			set
+			protected set
 			{
 				base.Health = value;
 
@@ -637,9 +637,9 @@ namespace DOL.GS.Keeps
 		/// <summary>
 		/// This function is called when door "die" to open door
 		/// </summary>
-		public override void Die(GameObject killer)
+		public override void Die()
 		{
-			base.Die(killer);
+			base.Die();
 
 			foreach (GamePlayer player in this.GetPlayersInRadius(WorldMgr.INFO_DISTANCE))
 				player.Out.SendMessage("The Keep Gate is broken!", eChatType.CT_System, eChatLoc.CL_SystemWindow);

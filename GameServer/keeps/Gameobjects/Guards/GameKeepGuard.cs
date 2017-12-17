@@ -195,11 +195,9 @@ namespace DOL.GS.Keeps
 		/// When guards Die and it isnt a keep reset (this killer) we call GuardSpam function
 		/// </summary>
 		/// <param name="killer"></param>
-		public override void Die(GameObject killer)
+		public override void Die()
 		{
-			if (killer != this)
-				GuardSpam(this);
-			base.Die(killer);
+			base.Die();
 			if (RespawnInterval == -1)
 				Delete();
 		}

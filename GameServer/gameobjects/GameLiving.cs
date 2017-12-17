@@ -132,7 +132,7 @@ namespace DOL.GS
         /// <summary>
         /// GameLiving performs the attack
         /// </summary>
-        public void ProvideAid(GameLiving target, Attack attack)
+        public void Attack(GameLiving target, Attack attack)
         {
             attack.Target = target;
             TakeAction(attack, Attacking, Attacked, target.ReceiveAttack);
@@ -216,7 +216,7 @@ namespace DOL.GS
 		public override int Health
         {
             get { return m_health; }
-            set
+            protected set
             {
                 m_health = Math.Min(Math.Max(m_health, 0), MaxHealth);
             }
@@ -1212,9 +1212,9 @@ namespace DOL.GS
 		/// <summary>
 		/// Called when this living dies
 		/// </summary>
-		public virtual void Die(GameObject killer)
+		public virtual void Die()
 		{
-			GameServer.ServerRules.OnLivingKilled(this, killer);
+			GameServer.ServerRules.OnLivingDied(this);
 
 			m_attackers.Clear();
 
@@ -1238,8 +1238,8 @@ namespace DOL.GS
 			
 			LastAttackedByEnemyTickPvE = 0;
 			LastAttackedByEnemyTickPvP = 0;
-			//Let's send the notification at the end
-			Notify(GameLivingEvent.Dying, this, new DyingEventArgs(killer));
+
+            //todo: raise some event for NPC dies
 		}
 
 		/// <summary>
@@ -1946,7 +1946,8 @@ namespace DOL.GS
 		{
 			if (Health < MaxHealth)
 			{
-				ChangeHealth(this, eHealthChangeType.Regenerate, GetModified(eProperty.HealthRegenerationRate));
+                HealingAid healingAid = new HealingAid(this, eHealingType.Regeneration);
+                ProvideAid(this, healingAid);
 			}
 
 			//If we are fully healed, we stop the timer

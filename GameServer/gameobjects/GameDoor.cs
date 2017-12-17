@@ -305,9 +305,9 @@ namespace DOL.GS
 		/// No regeneration over time of the door
 		/// </summary>
 		/// <param name="killer"></param>
-		public override void Die(GameObject killer)
+		public override void Die()
 		{
-			base.Die(killer);
+			base.Die();
 			StartHealthRegeneration();
 		}
 

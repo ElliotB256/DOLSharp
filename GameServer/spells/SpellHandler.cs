@@ -3340,7 +3340,7 @@ namespace DOL.GS.Spells
 		public virtual Attack CalculateDamageToTarget(GameLiving target, double effectiveness)
 		{
 			Attack ad = new Attack();
-			ad.Attacker = m_caster;
+			ad.Actor = m_caster;
 			ad.Target = target;
 			return ad;
 		}

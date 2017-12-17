@@ -424,7 +424,7 @@ namespace DOL.GS.Commands
 		{
 			try
 			{
-				targetDoor.Die(client.Player);
+				targetDoor.Die();
 				client.Out.SendMessage("Door " + targetDoor.Name + " health reaches 0", eChatType.CT_System,
 				                       eChatLoc.CL_SystemWindow);
 			}

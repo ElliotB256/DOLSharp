@@ -1036,8 +1036,7 @@ namespace DOL.GS.ServerRules
 		/// Called on living death that is not gameplayer or gamenpc
 		/// </summary>
 		/// <param name="killedLiving">The living object</param>
-		/// <param name="killer">The killer object</param>
-		public virtual void OnLivingKilled(GameLiving killedLiving, GameObject killer)
+		public virtual void OnLivingDied(GameLiving killedLiving)
 		{
 		}
 
