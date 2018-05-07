@@ -23,7 +23,7 @@ namespace DOL.GS.PropertyCalc
             return speed;
         }
 
-        public override int GetCap()
+        public override int GetCap(eCalculationType type)
         {
             return 250;
         }

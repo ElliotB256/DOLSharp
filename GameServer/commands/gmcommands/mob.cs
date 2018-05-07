@@ -1297,10 +1297,6 @@ namespace DOL.GS.Commands
 			}
 
 			info.Add(" ");
-			info.Add(" + STR  /  CON  /  DEX  /  QUI");
-			info.Add(" + " + targetMob.Strength + "  /  " + targetMob.Constitution + "  /  " + targetMob.Dexterity + "  /  " + targetMob.Quickness);
-			info.Add(" + INT  /  EMP  /  PIE  /  CHR");
-			info.Add(" + " + targetMob.Intelligence + "  /  " + targetMob.Empathy + "  /  " + targetMob.Piety + "  /  " + targetMob.Charisma);
 			info.Add(" + Block / Parry / Evade %:  " + targetMob.BlockChance + " / " + targetMob.ParryChance + " / " + targetMob.EvadeChance);
 			info.Add(" + Attack Speed (Melee Speed Increase %):  " + targetMob.AttackSpeed(targetMob.AttackWeapon) + " (" + (100 - targetMob.Attributes.GetProperty(eProperty.MeleeSpeed)) + ")");
 			info.Add(" + Casting Speed Increase %:  " + targetMob.Attributes.GetProperty(eProperty.CastingSpeed));
@@ -1329,19 +1325,6 @@ namespace DOL.GS.Commands
 				info.Add(" + Body Type:  " + targetMob.BodyType);
 
 			info.Add(" ");
-
-			info.Add("Race Resists:");
-			info.Add(" +  -- Crush/Slash/Thrust:  " + targetMob.GetDamageResist(eProperty.Resist_Crush)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Slash)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Thrust));
-			info.Add(" +  -- Heat/Cold/Matter:  " + targetMob.GetDamageResist(eProperty.Resist_Heat)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Cold)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Matter));
-			info.Add(" +  -- Body/Spirit/Energy:  " + targetMob.GetDamageResist(eProperty.Resist_Body)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Spirit)
-			         + " / " + targetMob.GetDamageResist(eProperty.Resist_Energy));
-			info.Add(" +  -- Natural:  " + targetMob.GetDamageResist(eProperty.Resist_Natural));
-
 			info.Add(" ");
 
 			info.Add("Current Resists:");
@@ -1497,7 +1480,6 @@ namespace DOL.GS.Commands
 			{
 				level = Convert.ToByte(args[2]);
 				targetMob.Level = level;
-				targetMob.AutoSetStats();
 				targetMob.SaveIntoDatabase();
 				client.Out.SendMessage("Mob level changed to: " + targetMob.Level + " and stats adjusted", eChatType.CT_System, eChatLoc.CL_SystemWindow);
 			}
@@ -2359,14 +2341,14 @@ namespace DOL.GS.Commands
 			mob.MeleeDamageType = targetMob.MeleeDamageType;
 			mob.RespawnInterval = targetMob.RespawnInterval;
 			mob.RoamingRange = targetMob.RoamingRange;
-			mob.Strength = targetMob.Strength;
-			mob.Constitution = targetMob.Constitution;
-			mob.Dexterity = targetMob.Dexterity;
-			mob.Quickness = targetMob.Quickness;
-			mob.Intelligence = targetMob.Intelligence;
-			mob.Empathy = targetMob.Empathy;
-			mob.Piety = targetMob.Piety;
-			mob.Charisma = targetMob.Charisma;
+			//mob.Strength = targetMob.Strength;
+			//mob.Constitution = targetMob.Constitution;
+			//mob.Dexterity = targetMob.Dexterity;
+			//mob.Quickness = targetMob.Quickness;
+			//mob.Intelligence = targetMob.Intelligence;
+			//mob.Empathy = targetMob.Empathy;
+			//mob.Piety = targetMob.Piety;
+			//mob.Charisma = targetMob.Charisma;
 			mob.CurrentSpeed = 0;
 			mob.MaxSpeedBase = targetMob.MaxSpeedBase;
 			mob.Inventory = targetMob.Inventory;
@@ -2525,14 +2507,14 @@ namespace DOL.GS.Commands
 
 			// also copies the stats
 
-			mob.Strength = targetMob.Strength;
-			mob.Constitution = targetMob.Constitution;
-			mob.Dexterity = targetMob.Dexterity;
-			mob.Quickness = targetMob.Quickness;
-			mob.Intelligence = targetMob.Intelligence;
-			mob.Empathy = targetMob.Empathy;
-			mob.Piety = targetMob.Piety;
-			mob.Charisma = targetMob.Charisma;
+			//mob.Strength = targetMob.Strength;
+			//mob.Constitution = targetMob.Constitution;
+			//mob.Dexterity = targetMob.Dexterity;
+			//mob.Quickness = targetMob.Quickness;
+			//mob.Intelligence = targetMob.Intelligence;
+			//mob.Empathy = targetMob.Empathy;
+			//mob.Piety = targetMob.Piety;
+			//mob.Charisma = targetMob.Charisma;
 
 			//Fill the living variables
 			mob.CurrentSpeed = 0;
@@ -2754,20 +2736,20 @@ namespace DOL.GS.Commands
 			{
 				statval = Convert.ToInt16(args[2]);
 
-				switch (statType)
-				{
-						case "STR": targetMob.Strength = statval; break;
-					case "CON":
-						targetMob.Constitution = statval;
-						targetMob.Health = targetMob.MaxHealth;
-						break;
-						case "DEX": targetMob.Dexterity = statval; break;
-						case "QUI": targetMob.Quickness = statval; break;
-						case "INT": targetMob.Intelligence = statval; break;
-						case "EMP": targetMob.Empathy = statval; break;
-						case "PIE": targetMob.Piety = statval; break;
-						case "CHA": targetMob.Charisma = statval; break;
-				}
+                switch (statType)
+                {
+                    case "STR": targetMob.Attributes.SetPropertyBase(eProperty.Strength, statval); break;
+                    case "CON":
+                        targetMob.Attributes.SetPropertyBase(eProperty.Constitution, statval);
+                        targetMob.Health = targetMob.MaxHealth;
+                        break;
+                    case "DEX": targetMob.Attributes.SetPropertyBase(eProperty.Dexterity, statval); break;
+                    case "QUI": targetMob.Attributes.SetPropertyBase(eProperty.Quickness, statval); break;
+                    case "INT": targetMob.Attributes.SetPropertyBase(eProperty.Intelligence, statval); break;
+                    case "EMP": targetMob.Attributes.SetPropertyBase(eProperty.Empathy, statval); break;
+                    case "PIE": targetMob.Attributes.SetPropertyBase(eProperty.Piety, statval); break;
+                    case "CHA": targetMob.Attributes.SetPropertyBase(eProperty.Charisma, statval); break;
+                }
 
 				targetMob.SaveIntoDatabase();
 				client.Out.SendMessage("Mob " + statType + " changed to: " + statval, eChatType.CT_System, eChatLoc.CL_SystemWindow);

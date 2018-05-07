@@ -1384,33 +1384,23 @@ namespace DOL.GS.Spells
 		}
 
 
-		#endregion
+        #endregion
 
-		/// <summary>
-		/// Calculates the power to cast the spell
-		/// </summary>
-		/// <param name="target"></param>
-		/// <returns></returns>
-		public virtual int PowerCost(GameLiving target)
-		{
-			double power = m_spell.Power; //<== defined a basevar first then modified this base-var to tell %-costs from absolut-costs
+        /// <summary>
+        /// Calculates the power to cast the spell
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public virtual int PowerCost(GameLiving target)
+        {
+            double power = m_spell.Power; //<== defined a basevar first then modified this base-var to tell %-costs from absolut-costs
 
-			// percent of maxPower if less than zero
-			if (power < 0)
-			{
-				if (Caster is GamePlayer && ((GamePlayer)Caster).CharacterClass.ManaStat != eStat.UNDEFINED)
-				{
-					GamePlayer player = Caster as GamePlayer;
-					power = player.CalculateMaxMana(player.Level, player.GetBaseStat(player.CharacterClass.ManaStat)) * power * -0.01;
-				}
-				else
-				{
-					power = Caster.MaxMana * power * -0.01;
-				}
-			}
+            // percent of maxPower if less than zero
+            if (power < 0)
+                power = Caster.MaxMana * power * -0.01;
 
-			return (int)power;
-		}
+            return (int)power;
+        }
 
 		/// <summary>
 		/// Calculates the enduance cost of the spell
@@ -3478,51 +3468,51 @@ namespace DOL.GS.Spells
 
 			eDamageType damageType = DetermineSpellDamageType();
 
-			#region Resists
-			eProperty property = target.GetResistTypeForDamage(damageType);
-			// The Daoc resistsystem is since 1.65 a 2category system.
-			// - First category are Item/Race/Buff/RvrBanners resists that are displayed in the characteroverview.
-			// - Second category are resists that are given through RAs like avoidance of magic, brilliance aura of deflection.
-			//   Those resist affect ONLY the spelldamage. Not the duration, not the effectiveness of debuffs.
-			// so calculation is (finaldamage * Category1Modification) * Category2Modification
-			// -> Remark for the future: VampirResistBuff is Category2 too.
-			// - avi
+			//#region Resists
+			//eProperty property = target.GetResistTypeForDamage(damageType);
+			//// The Daoc resistsystem is since 1.65 a 2category system.
+			//// - First category are Item/Race/Buff/RvrBanners resists that are displayed in the characteroverview.
+			//// - Second category are resists that are given through RAs like avoidance of magic, brilliance aura of deflection.
+			////   Those resist affect ONLY the spelldamage. Not the duration, not the effectiveness of debuffs.
+			//// so calculation is (finaldamage * Category1Modification) * Category2Modification
+			//// -> Remark for the future: VampirResistBuff is Category2 too.
+			//// - avi
 
-			#region Primary Resists
-			int primaryResistModifier = ad.Target.GetResist(damageType);
+			//#region Primary Resists
+			//int primaryResistModifier = ad.Target.GetResist(damageType);
 
-			/* Resist Pierce
-			 * Resipierce is a special bonus which has been introduced with TrialsOfAtlantis.
-			 * At the calculation of SpellDamage, it reduces the resistance that the victim recives
-			 * through ITEMBONUSES for the specified percentage.
-			 * http://de.daocpedia.eu/index.php/Resistenz_durchdringen (translated)
-			 */
-			int resiPierce = Caster.Attributes.GetProperty(eProperty.ResistPierce);
-			GamePlayer ply = Caster as GamePlayer;
-			if (resiPierce > 0 && Spell.SpellType != "Archery")
-			{
-				//substract max ItemBonus of property of target, but atleast 0.
-				primaryResistModifier -= Math.Max(0, Math.Min(ad.Target.ItemBonus[(int)property], resiPierce));
-			}
-			#endregion
+			///* Resist Pierce
+			// * Resipierce is a special bonus which has been introduced with TrialsOfAtlantis.
+			// * At the calculation of SpellDamage, it reduces the resistance that the victim recives
+			// * through ITEMBONUSES for the specified percentage.
+			// * http://de.daocpedia.eu/index.php/Resistenz_durchdringen (translated)
+			// */
+			//int resiPierce = Caster.Attributes.GetProperty(eProperty.ResistPierce);
+			//GamePlayer ply = Caster as GamePlayer;
+			//if (resiPierce > 0 && Spell.SpellType != "Archery")
+			//{
+			//	//substract max ItemBonus of property of target, but atleast 0.
+			//	primaryResistModifier -= Math.Max(0, Math.Min(ad.Target.ItemBonus[(int)property], resiPierce));
+			//}
+			//#endregion
 
-			#region Secondary Resists
-			//Using the resist BuffBonusCategory2 - its unused in ResistCalculator
-			int secondaryResistModifier = target.SpecBuffBonusCategory[(int)property];
+			//#region Secondary Resists
+			////Using the resist BuffBonusCategory2 - its unused in ResistCalculator
+			//int secondaryResistModifier = target.SpecBuffBonusCategory[(int)property];
 
-			if (secondaryResistModifier > 80)
-				secondaryResistModifier = 80;
-			#endregion
+			//if (secondaryResistModifier > 80)
+			//	secondaryResistModifier = 80;
+			//#endregion
 
-			int resistModifier = 0;
-			//primary resists
-			resistModifier += (int)(finalDamage * (double)primaryResistModifier * -0.01);
-			//secondary resists
-			resistModifier += (int)((finalDamage + (double)resistModifier) * (double)secondaryResistModifier * -0.01);
-			//apply resists
-			finalDamage += resistModifier;
+			//int resistModifier = 0;
+			////primary resists
+			//resistModifier += (int)(finalDamage * (double)primaryResistModifier * -0.01);
+			////secondary resists
+			//resistModifier += (int)((finalDamage + (double)resistModifier) * (double)secondaryResistModifier * -0.01);
+			////apply resists
+			//finalDamage += resistModifier;
 
-			#endregion
+			//#endregion
 
 			// Apply damage cap (this can be raised by effectiveness)
 			if (finalDamage > DamageCap(effectiveness))
@@ -3558,7 +3548,7 @@ namespace DOL.GS.Spells
 			ad.Damage = finalDamage;
 			ad.CriticalDamage = cdamage;
 			ad.DamageType = damageType;
-			ad.Modifier = resistModifier;
+			//ad.Modifier = resistModifier;
 
 			// Attacked living may modify the attack data.  Primarily used for keep doors and components.
 			ad.Target.ModifyAttack(ad);

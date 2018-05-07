@@ -26,7 +26,7 @@ namespace DOL.GS.PropertyCalc
             return con + MaxHealth;
         }
 
-        public override int GetCap()
+        public override int GetCap(eCalculationType type)
         {
             //no cap on max health - it is capped through the dependent stats
             return 0;

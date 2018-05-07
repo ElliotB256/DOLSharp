@@ -113,26 +113,6 @@ namespace DOL.GS
             }
 		}
 
-		/// <summary>
-		/// Specialisation level including item bonuses and RR.
-		/// </summary>
-		/// <param name="keyName">The specialisation line.</param>
-		/// <returns>The specialisation level.</returns>
-		public override int GetModifiedSpecLevel(string keyName)
-		{
-			switch (keyName)
-			{
-				case Specs.Slash:
-				case Specs.Crush:
-				case Specs.Two_Handed:
-				case Specs.Shields:
-				case Specs.Critical_Strike:
-				case Specs.Large_Weapons:
-					return Level;
-                default: return (Brain as IControlledBrain).GetLivingOwner().GetModifiedSpecLevel(keyName);
-			}
-		}
-
 		#endregion
 
 		#region Spells
@@ -155,88 +135,6 @@ namespace DOL.GS
             get { return (Brain as IControlledBrain).GetLivingOwner().Attributes.GetProperty(eProperty.CriticalSpellHitChance); }
 			set { }
 		}
-
-		#endregion
-
-		#region Stats
-
-		/// <summary>
-		/// Pet strength is determined by using template stength as a percentage multiplier
-		/// So A template value of 50 would mean pet strength is 50% of normal, 150 = 150% of normal, etc
-		/// </summary>
-		public override short Strength
-		{
-			get
-			{
-                short str = (short)(Properties.PET_AUTOSET_STR_BASE + Level * 10 * Properties.PET_AUTOSET_STR_MULTIPLIER);
-				if (base.Strength > 0)
-				{
-					str = (short)(str * base.Strength * .01);
-				}
-
-				return Math.Max((short)1, str);
-			}
-		}
-
-        /// <summary>
-        /// Pet Base constitution.
-        /// </summary>
-        public override short Constitution
-        {
-            get
-            {
-                if (base.Constitution == 0)
-                    return 30;
-                else
-                    return (short)(Properties.PET_AUTOSET_CON_BASE + Level * Properties.PET_AUTOSET_CON_MULTIPLIER);
-            }
-        }
-
-        /// <summary>
-		/// Pet Base dexterity.
-		/// </summary>
-		public override short Dexterity
-		{
-			get
-			{
-				if (base.Dexterity == 0)
-                    return 30;
-				else
-                    return (short)(Properties.PET_AUTOSET_DEX_BASE + Level * Properties.PET_AUTOSET_DEX_MULTIPLIER);
-            }
-		}
-
-		/// <summary>
-		/// Pet Base quickness.
-		/// </summary>
-		public override short Quickness
-		{
-			get
-			{
-				if (base.Quickness == 0)
-                    return 30;
-				else
-                    return (short)(Properties.PET_AUTOSET_QUI_BASE + Level * Properties.PET_AUTOSET_QUI_MULTIPLIER);
-            }
-		}
-
-		public override int MaxHealth
-		{
-			get
-			{
-				int hp = base.MaxHealth;
-				double hpPercent = 1.0;
-
-				// apply boosted hp reduction
-				if (Constitution > 0 && Constitution < 30)
-				{
-					hpPercent = (Constitution * 3.4) * .01;
-				}
-
-				return (int)(hp * hpPercent);
-			}
-		}
-
 
 		#endregion
 

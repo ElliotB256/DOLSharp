@@ -886,7 +886,7 @@ namespace DOL.GS.ServerRules
 				case eObjectType.Shield: return living.GetAbilityLevel(Abilities.Shield) >= item.Type_Damage;
 				case eObjectType.Bolt: abilityCheck = Abilities.Weapon_Crossbow; break;
 				case eObjectType.Arrow: otherCheck = new string[] { Abilities.Weapon_CompositeBows, Abilities.Weapon_Longbows, Abilities.Weapon_RecurvedBows, Abilities.Weapon_Shortbows }; break;
-				case eObjectType.Poison: return living.GetModifiedSpecLevel(Specs.Envenom) > 0;
+				case eObjectType.Poison: return false;// living.GetModifiedSpecLevel(Specs.Envenom) > 0;
 				case eObjectType.Instrument: return living.HasAbility(Abilities.Weapon_Instruments);
 					//TODO: different shield sizes
 			}

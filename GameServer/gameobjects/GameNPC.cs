@@ -2035,195 +2035,186 @@ namespace DOL.GS
 			}
 		}
 
-		/// <summary>
-		/// Load a NPC template onto this NPC
-		/// </summary>
-		/// <param name="template"></param>
-		public virtual void LoadTemplate(INpcTemplate template)
-		{
-			if (template == null)
-				return;
+        /// <summary>
+        /// Load a NPC template onto this NPC
+        /// </summary>
+        /// <param name="template"></param>
+        public virtual void LoadTemplate(INpcTemplate template)
+        {
+            if (template == null)
+                return;
 
-			var m_templatedInventory = new List<string>();
-			this.TranslationId = template.TranslationId;
-			this.Name = template.Name;
-			this.Suffix = template.Suffix;
-			this.GuildName = template.GuildName;
-			this.ExamineArticle = template.ExamineArticle;
-			this.MessageArticle = template.MessageArticle;
-			
-			#region Models, Sizes, Levels, Gender
-			// Grav: this.Model/Size/Level accessors are triggering SendUpdate()
-			// so i must use them, and not directly use private variables
-			ushort choosenModel = 1;
-			var splitModel = template.Model.SplitCSV(true);
-			ushort.TryParse(splitModel[Util.Random(0,splitModel.Count-1)], out choosenModel);
-			this.Model = choosenModel;
-			
-			// Graveen: template.Gender is 0,1 or 2 for respectively eGender.Neutral("it"), eGender.Male ("he"), 
-			// eGender.Female ("she"). Any other value is randomly choosing a gender for current GameNPC
-			int choosenGender = template.Gender>2?Util.Random(0,2):template.Gender;
+            var m_templatedInventory = new List<string>();
+            this.TranslationId = template.TranslationId;
+            this.Name = template.Name;
+            this.Suffix = template.Suffix;
+            this.GuildName = template.GuildName;
+            this.ExamineArticle = template.ExamineArticle;
+            this.MessageArticle = template.MessageArticle;
 
-			switch (choosenGender)
-			{
-				default	:
-				case 0	: this.Gender = eGender.Neutral; break;
-				case 1	: this.Gender = eGender.Male; break;
-				case 2	: this.Gender = eGender.Female; break;			
-			}
-			
-			byte choosenSize = 50;
-			if (!Util.IsEmpty(template.Size))
-			{
-				var split = template.Size.SplitCSV(true);
-				byte.TryParse(split[Util.Random(0,split.Count-1)], out choosenSize);
-			}
-			this.Size = choosenSize;
-			
-			byte choosenLevel = 1;
-			if (!Util.IsEmpty(template.Level))
-			{
-				var split = template.Level.SplitCSV(true);
-				byte.TryParse(split[Util.Random(0,split.Count-1)], out choosenLevel);
-			}
-			this.Level = choosenLevel;
-			#endregion
+            #region Models, Sizes, Levels, Gender
+            // Grav: this.Model/Size/Level accessors are triggering SendUpdate()
+            // so i must use them, and not directly use private variables
+            ushort choosenModel = 1;
+            var splitModel = template.Model.SplitCSV(true);
+            ushort.TryParse(splitModel[Util.Random(0, splitModel.Count - 1)], out choosenModel);
+            this.Model = choosenModel;
 
-			#region Stats
-			// Stats
-			if (template.Strength==0)
-			{
-				this.AutoSetStats();
-			}
-			else
-			{
-				this.Constitution = (short)template.Constitution;
-				this.Dexterity = (short)template.Dexterity;
-				this.Strength = (short)template.Strength;
-				this.Quickness = (short)template.Quickness;
-				this.Intelligence = (short)template.Intelligence;
-				this.Piety = (short)template.Piety;
-				this.Empathy = (short)template.Empathy;
-				this.Charisma = (short)template.Charisma;
-			}
-			#endregion
+            // Graveen: template.Gender is 0,1 or 2 for respectively eGender.Neutral("it"), eGender.Male ("he"), 
+            // eGender.Female ("she"). Any other value is randomly choosing a gender for current GameNPC
+            int choosenGender = template.Gender > 2 ? Util.Random(0, 2) : template.Gender;
 
-			#region Misc Stats
-			this.MaxDistance = template.MaxDistance;
-			this.TetherRange = template.TetherRange;
-			this.Race = (short)template.Race;
-			this.BodyType = (ushort)template.BodyType;
-			this.MaxSpeedBase = template.MaxSpeed;
-			this.Flags = (eFlags)template.Flags;
-			this.MeleeDamageType = template.MeleeDamageType;
-			this.ParryChance = template.ParryChance;
-			this.EvadeChance = template.EvadeChance;
-			this.BlockChance = template.BlockChance;
-			this.LeftHandSwingChance = template.LeftHandSwingChance;
-			#endregion
+            switch (choosenGender)
+            {
+                default:
+                case 0: this.Gender = eGender.Neutral; break;
+                case 1: this.Gender = eGender.Male; break;
+                case 2: this.Gender = eGender.Female; break;
+            }
 
-			#region Inventory
-			//Ok lets start loading the npc equipment - only if there is a value!
-			if (!Util.IsEmpty(template.Inventory))
-			{
-				bool equipHasItems = false;
-				GameNpcInventoryTemplate equip = new GameNpcInventoryTemplate();
-				//First let's try to reach the npcequipment table and load that!
-				//We use a ';' split to allow npctemplates to support more than one equipmentIDs
-				var equipIDs = template.Inventory.SplitCSV();
-				if (!template.Inventory.Contains(":"))
-				{
+            byte choosenSize = 50;
+            if (!Util.IsEmpty(template.Size))
+            {
+                var split = template.Size.SplitCSV(true);
+                byte.TryParse(split[Util.Random(0, split.Count - 1)], out choosenSize);
+            }
+            this.Size = choosenSize;
 
-					foreach (string str in equipIDs)
-					{
-						m_templatedInventory.Add(str);
-					}
+            byte choosenLevel = 1;
+            if (!Util.IsEmpty(template.Level))
+            {
+                var split = template.Level.SplitCSV(true);
+                byte.TryParse(split[Util.Random(0, split.Count - 1)], out choosenLevel);
+            }
+            this.Level = choosenLevel;
+            #endregion
 
-					string equipid = "";
+            // Stats
+            Attributes.SetPropertyBase(eProperty.Constitution, template.Constitution);
+            Attributes.SetPropertyBase(eProperty.Dexterity, template.Dexterity);
+            Attributes.SetPropertyBase(eProperty.Strength, template.Strength);
+            Attributes.SetPropertyBase(eProperty.Quickness, template.Quickness);
+            Attributes.SetPropertyBase(eProperty.Intelligence, template.Intelligence);
+            Attributes.SetPropertyBase(eProperty.Piety, template.Piety);
+            Attributes.SetPropertyBase(eProperty.Empathy, template.Empathy);
+            Attributes.SetPropertyBase(eProperty.Charisma, template.Charisma);
 
-					if (m_templatedInventory.Count > 0)
-					{
-						if (m_templatedInventory.Count == 1)
-							equipid = template.Inventory;
-						else
-							equipid = m_templatedInventory[Util.Random(m_templatedInventory.Count - 1)];
-					}
-					if (equip.LoadFromDatabase(equipid))
-						equipHasItems = true;
-				}
+            #region Misc Stats
+            this.MaxDistance = template.MaxDistance;
+            this.TetherRange = template.TetherRange;
+            this.Race = (short)template.Race;
+            this.BodyType = (ushort)template.BodyType;
+            this.MaxSpeedBase = template.MaxSpeed;
+            this.Flags = (eFlags)template.Flags;
+            this.MeleeDamageType = template.MeleeDamageType;
+            this.ParryChance = template.ParryChance;
+            this.EvadeChance = template.EvadeChance;
+            this.BlockChance = template.BlockChance;
+            this.LeftHandSwingChance = template.LeftHandSwingChance;
+            #endregion
 
-				#region Legacy Equipment Code
-				//Nope, nothing in the npcequipment table, lets do the crappy parsing
-				//This is legacy code
-				if (!equipHasItems && template.Inventory.Contains(":"))
-				{
-					//Temp list to store our models
-					List<int> tempModels = new List<int>();
+            #region Inventory
+            //Ok lets start loading the npc equipment - only if there is a value!
+            if (!Util.IsEmpty(template.Inventory))
+            {
+                bool equipHasItems = false;
+                GameNpcInventoryTemplate equip = new GameNpcInventoryTemplate();
+                //First let's try to reach the npcequipment table and load that!
+                //We use a ';' split to allow npctemplates to support more than one equipmentIDs
+                var equipIDs = template.Inventory.SplitCSV();
+                if (!template.Inventory.Contains(":"))
+                {
 
-					//Let's go through all of our ';' seperated slots
-					foreach (string str in equipIDs)
-					{
-						tempModels.Clear();
-						//Split the equipment into slot and model(s)
-						string[] slotXModels = str.Split(':');
-						//It should only be two in length SLOT : MODELS
-						if (slotXModels.Length == 2)
-						{
-							int slot;
-							//Let's try to get our slot
-							if (Int32.TryParse(slotXModels[0], out slot))
-							{
-								//Now lets go through and add all the models to the list
-								string[] models = slotXModels[1].Split('|');
-								foreach (string strModel in models)
-								{
-									//We'll add it to the list if we successfully parse it!
-									int model;
-									if (Int32.TryParse(strModel, out model))
-										tempModels.Add(model);
-								}
+                    foreach (string str in equipIDs)
+                    {
+                        m_templatedInventory.Add(str);
+                    }
 
-								//If we found some models let's randomly pick one and add it the equipment
-								if (tempModels.Count > 0)
-									equipHasItems |= equip.AddNPCEquipment((eInventorySlot)slot, tempModels[Util.Random(tempModels.Count - 1)]);
-							}
-						}
-					}
-				}
-				#endregion
+                    string equipid = "";
 
-				//We added some items - let's make it the new inventory
-				if (equipHasItems)
-				{
-					this.Inventory = new GameNPCInventory(equip);
-					if (this.Inventory.GetItem(eInventorySlot.DistanceWeapon) != null)
-						this.SwitchWeapon(eActiveWeaponSlot.Distance);
-				}
-				
-				if (template.VisibleActiveWeaponSlot > 0)
-					this.VisibleActiveWeaponSlots = template.VisibleActiveWeaponSlot;
-			}
-			#endregion
-			
-			if (template.Spells != null) this.Spells = template.Spells;
-			if (template.Styles != null) this.Styles = template.Styles;
-			if (template.Abilities != null)
-			{
-				lock (m_lockAbilities)
-				{
-					foreach (Ability ab in template.Abilities)
-						m_abilities[ab.KeyName] = ab;
-				}
-			}
+                    if (m_templatedInventory.Count > 0)
+                    {
+                        if (m_templatedInventory.Count == 1)
+                            equipid = template.Inventory;
+                        else
+                            equipid = m_templatedInventory[Util.Random(m_templatedInventory.Count - 1)];
+                    }
+                    if (equip.LoadFromDatabase(equipid))
+                        equipHasItems = true;
+                }
 
-			m_ownBrain = new StandardMobBrain
-			{
-				Body = this,
-				AggroLevel = template.AggroLevel,
-				AggroRange = template.AggroRange
-			};
-			this.NPCTemplate = template as NpcTemplate;
-		}
+                #region Legacy Equipment Code
+                //Nope, nothing in the npcequipment table, lets do the crappy parsing
+                //This is legacy code
+                if (!equipHasItems && template.Inventory.Contains(":"))
+                {
+                    //Temp list to store our models
+                    List<int> tempModels = new List<int>();
+
+                    //Let's go through all of our ';' seperated slots
+                    foreach (string str in equipIDs)
+                    {
+                        tempModels.Clear();
+                        //Split the equipment into slot and model(s)
+                        string[] slotXModels = str.Split(':');
+                        //It should only be two in length SLOT : MODELS
+                        if (slotXModels.Length == 2)
+                        {
+                            int slot;
+                            //Let's try to get our slot
+                            if (Int32.TryParse(slotXModels[0], out slot))
+                            {
+                                //Now lets go through and add all the models to the list
+                                string[] models = slotXModels[1].Split('|');
+                                foreach (string strModel in models)
+                                {
+                                    //We'll add it to the list if we successfully parse it!
+                                    int model;
+                                    if (Int32.TryParse(strModel, out model))
+                                        tempModels.Add(model);
+                                }
+
+                                //If we found some models let's randomly pick one and add it the equipment
+                                if (tempModels.Count > 0)
+                                    equipHasItems |= equip.AddNPCEquipment((eInventorySlot)slot, tempModels[Util.Random(tempModels.Count - 1)]);
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                //We added some items - let's make it the new inventory
+                if (equipHasItems)
+                {
+                    this.Inventory = new GameNPCInventory(equip);
+                    if (this.Inventory.GetItem(eInventorySlot.DistanceWeapon) != null)
+                        this.SwitchWeapon(eActiveWeaponSlot.Distance);
+                }
+
+                if (template.VisibleActiveWeaponSlot > 0)
+                    this.VisibleActiveWeaponSlots = template.VisibleActiveWeaponSlot;
+            }
+            #endregion
+
+            if (template.Spells != null) this.Spells = template.Spells;
+            if (template.Styles != null) this.Styles = template.Styles;
+            if (template.Abilities != null)
+            {
+                lock (m_lockAbilities)
+                {
+                    foreach (Ability ab in template.Abilities)
+                        m_abilities[ab.KeyName] = ab;
+                }
+            }
+
+            m_ownBrain = new StandardMobBrain
+            {
+                Body = this,
+                AggroLevel = template.AggroLevel,
+                AggroRange = template.AggroRange
+            };
+            this.NPCTemplate = template as NpcTemplate;
+        }
 
 		/// <summary>
 		/// Switches the active weapon to another one
