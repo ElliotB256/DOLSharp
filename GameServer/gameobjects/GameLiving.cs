@@ -3813,141 +3813,17 @@ namespace DOL.GS
         /// </summary>
         public LivingProperties Attributes { get; protected set; }
         
-		#region Stats, Resists
-
-		/// <summary>
-		/// base values for char stats
-		/// </summary>
-		protected readonly short[] m_charStat = new short[8];
-
-		/// <summary>
-		/// get a unmodified char stat value
-		/// </summary>
-		/// <param name="stat"></param>
-		/// <returns></returns>
-		public int GetBaseStat(eStat stat)
-		{
-			return m_charStat[stat - eStat._First];
-		}
-		/// <summary>
-		/// changes a base stat value
-		/// </summary>
-		/// <param name="stat"></param>
-		/// <param name="amount"></param>
-		public virtual void ChangeBaseStat(eStat stat, short amount)
-		{
-			m_charStat[stat - eStat._First] += amount;
-		}
-
-		/// <summary>
-		/// this field is just for convinience and speed purposes
-		/// converts the damage types to resist fields
-		/// </summary>
-		protected static readonly eProperty[] m_damageTypeToResistBonusConversion = new eProperty[] {
-			eProperty.Resist_Natural, //0,
-			eProperty.Resist_Crush,
-			eProperty.Resist_Slash,
-			eProperty.Resist_Thrust,
-			0, 0, 0, 0, 0, 0,
-			eProperty.Resist_Body,
-			eProperty.Resist_Cold,
-			eProperty.Resist_Energy,
-			eProperty.Resist_Heat,
-			eProperty.Resist_Matter,
-			eProperty.Resist_Spirit
-		};
-		/// <summary>
-		/// gets the resistance value by damage type, refer to eDamageType for constants
-		/// </summary>
-		/// <param name="damageType"></param>
-		/// <returns></returns>
-		public virtual eProperty GetResistTypeForDamage(eDamageType damageType)
-		{
-			if ((int)damageType < m_damageTypeToResistBonusConversion.Length)
-			{
-				return m_damageTypeToResistBonusConversion[(int)damageType];
-			}
-			else
-			{
-				log.ErrorFormat("No resist found for damage type {0} on living {1}!", (int)damageType, Name);
-				return 0;
-			}
-		}
-		/// <summary>
-		/// gets the resistance value by damage types
-		/// </summary>
-		/// <param name="damageType">the damag etype</param>
-		/// <returns>the resist value</returns>
-		public virtual int GetResist(eDamageType damageType)
-		{
-			return Attributes.GetProperty(GetResistTypeForDamage(damageType));
-		}
-
-		/// <summary>
-		/// Get the resistance to damage by resist type
-		/// </summary>
-		/// <param name="property">one of the Resist_XXX properties</param>
-		/// <returns>the resist value</returns>
-		public virtual int GetDamageResist(eProperty property)
-		{
-			return SkillBase.GetRaceResist( m_race, (eResist)property );
-		}
-
-		/// <summary>
-		/// Gets the Damage Resist for a damage type
-		/// </summary>
-		/// <param name="damageType"></param>
-		/// <returns></returns>
-		public virtual int GetDamageResist(eDamageType damageType)
-		{
-			return GetDamageResist(GetResistTypeForDamage(damageType));
-		}
-
-		/// <summary>
-		/// temp properties
-		/// </summary>
 		private readonly PropertyCollection m_tempProps = new PropertyCollection();
 
-		/// <summary>
-		/// use it to store temporary properties on this living
-		/// beware to use unique keys so they do not interfere
-		/// </summary>
-		public PropertyCollection TempProperties
+        /// <summary>
+        /// Temporary Properties of this GameLiving. Beware to use unique keys so they do not interfere.
+        /// In future, will be removed. Please do not use.
+        /// </summary>
+        public PropertyCollection TempProperties
 		{
 			get { return m_tempProps; }
 		}
 
-		/// <summary>
-		/// Gets or Sets the effective level of the Object
-		/// </summary>
-		public override int EffectiveLevel
-		{
-			get { return Attributes.GetProperty(eProperty.LivingEffectiveLevel); }
-		}
-
-		/// <summary>
-		/// returns the level of a specialization
-		/// if 0 is returned, the spec is non existent on living
-		/// </summary>
-		/// <param name="keyName"></param>
-		/// <returns></returns>
-		public virtual int GetBaseSpecLevel(string keyName)
-		{
-			return Level;
-		}
-
-		/// <summary>
-		/// returns the level of a specialization + bonuses from RR and Items
-		/// if 0 is returned, the spec is non existent on the living
-		/// </summary>
-		/// <param name="keyName"></param>
-		/// <returns></returns>
-		public virtual int GetModifiedSpecLevel(string keyName)
-		{
-			return Level;
-		}
-
-		#endregion
 		#region Regeneration
 		/// <summary>
 		/// GameTimer used for restoring hp

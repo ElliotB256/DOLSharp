@@ -26,22 +26,20 @@ namespace DOL.GS.PropertyCalc
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        //These need to be private - don't want anything outside of attribute modfying them!
-
         /// <summary>
         /// Bonuses to properties based on talents of the living.
         /// </summary>
-        private IPropertyIndexer m_TalentBonus;
+        protected IPropertyIndexer m_TalentBonus;
 
         /// <summary>
         /// Bonuses to properties based on equipment used by the living.
         /// </summary>
-        private IPropertyIndexer m_EquipmentBonus;
+        protected IPropertyIndexer m_EquipmentBonus;
 
         /// <summary>
         /// Bonuses to properties based on applied skill effects.
         /// </summary>
-        private IPropertyIndexer m_EffectBonus;
+        protected IPropertyIndexer m_EffectBonus;
 
         public int GetTalentBonus(eProperty prop)
         {
@@ -56,6 +54,24 @@ namespace DOL.GS.PropertyCalc
         public int GetEffectBonus(eProperty prop)
         {
             return m_EffectBonus[prop];
+        }
+
+        /// <summary>
+        /// Base value of properties.
+        /// </summary>
+        protected IPropertyIndexer m_PropertyBase;
+
+        /// <summary>
+        /// Get base value of property.
+        /// </summary>
+        public int GetPropertyBase(eProperty prop)
+        {
+            return m_PropertyBase[prop];
+        }
+
+        public void SetPropertyBase(eProperty prop, int value)
+        {
+            m_PropertyBase[prop] = value;
         }
 
         /// <summary>
@@ -74,6 +90,11 @@ namespace DOL.GS.PropertyCalc
                 log.ErrorFormat("{0} did not find property calculator for property ID {1}.", m_owner.Name, (int)property);
             }
             return 0;
+        }
+
+        public virtual int GetResist(eDamageType damageType, eCalculationType calculationType = eCalculationType.All)
+        {
+            
         }
 
         #region Static methods

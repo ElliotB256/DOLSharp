@@ -45,7 +45,7 @@ namespace DOL.GS.PropertyCalc
         /// <summary>
         /// Calculate the cap for this property.
         /// </summary>
-        public virtual int GetCap()
+        public virtual int GetCap(eCalculationType type)
         {
             return 0;
         }
