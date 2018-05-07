@@ -293,11 +293,11 @@ namespace DOL.GS.PacketHandler
 						{
 	
 							if (m_gameClient.Player.CharacterClass.ClassType != eClassType.PureTank)
-								acuityItemBonus = m_gameClient.Player.ItemBonus[(int)eProperty.Acuity];
+								acuityItemBonus = m_gameClient.Player.Attributes.GetEquipmentBonus(eProperty.Acuity);
 						}
 					}
 	
-					pak.WriteShort( (ushort)(m_gameClient.Player.ItemBonus[(int)updateStats[i]] + acuityItemBonus) );
+					pak.WriteShort( (ushort)(m_gameClient.Player.Attributes.GetEquipmentBonus((eProperty)updateStats[i]) + acuityItemBonus) );
 				}
 	
 				pak.WriteShort(0);

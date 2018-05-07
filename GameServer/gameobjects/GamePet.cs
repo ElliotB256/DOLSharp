@@ -152,7 +152,7 @@ namespace DOL.GS
 		/// </summary>
 		public override int SpellCriticalChance
 		{
-            get { return (Brain as IControlledBrain).GetLivingOwner().GetModified(eProperty.CriticalSpellHitChance); }
+            get { return (Brain as IControlledBrain).GetLivingOwner().Attributes.GetProperty(eProperty.CriticalSpellHitChance); }
 			set { }
 		}
 

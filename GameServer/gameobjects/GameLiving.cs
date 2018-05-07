@@ -47,11 +47,19 @@ namespace DOL.GS
 	{
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		#region Combat
-		/// <summary>
-		/// Holds the AttackData object of last attack
-		/// </summary>
-		public const string LAST_ATTACK_DATA = "LastAttackData";
+        /// <summary>
+        /// Can this living accept any item regardless of tradable or droppable?
+        /// </summary>
+        public virtual bool CanTradeAnyItem
+        {
+            get { return false; }
+        }
+
+        #region Combat
+        /// <summary>
+        /// Holds the AttackData object of last attack
+        /// </summary>
+        public const string LAST_ATTACK_DATA = "LastAttackData";
 
 		protected string m_lastInterruptMessage;
 		public string LastInterruptMessage
@@ -338,14 +346,6 @@ namespace DOL.GS
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Can this living accept any item regardless of tradable or droppable?
-		/// </summary>
-		public virtual bool CanTradeAnyItem
-		{
-			get { return false; }
-		}
 
 
 		/// <summary>
@@ -1679,7 +1679,7 @@ namespace DOL.GS
 				int resist = (int)(damage * ad.Target.GetDamageResist(GetResistTypeForDamage(ad.DamageType)) * -0.01);
 
 				eProperty property = ad.Target.GetResistTypeForDamage(ad.DamageType);
-				int secondaryResistModifier = ad.Target.SpecBuffBonusCategory[(int)property];
+                int secondaryResistModifier = 0;// ad.Target.SpecBuffBonusCategory[(int)property];
 				int resistModifier = 0;
 				resistModifier += (int)((ad.Damage + (double)resistModifier) * (double)secondaryResistModifier * -0.01);
 
@@ -2968,7 +2968,7 @@ namespace DOL.GS
 
 			// Missrate
 			int missrate = (ad.Attacker is GamePlayer) ? 20 : 25; //player vs player tests show 20% miss on any level
-			missrate -= ad.Attacker.GetModified(eProperty.ToHitBonus);
+			missrate -= ad.Attacker.Attributes.GetProperty(eProperty.ToHitBonus);
 			// PVE group missrate
 			if (this is GameNPC && ad.Attacker is GamePlayer &&
 			    ((GamePlayer)ad.Attacker).Group != null &&

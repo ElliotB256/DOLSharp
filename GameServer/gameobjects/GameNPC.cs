@@ -4448,7 +4448,7 @@ namespace DOL.GS
 			if (weapon != null && weapon.Item_Type == Slot.RANGED && RangedAttackType == eRangedAttackType.Critical)
 				return 0; // no crit damage for crit shots
 
-			return GetModified(eProperty.CriticalMeleeHitChance);
+			return Attributes.GetProperty(eProperty.CriticalMeleeHitChance);
 		}
 
 		/// <summary>
@@ -4552,9 +4552,9 @@ namespace DOL.GS
 						if (killer is GamePlayer)
 						{
 							GamePlayer killerPlayer = killer as GamePlayer;
-							if (killerPlayer.GetModified(eProperty.MythicalCoin) > 0)
+							if (killerPlayer.Attributes.GetProperty(eProperty.MythicalCoin) > 0)
 							{
-								value += (value * killerPlayer.GetModified(eProperty.MythicalCoin)) / 100;
+								value += (value * killerPlayer.Attributes.GetProperty(eProperty.MythicalCoin)) / 100;
 								killerPlayer.Out.SendMessage(LanguageMgr.GetTranslation(killerPlayer.Client,
 								                                                        "GameNPC.DropLoot.ItemAdditionalMoney", Money.GetString(value - lootTemplate.Price)), eChatType.CT_Loot, eChatLoc.CL_SystemWindow);
 							}

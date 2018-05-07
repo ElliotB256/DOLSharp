@@ -5557,114 +5557,20 @@ namespace DOL.GS
 			base.TakeDamage(source, damageType, damageAmount, criticalAmount);
 		}
 
-		/// <summary>
-		/// Gets the effective AF of this living.  This is used for the overall AF display
-		/// on the character but not used in any damage equations.
-		/// </summary>
-		public override int EffectiveOverallAF
-		{
-			get
-			{
-				int eaf = 0;
-				int abs = 0;
-				foreach (InventoryItem item in Inventory.VisibleItems)
-				{
-					double factor = 0;
-					switch (item.Item_Type)
-					{
-						case Slot.TORSO:
-							factor = 2.2;
-							break;
-						case Slot.LEGS:
-							factor = 1.3;
-							break;
-						case Slot.ARMS:
-							factor = 0.75;
-							break;
-						case Slot.HELM:
-							factor = 0.5;
-							break;
-						case Slot.HANDS:
-							factor = 0.25;
-							break;
-						case Slot.FEET:
-							factor = 0.25;
-							break;
-					}
+        public override int EffectiveOverallAF
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
-					int itemAFCap = Level << 1;
-					if (RealmLevel > 39)
-						itemAFCap += 2;
-					switch ((eObjectType)item.Object_Type)
-					{
-						case eObjectType.Cloth:
-							abs = 0;
-							itemAFCap >>= 1;
-							break;
-						case eObjectType.Leather:
-							abs = 10;
-							break;
-						case eObjectType.Reinforced:
-							abs = 19;
-							break;
-						case eObjectType.Studded:
-							abs = 19;
-							break;
-						case eObjectType.Scale:
-							abs = 27;
-							break;
-						case eObjectType.Chain:
-							abs = 27;
-							break;
-						case eObjectType.Plate:
-							abs = 34;
-							break;
-					}
-
-					if (factor > 0)
-					{
-						int af = item.DPS_AF;
-						if (af > itemAFCap)
-							af = itemAFCap;
-						double piece_eaf = af * item.Quality / 100.0 * item.ConditionPercent / 100.0 * (1 + abs / 100.0);
-						eaf += (int)(piece_eaf * factor);
-					}
-				}
-
-				// Overall AF CAP = 10 * level * (1 + abs%/100)
-				int bestLevel = -1;
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.AlbArmor));
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.HibArmor));
-				bestLevel = Math.Max(bestLevel, GetAbilityLevel(Abilities.MidArmor));
-				switch (bestLevel)
-				{
-						default: abs = 0; break; // cloth etc
-						case ArmorLevel.Leather: abs = 10; break;
-						case ArmorLevel.Studded: abs = 19; break;
-						case ArmorLevel.Chain: abs = 27; break;
-						case ArmorLevel.Plate: abs = 34; break;
-				}
-
-				eaf += BaseBuffBonusCategory[(int)eProperty.ArmorFactor]; // base buff before cap
-				int eafcap = (int)(10 * Level * (1 + abs * 0.01));
-				if (eaf > eafcap)
-					eaf = eafcap;
-				eaf += (int)Math.Min(Level * 1.875, SpecBuffBonusCategory[(int)eProperty.ArmorFactor])
-					- DebuffCategory[(int)eProperty.ArmorFactor]
-					+ BuffBonusCategory4[(int)eProperty.ArmorFactor]
-					+ Math.Min(Level, ItemBonus[(int)eProperty.ArmorFactor]);
-
-				eaf = (int)(eaf * BuffBonusMultCategory1.Get((int)eProperty.ArmorFactor));
-
-				return eaf;
-			}
-		}
-		/// <summary>
-		/// Calc Armor hit location when player is hit by enemy
-		/// </summary>
-		/// <returns>slotnumber where enemy hits</returns>
-		/// attackdata(ad) changed
-		public virtual eArmorSlot CalculateArmorHitLocation(AttackData ad)
+        /// <summary>
+        /// Calc Armor hit location when player is hit by enemy
+        /// </summary>
+        /// <returns>slotnumber where enemy hits</returns>
+        /// attackdata(ad) changed
+        public virtual eArmorSlot CalculateArmorHitLocation(AttackData ad)
 		{
 			if (ad.Style != null)
 			{
@@ -6151,7 +6057,7 @@ namespace DOL.GS
 
 			speed /= count;
 
-			int qui = Math.Min(250, Attributes.GetProperty(eProperty.Quickness); //250 soft cap on quickness
+			int qui = Math.Min(250, Attributes.GetProperty(eProperty.Quickness)); //250 soft cap on quickness
 
 			if (bowWeapon)
 			{
@@ -6513,21 +6419,6 @@ namespace DOL.GS
 			int classResist = 0;
 			int secondResist = 0;
 
-			//Q: Do the Magic resist bonuses from Bedazzling Aura and Empty Mind stack with each other?
-			//A: Nope.
-			switch ((eResist)property)
-			{
-				case eResist.Body:
-				case eResist.Cold:
-				case eResist.Energy:
-				case eResist.Heat:
-				case eResist.Matter:
-				case eResist.Spirit:
-					res += BaseBuffBonusCategory[(int)eProperty.MagicAbsorption];
-					break;
-				default:
-					break;
-			}
 			return (int)((res + classResist) - 0.01 * secondResist * (res + classResist) + secondResist);
 		}
 
