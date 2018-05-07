@@ -14,9 +14,10 @@ namespace DOL.GS.PropertyCalc
         {
             m_owner = owner;
 
-            m_TalentBonus = new PropertyIndexer();
-            m_EquipmentBonus = new PropertyIndexer();
-            m_EffectBonus = new PropertyIndexer();
+            m_TalentBonus = new PropertyIndexer((int)eProperty.MaxProperty);
+            m_EquipmentBonus = new PropertyIndexer((int)eProperty.MaxProperty);
+            m_EffectBonus = new PropertyIndexer((int)eProperty.MaxProperty);
+            m_PropertyBase = new PropertyIndexer((int)eProperty.MaxProperty);
         }
 
         /// <summary>
@@ -90,11 +91,6 @@ namespace DOL.GS.PropertyCalc
                 log.ErrorFormat("{0} did not find property calculator for property ID {1}.", m_owner.Name, (int)property);
             }
             return 0;
-        }
-
-        public virtual int GetResist(eDamageType damageType, eCalculationType calculationType = eCalculationType.All)
-        {
-            
         }
 
         #region Static methods

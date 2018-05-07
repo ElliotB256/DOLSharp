@@ -420,30 +420,30 @@ namespace DOL.GS.PacketHandler
 
 			using (var pak = new GSTCPPacketOut(GetPacketCode(eServerPackets.StatsUpdate), 36))
 			{
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.STR));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.DEX));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.CON));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.QUI));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.INT));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.PIE));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.EMP));
-				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.CHR));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Strength) - m_gameClient.Player.GetBaseStat(eStat.STR)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Dexterity) - m_gameClient.Player.GetBaseStat(eStat.DEX)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Constitution) - m_gameClient.Player.GetBaseStat(eStat.CON)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Quickness) - m_gameClient.Player.GetBaseStat(eStat.QUI)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Intelligence) - m_gameClient.Player.GetBaseStat(eStat.INT)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Piety) - m_gameClient.Player.GetBaseStat(eStat.PIE)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Empathy) - m_gameClient.Player.GetBaseStat(eStat.EMP)));
-				pak.WriteShort(
-					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Charisma) - m_gameClient.Player.GetBaseStat(eStat.CHR)));
+				pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Strength, PropertyCalc.eCalculationType.Base));
+				pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Dexterity, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Constitution, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Quickness, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Intelligence, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Piety, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Empathy, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort((ushort) m_gameClient.Player.Attributes.GetProperty(eProperty.Charisma, PropertyCalc.eCalculationType.Base));
+                pak.WriteShort(
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Strength, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Dexterity, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Constitution, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Quickness, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Intelligence, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Piety, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Empathy, PropertyCalc.eCalculationType.Bonus)));
+                pak.WriteShort(
+                    (ushort)(m_gameClient.Player.Attributes.GetProperty(eProperty.Charisma, PropertyCalc.eCalculationType.Bonus)));
 				pak.WriteShort((ushort) m_gameClient.Player.MaxHealth);
 				pak.WriteByte(0x24); //TODO Unknown
 				pak.WriteByte(0x25); //TODO Unknown

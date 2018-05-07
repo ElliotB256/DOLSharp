@@ -267,7 +267,7 @@ namespace DOL.GS.PacketHandler
 				// base
 				for (int i = 0; i < updateStats.Length; i++)
 				{
-					baseStats[i] = m_gameClient.Player.GetBaseStat(updateStats[i]);					
+					baseStats[i] = m_gameClient.Player.Attributes.GetProperty((eProperty)updateStats[i], PropertyCalc.eCalculationType.Base);					
 					pak.WriteShort((ushort)baseStats[i]);
 				}
 	

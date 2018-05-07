@@ -269,65 +269,6 @@ namespace DOL.GS
 			info.Add(" ");
 			info.Add(LanguageMgr.GetTranslation(player.Client.Account.Language, "PlayerBonusesListRequestHandler.HandlePacket.Special"));
 
-			//This is an Array of the bonuses that show up in the Bonus Snapshot on Live, the only ones that really need to be there.
-			int[] bonusToBeDisplayed = new int[36] { 10, 150, 151, 153, 154, 155, 173, 174, 179, 180, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 247, 248, 251, 252, 253, 254, 210 };
-			for (int i = 0; i < (int)eProperty.MaxProperty; i++)
-			{
-				if ((player.ItemBonus[i] > 0) && ((Array.BinarySearch(bonusToBeDisplayed, i)) >= 0)) //Tiny edit here to add the binary serach to weed out the non essential bonuses
-				{
-					if (player.ItemBonus[i] != 0)
-					{
-						//LIFEFLIGHT Add, to correct power pool from showing too much
-						//This is where we need to correct the display, make it cut off at the cap if
-						//Same with hits and hits cap
-						if (i == (int)eProperty.PowerPool)
-						{
-							int powercap = player.ItemBonus[(int)eProperty.PowerPoolCapBonus];
-							if (powercap > 50)
-							{
-								powercap = 50;
-							}
-							int powerpool = player.ItemBonus[(int)eProperty.PowerPool];
-							if (powerpool > powercap + 25)
-							{
-								int tempbonus = powercap + 25;
-								info.Add(ItemBonusDescription(tempbonus, i));
-							}
-							else
-							{
-								int tempbonus = powerpool;
-								info.Add(ItemBonusDescription(tempbonus, i));
-							}
-
-
-						}
-						else if (i == (int)eProperty.MaxHealth)
-						{
-							int hitscap = player.ItemBonus[(int)eProperty.MaxHealthCapBonus];
-							if (hitscap > 200)
-							{
-								hitscap = 200;
-							}
-							int hits = player.ItemBonus[(int)eProperty.MaxHealth];
-							if (hits > hitscap + 200)
-							{
-								int tempbonus = hitscap + 200;
-								info.Add(ItemBonusDescription(tempbonus, i));
-							}
-							else
-							{
-								int tempbonus = hits;
-								info.Add(ItemBonusDescription(tempbonus, i));
-							}
-						}
-						else
-						{
-							info.Add(ItemBonusDescription(player.ItemBonus[i], i));
-						}
-					}
-				}
-			}
-
 			info.Add(" ");
 			info.Add(LanguageMgr.GetTranslation(player.Client.Account.Language, "PlayerBonusesListRequestHandler.HandlePacket.Realm"));
 			if (player.RealmLevel > 10)

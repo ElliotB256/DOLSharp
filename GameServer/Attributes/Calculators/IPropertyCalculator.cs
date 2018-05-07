@@ -21,10 +21,11 @@ namespace DOL.GS.PropertyCalc
 {
     public enum eCalculationType
     {
-        All,
-        NotBuffs,
-        NotItems,
-        Base
+        All,        // Complete modified property value
+        NotBuffs,   // Modified property value from all but buffs
+        NotItems,   // Modified property value from all but items
+        Bonus,      // Amount property value is increased from all bonuses (does not include base)
+        Base        // Value of unmodified property
     }
 
     /// <summary>

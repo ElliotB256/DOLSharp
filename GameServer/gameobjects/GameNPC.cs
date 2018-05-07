@@ -199,11 +199,6 @@ namespace DOL.GS
 			{
 				base.Level = value;
 
-				if( Strength + Constitution + Dexterity + Quickness + Intelligence + Piety + Empathy + Charisma <= 0 )
-				{
-					AutoSetStats();
-				}
-
 				if (!InCombat)
 					m_health = MaxHealth;
 
@@ -217,22 +212,6 @@ namespace DOL.GS
 					}
 				}
 			}
-		}
-
-		public virtual void AutoSetStats()
-		{
-			// Values changed by Argo, based on Tolakrams Advice for how to change the Multiplier for Autoset str
-
-			Strength = (short)(Properties.MOB_AUTOSET_STR_BASE + Level * 10 * Properties.MOB_AUTOSET_STR_MULTIPLIER);
-			Constitution = (short)(Properties.MOB_AUTOSET_CON_BASE + Level * Properties.MOB_AUTOSET_CON_MULTIPLIER);
-			Quickness = (short)(Properties.MOB_AUTOSET_QUI_BASE + Level * Properties.MOB_AUTOSET_QUI_MULTIPLIER);
-			Dexterity = (short)(Properties.MOB_AUTOSET_DEX_BASE + Level * Properties.MOB_AUTOSET_DEX_MULTIPLIER);
-			
-			Intelligence = (short)(30);
-			Empathy = (short)(30);
-			Piety = (short)(30);
-			Charisma = (short)(30);
-			
 		}
 
 		/// <summary>
@@ -441,113 +420,6 @@ namespace DOL.GS
 		{
 			get { return m_houseNumber; }
 			set { m_houseNumber = value; }
-		}
-		#endregion
-		
-		#region Stats
-
-
-		/// <summary>
-		/// Change a stat value
-		/// (delegate to GameNPC)
-		/// </summary>
-		/// <param name="stat">The stat to change</param>
-		/// <param name="val">The new value</param>
-		public override void ChangeBaseStat(eStat stat, short val)
-		{
-			int oldstat = GetBaseStat(stat);
-			base.ChangeBaseStat(stat, val);
-			int newstat = GetBaseStat(stat);
-			GameNPC npc = this;
-			if (this != null && oldstat != newstat)
-			{
-				switch (stat)
-				{
-						case eStat.STR: npc.Strength = (short)newstat; break;
-						case eStat.DEX: npc.Dexterity = (short)newstat; break;
-						case eStat.CON: npc.Constitution = (short)newstat; break;
-						case eStat.QUI: npc.Quickness = (short)newstat; break;
-						case eStat.INT: npc.Intelligence = (short)newstat; break;
-						case eStat.PIE: npc.Piety = (short)newstat; break;
-						case eStat.EMP: npc.Empathy = (short)newstat; break;
-						case eStat.CHR: npc.Charisma = (short)newstat; break;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets NPC's constitution
-		/// </summary>
-		public virtual short Constitution
-		{
-			get
-			{
-				return m_charStat[eStat.CON - eStat._First];
-			}
-			set { m_charStat[eStat.CON - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's dexterity
-		/// </summary>
-		public virtual short Dexterity
-		{
-			get { return m_charStat[eStat.DEX - eStat._First]; }
-			set { m_charStat[eStat.DEX - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's strength
-		/// </summary>
-		public virtual short Strength
-		{
-			get { return m_charStat[eStat.STR - eStat._First]; }
-			set { m_charStat[eStat.STR - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's quickness
-		/// </summary>
-		public virtual short Quickness
-		{
-			get { return m_charStat[eStat.QUI - eStat._First]; }
-			set { m_charStat[eStat.QUI - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's intelligence
-		/// </summary>
-		public virtual short Intelligence
-		{
-			get { return m_charStat[eStat.INT - eStat._First]; }
-			set { m_charStat[eStat.INT - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's piety
-		/// </summary>
-		public virtual short Piety
-		{
-			get { return m_charStat[eStat.PIE - eStat._First]; }
-			set { m_charStat[eStat.PIE - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's empathy
-		/// </summary>
-		public virtual short Empathy
-		{
-			get { return m_charStat[eStat.EMP - eStat._First]; }
-			set { m_charStat[eStat.EMP - eStat._First] = value; }
-		}
-
-		/// <summary>
-		/// Gets NPC's charisma
-		/// </summary>
-		public virtual short Charisma
-		{
-			get { return m_charStat[eStat.CHR - eStat._First]; }
-			set { m_charStat[eStat.CHR - eStat._First] = value; }
 		}
 		#endregion
 		
@@ -1941,15 +1813,6 @@ namespace DOL.GS
 			Flags = (eFlags)dbMob.Flags;
 			m_packageID = dbMob.PackageID;
 
-			Strength = (short)dbMob.Strength;
-			Constitution = (short)dbMob.Constitution;
-			Dexterity = (short)dbMob.Dexterity;
-			Quickness = (short)dbMob.Quickness;
-			Intelligence = (short)dbMob.Intelligence;
-			Piety = (short)dbMob.Piety;
-			Charisma = (short)dbMob.Charisma;
-			Empathy = (short)dbMob.Empathy;
-
 			MeleeDamageType = (eDamageType)dbMob.MeleeDamageType;
 			if (MeleeDamageType == 0)
 			{
@@ -2120,16 +1983,6 @@ namespace DOL.GS
 			mob.Model = Model;
 			mob.Size = Size;
 			mob.Level = Level;
-
-			// Stats
-			mob.Constitution = Constitution;
-			mob.Dexterity = Dexterity;
-			mob.Strength = Strength;
-			mob.Quickness = Quickness;
-			mob.Intelligence = Intelligence;
-			mob.Piety = Piety;
-			mob.Empathy = Empathy;
-			mob.Charisma = Charisma;
 
 			mob.ClassType = this.GetType().ToString();
 			mob.Flags = (uint)Flags;
@@ -5252,11 +5105,7 @@ namespace DOL.GS
 			copyTarget.BlockChance = BlockChance;
 			copyTarget.BodyType = BodyType;
 			copyTarget.CanUseLefthandedWeapon = CanUseLefthandedWeapon;
-			copyTarget.Charisma = Charisma;
-			copyTarget.Constitution = Constitution;
 			copyTarget.CurrentRegion = CurrentRegion;
-			copyTarget.Dexterity = Dexterity;
-			copyTarget.Empathy = Empathy;
 			copyTarget.Endurance = Endurance;
 			copyTarget.EquipmentTemplateID = EquipmentTemplateID;
 			copyTarget.EvadeChance = EvadeChance;
@@ -5266,7 +5115,6 @@ namespace DOL.GS
 			copyTarget.ExamineArticle = ExamineArticle;
 			copyTarget.MessageArticle = MessageArticle;
 			copyTarget.Heading = Heading;
-			copyTarget.Intelligence = Intelligence;
 			copyTarget.IsCloakHoodUp = IsCloakHoodUp;
 			copyTarget.IsCloakInvisible = IsCloakInvisible;
 			copyTarget.IsHelmInvisible = IsHelmInvisible;
@@ -5282,15 +5130,12 @@ namespace DOL.GS
 			copyTarget.ParryChance = ParryChance;
 			copyTarget.PathID = PathID;
 			copyTarget.PathingNormalSpeed = PathingNormalSpeed;
-			copyTarget.Quickness = Quickness;
-			copyTarget.Piety = Piety;
 			copyTarget.Race = Race;
 			copyTarget.Realm = Realm;
 			copyTarget.RespawnInterval = RespawnInterval;
 			copyTarget.RoamingRange = RoamingRange;
 			copyTarget.Size = Size;
 			copyTarget.SaveInDB = SaveInDB;
-			copyTarget.Strength = Strength;
 			copyTarget.TetherRange = TetherRange;
 			copyTarget.MaxDistance = MaxDistance;
 			copyTarget.X = X;
