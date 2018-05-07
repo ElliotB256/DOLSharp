@@ -673,14 +673,12 @@ namespace DOL.GS
 				if (!InitComponent(FactionMgr.Init(), "Faction Managers"))
 					return false;
 
-				//---------------------------------------------------------------
-				//Load all calculators
-				if (!InitComponent(GameLiving.LoadCalculators(), "GameLiving.LoadCalculators()"))
-					return false;
+                if (!InitComponent(PropertyCalc.LivingProperties.LoadCalculators(), "Attributes.LoadCalculators()"))
+                    return false;
 
-				//---------------------------------------------------------------
-				//Try to start the npc equipment
-				if (!InitComponent(GameNpcInventoryTemplate.Init(), "Npc Equipment"))
+                //---------------------------------------------------------------
+                //Try to start the npc equipment
+                if (!InitComponent(GameNpcInventoryTemplate.Init(), "Npc Equipment"))
 					return false;
 
 				//---------------------------------------------------------------

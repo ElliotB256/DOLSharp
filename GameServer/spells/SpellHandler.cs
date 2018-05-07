@@ -1427,7 +1427,7 @@ namespace DOL.GS.Spells
 		/// <returns></returns>
 		public virtual int CalculateSpellRange()
 		{
-			int range = Math.Max(32, (int)(Spell.Range * Caster.GetModified(eProperty.SpellRange) * 0.01));
+			int range = Math.Max(32, (int)(Spell.Range * Caster.Attributes.GetProperty(eProperty.SpellRange) * 0.01));
 			return range;
 			//Dinberg: add for warlock range primer
 		}
@@ -2245,7 +2245,7 @@ namespace DOL.GS.Spells
 		protected virtual int CalculateEffectDuration(GameLiving target, double effectiveness)
 		{
 			double duration = Spell.Duration;
-			duration *= (1.0 + m_caster.GetModified(eProperty.SpellDuration) * 0.01);
+			duration *= (1.0 + m_caster.Attributes.GetProperty(eProperty.SpellDuration) * 0.01);
 			if (Spell.InstrumentRequirement != 0)
 			{
 				InventoryItem instrument = Caster.AttackWeapon;
@@ -3305,14 +3305,14 @@ namespace DOL.GS.Spells
 				    && player.CharacterClass.ID != (int)eCharacterClass.MaulerHib
 				    && player.CharacterClass.ID != (int)eCharacterClass.Vampiir)
 				{
-					int manaStatValue = player.GetModified((eProperty)player.CharacterClass.ManaStat);
+					int manaStatValue = player.Attributes.GetProperty((eProperty)player.CharacterClass.ManaStat);
 					spellDamage *= (manaStatValue + 200) / 275.0;
 				}
 			}
 			else if (Caster is GameNPC)
 			{
 				var npc = (GameNPC) Caster;
-				int manaStatValue = npc.GetModified(eProperty.Intelligence);
+				int manaStatValue = npc.Attributes.GetProperty(eProperty.Intelligence);
 				spellDamage = CapNPCSpellDamage(spellDamage, npc)*(manaStatValue + 200)/275.0;
 			}
 
@@ -3342,7 +3342,7 @@ namespace DOL.GS.Spells
 				caster = m_caster;
 			}
 
-			int spellbonus = caster.GetModified(eProperty.SpellLevel);
+			int spellbonus = caster.Attributes.GetProperty(eProperty.SpellLevel);
 			spellLevel += spellbonus;
 
 			GamePlayer playerCaster = caster as GamePlayer;
@@ -3360,7 +3360,7 @@ namespace DOL.GS.Spells
 				spellLevel = Math.Min(playerCaster.MaxLevel, target.Level);
 			}
 
-			int bonustohit = m_caster.GetModified(eProperty.ToHitBonus);
+			int bonustohit = m_caster.Attributes.GetProperty(eProperty.ToHitBonus);
 
 			/*
 			http://www.camelotherald.com/news/news_article.php?storyid=704
@@ -3444,7 +3444,7 @@ namespace DOL.GS.Spells
 
 			if (m_caster is GamePlayer)
 			{
-				effectiveness += m_caster.GetModified(eProperty.SpellDamage) * 0.01;
+				effectiveness += m_caster.Attributes.GetProperty(eProperty.SpellDamage) * 0.01;
 
 				// Relic bonus applied to damage, does not alter effectiveness or increase cap
 				spellDamage *= (1.0 + RelicMgr.GetRelicBonusModifier(m_caster.Realm, eRelicType.Magic));
@@ -3497,7 +3497,7 @@ namespace DOL.GS.Spells
 			 * through ITEMBONUSES for the specified percentage.
 			 * http://de.daocpedia.eu/index.php/Resistenz_durchdringen (translated)
 			 */
-			int resiPierce = Caster.GetModified(eProperty.ResistPierce);
+			int resiPierce = Caster.Attributes.GetProperty(eProperty.ResistPierce);
 			GamePlayer ply = Caster as GamePlayer;
 			if (resiPierce > 0 && Spell.SpellType != "Archery")
 			{
@@ -3540,11 +3540,11 @@ namespace DOL.GS.Spells
 				cdamage = Util.Random(finalDamage / 10, critmax); //think min crit is 10% of damage
 			}
 			//Andraste
-			if(ad.Target is GamePlayer && ad.Target.GetModified(eProperty.Conversion)>0)
+			if(ad.Target is GamePlayer && ad.Target.Attributes.GetProperty(eProperty.Conversion)>0)
 			{
-				int manaconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.GetModified(eProperty.Conversion)/200);
+				int manaconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.Attributes.GetProperty(eProperty.Conversion)/200);
 				//int enduconversion=(int)Math.Round((double)manaconversion*(double)ad.Target.MaxEndurance/(double)ad.Target.MaxMana);
-				int enduconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.GetModified(eProperty.Conversion)/200);
+				int enduconversion=(int)Math.Round(((double)ad.Damage+(double)ad.CriticalDamage)*(double)ad.Target.Attributes.GetProperty(eProperty.Conversion)/200);
 				if(ad.Target.Mana+manaconversion>ad.Target.MaxMana) manaconversion=ad.Target.MaxMana-ad.Target.Mana;
 				if(ad.Target.Endurance+enduconversion>ad.Target.MaxEndurance) enduconversion=ad.Target.MaxEndurance-ad.Target.Endurance;
 				if(manaconversion<1) manaconversion=0;

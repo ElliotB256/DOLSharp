@@ -143,6 +143,8 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Attributes\Attributes.cs" />
+    <Compile Include="Attributes\Calculators\MaxSpeedCalculator.cs" />
     <Compile Include="behaviour\AbstractTrigger.cs" />
     <Compile Include="behaviour\AbstractRequirement.cs" />
     <Compile Include="behaviour\Actions\AnimationAction.cs" />
@@ -1030,24 +1032,6 @@
     <Compile Include="playertitles\titles\level\ChampionTitle.cs" />
     <Compile Include="playertitles\titles\level\Level20Title.cs" />
     <Compile Include="playertitles\titles\rank\CraftTitle.cs" />
-    <Compile Include="propertycalc\ArcaneSyphonCalculator.cs" />
-    <Compile Include="propertycalc\ConversionPercentCalculator.cs" />
-    <Compile Include="propertycalc\BountyPointsCalculator.cs" />
-    <Compile Include="propertycalc\MythicalCoinCalculator.cs" />
-    <Compile Include="propertycalc\MythicalDiscumberingCalculator.cs" />
-    <Compile Include="propertycalc\RealmPointsCalculator.cs" />
-    <Compile Include="propertycalc\FatigueCalculator.cs" />
-    <Compile Include="propertycalc\CriticalSpellHitChanceCalculator.cs" />
-    <Compile Include="propertycalc\CriticalArcheryHitChanceCalculator.cs" />
-    <Compile Include="propertycalc\CriticalMeleeHitChanceCalculator.cs" />
-    <Compile Include="propertycalc\ExtraHPPercentCalculator.cs" />
-    <Compile Include="propertycalc\ResistPiercePropertyCalculator.cs" />
-    <Compile Include="propertycalc\MythicalSafeFallCalculator.cs" />
-    <Compile Include="propertycalc\SpellLevelCalculator.cs" />
-    <Compile Include="propertycalc\StyleAbsorbPercentCalculator.cs" />
-    <Compile Include="propertycalc\WaterSpeedCalculator.cs" />
-    <Compile Include="propertycalc\WeaponSkillCalculator.cs" />
-    <Compile Include="propertycalc\XPPointsCalculator.cs" />
     <Compile Include="quests\Missions\AbstractMission.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -1359,115 +1343,24 @@
     <Compile Include="playertitles\SimplePlayerTitle.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\ArcheryRangePercentCalculator.cs">
+    <Compile Include="Attributes\Calculators\IPropertyCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\ArcherySpeedPercentCalculator.cs">
+    <Compile Include="Attributes\Calculators\IPropertyIndexer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\ArmorAbsorbtionCalculator.cs">
+    <Compile Include="Attributes\Calculators\MaxHealthCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\ArmorFactorCalculator.cs">
+    <Compile Include="Attributes\Calculators\PropertyCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\BlockChanceCalculator.cs">
+    <Compile Include="Attributes\Calculators\PropertyCalculatorAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\DPSCalculator.cs" />
-    <Compile Include="propertycalc\EnduranceRegenerationRateCalculator.cs">
+    <Compile Include="Attributes\Calculators\PropertyIndexer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="propertycalc\EvadeChanceCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\FatigueConsumptionPercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\FocusLevelCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\FumbleChanceCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\HealthRegenerationRateCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\IMultiplicativeProperties.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\IPropertyCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\IPropertyIndexer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\LivingEffectiveLevelCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MaxConcentrationCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MaxHealthCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MaxManaCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MaxSpeedCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MeleeDamagePercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MeleeSpeedPercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MesmerizeDurationPercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\MultiplicativePropertiesHybrid.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\ParryChanceCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\PowerRegenerationRateCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\PropertyCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\PropertyCalculatorAttribute.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\PropertyIndexer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\RangedDamagePercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\ResistCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\SkillLevelCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\SpeedDecreaseDurationPercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\SpellRangePercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\StatCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\StunDurationPercentCalculator.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="propertycalc\StyleDamagePercentCalculator.cs" />
-    <Compile Include="propertycalc\TOABonusCalculator.cs" />
-    <Compile Include="propertycalc\ToHitCalculator.cs" />
     <Compile Include="quests\Tasks\AbstractTask.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -1510,34 +1403,19 @@
     <Compile Include="serverrules\ServerRulesAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="skillhandler\StatChangingAbility.cs" />
-    <Compile Include="skillhandler\PropertyChangingAbility.cs" />
-    <Compile Include="skillhandler\SpellCastingAbilityHandler.cs" />
     <Compile Include="skillhandler\SprintAbilityHandler.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="spells\buff\SingleStatAbilityBuffHandler.cs" />
     <Compile Include="spells\ConcentrationList.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="spells\ConfusionSpellHandler.cs" />
     <Compile Include="spells\ISpellHandler.cs" />
-    <Compile Include="spells\SingleStatBuff.cs" />
     <Compile Include="spells\SpellHelpers\SpellHelper.cs" />
     <Compile Include="spells\SpellHelpers\SpellMessagesHelper.cs" />
     <Compile Include="spells\SpellHelpers\StatsSpellHelper.cs" />
     <Compile Include="spells\Teleport\GatewayPersonalBind.cs" />
     <Compile Include="spells\Teleport\UniPortal.cs" />
-    <Compile Include="spells\PropertyChangingSpell.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="spells\RemoveSpellEffectHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="spells\ResurrectSpellHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="spells\SingleStatDebuff.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="spells\Spell.cs">

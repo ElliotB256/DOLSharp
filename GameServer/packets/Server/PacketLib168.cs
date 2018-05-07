@@ -429,21 +429,21 @@ namespace DOL.GS.PacketHandler
 				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.EMP));
 				pak.WriteShort((ushort) m_gameClient.Player.GetBaseStat(eStat.CHR));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Strength) - m_gameClient.Player.GetBaseStat(eStat.STR)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Strength) - m_gameClient.Player.GetBaseStat(eStat.STR)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Dexterity) - m_gameClient.Player.GetBaseStat(eStat.DEX)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Dexterity) - m_gameClient.Player.GetBaseStat(eStat.DEX)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Constitution) - m_gameClient.Player.GetBaseStat(eStat.CON)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Constitution) - m_gameClient.Player.GetBaseStat(eStat.CON)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Quickness) - m_gameClient.Player.GetBaseStat(eStat.QUI)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Quickness) - m_gameClient.Player.GetBaseStat(eStat.QUI)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Intelligence) - m_gameClient.Player.GetBaseStat(eStat.INT)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Intelligence) - m_gameClient.Player.GetBaseStat(eStat.INT)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Piety) - m_gameClient.Player.GetBaseStat(eStat.PIE)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Piety) - m_gameClient.Player.GetBaseStat(eStat.PIE)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Empathy) - m_gameClient.Player.GetBaseStat(eStat.EMP)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Empathy) - m_gameClient.Player.GetBaseStat(eStat.EMP)));
 				pak.WriteShort(
-					(ushort) (m_gameClient.Player.GetModified(eProperty.Charisma) - m_gameClient.Player.GetBaseStat(eStat.CHR)));
+					(ushort) (m_gameClient.Player.Attributes.GetProperty(eProperty.Charisma) - m_gameClient.Player.GetBaseStat(eStat.CHR)));
 				pak.WriteShort((ushort) m_gameClient.Player.MaxHealth);
 				pak.WriteByte(0x24); //TODO Unknown
 				pak.WriteByte(0x25); //TODO Unknown
@@ -1210,7 +1210,7 @@ namespace DOL.GS.PacketHandler
 					(byte)
 					Math.Min(byte.MaxValue,
 					         ((m_gameClient.Player.MaxSpeed*100/GamePlayer.PLAYER_BASE_SPEED)*
-					          (m_gameClient.Player.GetModified(eProperty.WaterSpeed)*.01))));
+					          (m_gameClient.Player.Attributes.GetProperty(eProperty.WaterSpeed)*.01))));
 				SendTCP(pak);
 			}
 		}

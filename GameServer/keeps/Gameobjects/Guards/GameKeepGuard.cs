@@ -126,7 +126,7 @@ namespace DOL.GS.Keeps
 
 		public override double GetArmorAbsorb(eArmorSlot slot)
 		{
-			double abs = GetModified(eProperty.ArmorAbsorption);
+			double abs = Attributes.GetProperty(eProperty.ArmorAbsorption);
 
 			if (this is GuardLord)
 			{
@@ -150,7 +150,7 @@ namespace DOL.GS.Keeps
 
 		public override int MaxHealth
 		{
-			get { return GetModified(eProperty.MaxHealth) + (base.Level * 4); }
+			get { return Attributes.GetProperty(eProperty.MaxHealth) + (base.Level * 4); }
 		}
 
 		private bool m_changingPositions = false;

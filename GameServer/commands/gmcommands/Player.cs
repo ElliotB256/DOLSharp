@@ -2219,7 +2219,7 @@ namespace DOL.GS.Commands
 			for (eProperty stat = eProperty.Stat_First; stat <= eProperty.Stat_Last; stat++, cnt++)
 			{
 				sTitle += GlobalConstants.PropertyToName(stat) + "/";
-				sCurrent += player.GetModified(stat) + "/";
+				sCurrent += player.Attributes.GetProperty(stat) + "/";
 				if (cnt == 3)
 				{
 					text.Add("  - Current stats " + sTitle + " : " + sCurrent);
@@ -2235,7 +2235,7 @@ namespace DOL.GS.Commands
 			for (eProperty res = eProperty.Resist_First; res <= eProperty.Resist_Last; res++, cnt++)
 			{
 				sTitle += GlobalConstants.PropertyToName(res) + "/";
-				sCurrent += player.GetModified(res) + "/";
+				sCurrent += player.Attributes.GetProperty(res) + "/";
 				if (cnt == 2)
 				{
 					text.Add("  - Current " + sTitle + " : " + sCurrent);
@@ -2252,8 +2252,8 @@ namespace DOL.GS.Commands
 			text.Add("  - Current " + sTitle + " : " + sCurrent);
 
 			text.Add("  - Maximum Health : " + player.MaxHealth);
-			text.Add("  - Current AF and ABS : " + player.GetModified(eProperty.ArmorFactor) + " AF, " +
-					 player.GetModified(eProperty.ArmorAbsorption) + " ABS");
+			text.Add("  - Current AF and ABS : " + player.Attributes.GetProperty(eProperty.ArmorFactor) + " AF, " +
+					 player.Attributes.GetProperty(eProperty.ArmorAbsorption) + " ABS");
 			text.Add(" ");
 			text.Add("SPECCING INFORMATIONS ");
 			text.Add("  - Respecs availables : " + player.RespecAmountDOL + " dol, " + player.RespecAmountSingleSkill +

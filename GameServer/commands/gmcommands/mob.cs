@@ -1302,8 +1302,8 @@ namespace DOL.GS.Commands
 			info.Add(" + INT  /  EMP  /  PIE  /  CHR");
 			info.Add(" + " + targetMob.Intelligence + "  /  " + targetMob.Empathy + "  /  " + targetMob.Piety + "  /  " + targetMob.Charisma);
 			info.Add(" + Block / Parry / Evade %:  " + targetMob.BlockChance + " / " + targetMob.ParryChance + " / " + targetMob.EvadeChance);
-			info.Add(" + Attack Speed (Melee Speed Increase %):  " + targetMob.AttackSpeed(targetMob.AttackWeapon) + " (" + (100 - targetMob.GetModified(eProperty.MeleeSpeed)) + ")");
-			info.Add(" + Casting Speed Increase %:  " + targetMob.GetModified(eProperty.CastingSpeed));
+			info.Add(" + Attack Speed (Melee Speed Increase %):  " + targetMob.AttackSpeed(targetMob.AttackWeapon) + " (" + (100 - targetMob.Attributes.GetProperty(eProperty.MeleeSpeed)) + ")");
+			info.Add(" + Casting Speed Increase %:  " + targetMob.Attributes.GetProperty(eProperty.CastingSpeed));
 
 			if (targetMob.LeftHandSwingChance > 0)
 				info.Add(" + Left Swing %: " + targetMob.LeftHandSwingChance);
@@ -1345,16 +1345,16 @@ namespace DOL.GS.Commands
 			info.Add(" ");
 
 			info.Add("Current Resists:");
-			info.Add(" +  -- Crush/Slash/Thrust:  " + targetMob.GetModified(eProperty.Resist_Crush)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Slash)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Thrust));
-			info.Add(" +  -- Heat/Cold/Matter:  " + targetMob.GetModified(eProperty.Resist_Heat)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Cold)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Matter));
-			info.Add(" +  -- Body/Spirit/Energy:  " + targetMob.GetModified(eProperty.Resist_Body)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Spirit)
-			         + " / " + targetMob.GetModified(eProperty.Resist_Energy));
-			info.Add(" +  -- Natural:  " + targetMob.GetModified(eProperty.Resist_Natural));
+			info.Add(" +  -- Crush/Slash/Thrust:  " + targetMob.Attributes.GetProperty(eProperty.Resist_Crush)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Slash)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Thrust));
+			info.Add(" +  -- Heat/Cold/Matter:  " + targetMob.Attributes.GetProperty(eProperty.Resist_Heat)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Cold)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Matter));
+			info.Add(" +  -- Body/Spirit/Energy:  " + targetMob.Attributes.GetProperty(eProperty.Resist_Body)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Spirit)
+			         + " / " + targetMob.Attributes.GetProperty(eProperty.Resist_Energy));
+			info.Add(" +  -- Natural:  " + targetMob.Attributes.GetProperty(eProperty.Resist_Natural));
 
 			info.Add(" ");
 
@@ -1421,20 +1421,20 @@ namespace DOL.GS.Commands
 			for (eProperty property = eProperty.Stat_First; property <= eProperty.Stat_Last; ++property)
 				info.Add(String.Format("{0}: {1}",
 				                       GlobalConstants.PropertyToName(property),
-				                       targetMob.GetModified(property)));
+				                       targetMob.Attributes.GetProperty(property)));
 			info.Add("");
 			info.Add("Modified resists:");
 			info.Add("");
 			for (eProperty property = eProperty.Resist_First + 1; property <= eProperty.Resist_Last; ++property)
 				info.Add(String.Format("{0}: {1}",
 				                       GlobalConstants.PropertyToName(property),
-				                       targetMob.GetModified(property)));
+				                       targetMob.Attributes.GetProperty(property)));
 			info.Add("");
 			info.Add("Miscellaneous:");
 			info.Add("");
 			info.Add(String.Format("Maximum Health: {0}", targetMob.MaxHealth));
-			info.Add(String.Format("Armor Factor (AF): {0}", targetMob.GetModified(eProperty.ArmorFactor)));
-			info.Add(String.Format("Absorption (ABS): {0}", targetMob.GetModified(eProperty.ArmorAbsorption)));
+			info.Add(String.Format("Armor Factor (AF): {0}", targetMob.Attributes.GetProperty(eProperty.ArmorFactor)));
+			info.Add(String.Format("Absorption (ABS): {0}", targetMob.Attributes.GetProperty(eProperty.ArmorAbsorption)));
 			client.Out.SendCustomTextWindow("[ " + targetMob.Name + " ]", info);
 			return;
 		}

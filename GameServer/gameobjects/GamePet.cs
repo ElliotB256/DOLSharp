@@ -291,8 +291,8 @@ namespace DOL.GS
 				weaponSpeed = 34.0;
 			}
 
-			double speed = 100 * weaponSpeed * (1.0 - (GetModified(eProperty.Quickness) - 60) / 500.0);
-			return (int)Math.Max(500.0, (speed * (double)GetModified(eProperty.MeleeSpeed) * 0.01)); // no bonus is 100%, opposite how players work
+			double speed = 100 * weaponSpeed * (1.0 - (Attributes.GetProperty(eProperty.Quickness) - 60) / 500.0);
+			return (int)Math.Max(500.0, (speed * (double)Attributes.GetProperty(eProperty.MeleeSpeed) * 0.01)); // no bonus is 100%, opposite how players work
 		}
 
 		/// <summary>
@@ -305,7 +305,7 @@ namespace DOL.GS
 			int ticks = spell.CastTime;
 
 			double percent = DexterityCastTimeReduction;
-			percent -= GetModified(eProperty.CastingSpeed) * .01;
+			percent -= Attributes.GetProperty(eProperty.CastingSpeed) * .01;
 
 			ticks = (int)(ticks * Math.Max(CastingSpeedReductionCap, percent));
 			if (ticks < MinimumCastingSpeed)

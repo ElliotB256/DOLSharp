@@ -1827,70 +1827,6 @@ namespace DOL.GS
 			}
 		}
 
-		/// <summary>
-		/// Gets player's constitution
-		/// </summary>
-		public int Constitution
-		{
-			get { return GetModified(eProperty.Constitution); }
-		}
-
-		/// <summary>
-		/// Gets player's dexterity
-		/// </summary>
-		public int Dexterity
-		{
-			get { return GetModified(eProperty.Dexterity); }
-		}
-
-		/// <summary>
-		/// Gets player's strength
-		/// </summary>
-		public int Strength
-		{
-			get { return GetModified(eProperty.Strength); }
-		}
-
-		/// <summary>
-		/// Gets player's quickness
-		/// </summary>
-		public int Quickness
-		{
-			get { return GetModified(eProperty.Quickness); }
-		}
-
-		/// <summary>
-		/// Gets player's intelligence
-		/// </summary>
-		public int Intelligence
-		{
-			get { return GetModified(eProperty.Intelligence); }
-		}
-
-		/// <summary>
-		/// Gets player's piety
-		/// </summary>
-		public int Piety
-		{
-			get { return GetModified(eProperty.Piety); }
-		}
-
-		/// <summary>
-		/// Gets player's empathy
-		/// </summary>
-		public int Empathy
-		{
-			get { return GetModified(eProperty.Empathy); }
-		}
-
-		/// <summary>
-		/// Gets player's charisma
-		/// </summary>
-		public int Charisma
-		{
-			get { return GetModified(eProperty.Charisma); }
-		}
-
 		protected IPlayerStatistics m_statistics = null;
 
 		/// <summary>
@@ -1996,13 +1932,13 @@ namespace DOL.GS
 
 			if (Health < MaxHealth)
 			{
-				ChangeHealth(this, eHealthChangeType.Regenerate, GetModified(eProperty.HealthRegenerationRate));
+				ChangeHealth(this, eHealthChangeType.Regenerate, Attributes.GetProperty(eProperty.HealthRegenerationRate));
 			}
 
 			#region PVP DAMAGE
 
 			if (DamageRvRMemory > 0)
-				DamageRvRMemory -= (long)Math.Max(GetModified(eProperty.HealthRegenerationRate), 0);
+				DamageRvRMemory -= (long)Math.Max(Attributes.GetProperty(eProperty.HealthRegenerationRate), 0);
 
 			#endregion PVP DAMAGE
 
@@ -2067,8 +2003,8 @@ namespace DOL.GS
 
 			if (Endurance < MaxEndurance || sprinting)
 			{
-				int regen = GetModified(eProperty.EnduranceRegenerationRate);  //default is 1
-				int endchant = GetModified(eProperty.FatigueConsumption);      //Pull chant/buff value
+				int regen = Attributes.GetProperty(eProperty.EnduranceRegenerationRate);  //default is 1
+				int endchant = Attributes.GetProperty(eProperty.FatigueConsumption);      //Pull chant/buff value
 
 				if (sprinting && IsMoving)
 				{
@@ -2150,8 +2086,8 @@ namespace DOL.GS
 			if (ChampionLevel >= 1)
 				hp3 = ServerProperties.Properties.HPS_PER_CHAMPIONLEVEL * ChampionLevel;
 			double hp4 = 20 + hp1 / 50 + hp2 + hp3;
-			if (GetModified(eProperty.ExtraHP) > 0)
-				hp4 += Math.Round(hp4 * (double)GetModified(eProperty.ExtraHP) / 100);
+			if (Attributes.GetProperty(eProperty.ExtraHP) > 0)
+				hp4 += Math.Round(hp4 * (double)Attributes.GetProperty(eProperty.ExtraHP) / 100);
 
 			return Math.Max(1, (int)hp4);
 		}
@@ -2243,7 +2179,7 @@ namespace DOL.GS
 		/// </summary>
 		public override int MaxMana
 		{
-			get { return GetModified(eProperty.MaxMana); }
+			get { return Attributes.GetProperty(eProperty.MaxMana); }
 		}
 
 		/// <summary>
@@ -2284,7 +2220,7 @@ namespace DOL.GS
 		/// </summary>
 		public override int MaxEndurance
 		{
-			get { return GetModified(eProperty.Fatigue); }
+			get { return Attributes.GetProperty(eProperty.Fatigue); }
 			set
 			{
 				//If it is already set, don't do anything
@@ -2309,7 +2245,7 @@ namespace DOL.GS
 		/// </summary>
 		public override int MaxConcentration
 		{
-			get { return GetModified(eProperty.MaxConcentration); }
+			get { return Attributes.GetProperty(eProperty.MaxConcentration); }
 		}
 
 		#region Calculate Fall Damage
@@ -3087,7 +3023,7 @@ namespace DOL.GS
 				// needs eProperty -> specKey conversion to find how much points player has spent
 				eProperty skillProp = SkillBase.SpecToSkill(keyName);
 				if (skillProp != eProperty.Undefined)
-					level += GetModified(skillProp);
+					level += Attributes.GetProperty(skillProp);
 			}
 				
 			return level;
@@ -3675,7 +3611,7 @@ namespace DOL.GS
 				}
 
 				//[Freya] Nidel: ToA Rp Bonus
-				long rpBonus = GetModified(eProperty.RealmPoints);
+				long rpBonus = Attributes.GetProperty(eProperty.RealmPoints);
 				if (rpBonus > 0)
 				{
 					amount += (amount * rpBonus) / 100;
@@ -3821,7 +3757,7 @@ namespace DOL.GS
 				}
 
 				//[Freya] Nidel: ToA Bp Bonus
-				long bpBonus = GetModified(eProperty.BountyPoints);
+				long bpBonus = Attributes.GetProperty(eProperty.BountyPoints);
 
 				if (bpBonus > 0)
 				{
@@ -4346,7 +4282,7 @@ namespace DOL.GS
 					expTotal = (long)(expTotal * ServerProperties.Properties.XP_RATE);
 
 				// [Freya] Nidel: ToA Xp Bonus
-				long xpBonus = GetModified(eProperty.XpPoints);
+				long xpBonus = Attributes.GetProperty(eProperty.XpPoints);
 				if (xpBonus != 0)
 				{
 					expTotal += (expTotal * xpBonus) / 100;
@@ -5835,7 +5771,7 @@ namespace DOL.GS
 			double preBuff = ((Level * classbase * 0.02 * (1 + (GetWeaponStat(weapon) - 50) * 0.005)) * Effectiveness);
 
 			//return ((Level * classbase * 0.02 * (1 + (GetWeaponStat(weapon) - 50) * 0.005)) * PlayerEffectiveness);
-			return Math.Max(0, preBuff * GetModified(eProperty.WeaponSkill) * 0.01);
+			return Math.Max(0, preBuff * Attributes.GetProperty(eProperty.WeaponSkill) * 0.01);
 		}
 
 		/// <summary>
@@ -5858,7 +5794,7 @@ namespace DOL.GS
 					case eObjectType.RecurvedBow:
 					case eObjectType.Thrown:
 					case eObjectType.Shield:
-						return GetModified(eProperty.Dexterity);
+						return Attributes.GetProperty(eProperty.Dexterity);
 
 						// STR+DEX modifier
 					case eObjectType.ThrustWeapon:
@@ -5866,11 +5802,11 @@ namespace DOL.GS
 					case eObjectType.Spear:
 					case eObjectType.Flexible:
 					case eObjectType.HandToHand:
-						return (GetModified(eProperty.Strength) + GetModified(eProperty.Dexterity)) >> 1;
+						return (Attributes.GetProperty(eProperty.Strength) + Attributes.GetProperty(eProperty.Dexterity)) >> 1;
 				}
 			}
 			// STR modifier for others
-			return GetModified(eProperty.Strength);
+			return Attributes.GetProperty(eProperty.Strength);
 		}
 
 		/// <summary>
@@ -5899,7 +5835,7 @@ namespace DOL.GS
 			// my test shows that qual is added after AF buff
 			eaf *= item.Quality * 0.01 * item.Condition / item.MaxCondition;
 
-			eaf += GetModified(eProperty.ArmorFactor);
+			eaf += Attributes.GetProperty(eProperty.ArmorFactor);
 
 			/*GameSpellEffect effect = SpellHandler.FindEffectOnTarget(this, typeof(VampiirArmorDebuff));
 			if (effect != null && slot == (effect.SpellHandler as VampiirArmorDebuff).Slot)
@@ -5920,7 +5856,7 @@ namespace DOL.GS
 			InventoryItem item = Inventory.GetItem((eInventorySlot)slot);
 			if (item == null) return 0;
 			// vampiir random armor debuff change ~
-			double eaf = (item.SPD_ABS + GetModified(eProperty.ArmorAbsorption)) * 0.01;
+			double eaf = (item.SPD_ABS + Attributes.GetProperty(eProperty.ArmorAbsorption)) * 0.01;
 			return eaf;
 		}
 
@@ -5964,7 +5900,7 @@ namespace DOL.GS
 					DPS = cap;
 				}
 				//(1.0 + BuffBonusCategory1[(int)eProperty.DPS]/100.0 - BuffBonusCategory3[(int)eProperty.DPS]/100.0)
-				DPS = (int)(DPS * (1 + (GetModified(eProperty.DPS) * 0.01)));
+				DPS = (int)(DPS * (1 + (Attributes.GetProperty(eProperty.DPS) * 0.01)));
 				// beware to use always ConditionPercent, because Condition is abolute value
 				//				return (int) ((DPS/10.0)*(weapon.Quality/100.0)*(weapon.Condition/(double)weapon.MaxCondition)*100.0);
 				double wdamage = (0.001 * DPS * weapon.Quality * weapon.Condition) / weapon.MaxCondition;
@@ -6019,22 +5955,22 @@ namespace DOL.GS
 				{
 					if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == true)
 					{
-						result += GetModified(eProperty.RangedDamage) * 0.01;
+						result += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 					}
 					else if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == false)
 					{
-						result += GetModified(eProperty.SpellDamage) * 0.01;
-						result += GetModified(eProperty.RangedDamage) * 0.01;
+						result += Attributes.GetProperty(eProperty.SpellDamage) * 0.01;
+						result += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 					}
 				}
 				else if (weapon.Item_Type == Slot.RANGED)
 				{
 					//Ranged damage buff,debuff,Relic,RA
-					result += GetModified(eProperty.RangedDamage) * 0.01;
+					result += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 				}
 				else if (weapon.Item_Type == Slot.RIGHTHAND || weapon.Item_Type == Slot.LEFTHAND || weapon.Item_Type == Slot.TWOHAND)
 				{
-					result += GetModified(eProperty.MeleeDamage) * 0.01;
+					result += Attributes.GetProperty(eProperty.MeleeDamage) * 0.01;
 				}
 				
 				return result;
@@ -6067,13 +6003,13 @@ namespace DOL.GS
 			// check for melee attack
 			if (weapon != null && weapon.Item_Type != Slot.RANGED)
 			{
-				return GetModified(eProperty.CriticalMeleeHitChance);
+				return Attributes.GetProperty(eProperty.CriticalMeleeHitChance);
 			}
 
 			// check for ranged attack
 			if (weapon != null && weapon.Item_Type == Slot.RANGED)
 			{
-				return GetModified(eProperty.CriticalArcheryHitChance);
+				return Attributes.GetProperty(eProperty.CriticalArcheryHitChance);
 			}
 
 			// base 10% chance of critical for all with melee weapons
@@ -6142,7 +6078,7 @@ namespace DOL.GS
 							default: range = 1200; break; // shortbow, xbow, throwing
 					}
 
-					range = Math.Max(32, range * GetModified(eProperty.ArcheryRange) * 0.01);
+					range = Math.Max(32, range * Attributes.GetProperty(eProperty.ArcheryRange) * 0.01);
 
 					if (ammo != null)
 						switch ((ammo.SPD_ABS >> 2) & 0x3)
@@ -6215,7 +6151,7 @@ namespace DOL.GS
 
 			speed /= count;
 
-			int qui = Math.Min(250, Quickness); //250 soft cap on quickness
+			int qui = Math.Min(250, Attributes.GetProperty(eProperty.Quickness); //250 soft cap on quickness
 
 			if (bowWeapon)
 			{
@@ -6225,7 +6161,7 @@ namespace DOL.GS
 			{
 				// TODO use haste
 				//Weapon Speed*(1-(Quickness-60)/500]*(1-Haste)
-				speed *= (1.0 - (qui - 60) * 0.002) * 0.01 * GetModified(eProperty.MeleeSpeed);
+				speed *= (1.0 - (qui - 60) * 0.002) * 0.01 * Attributes.GetProperty(eProperty.MeleeSpeed);
 			}
 
 			// apply speed cap
@@ -6270,12 +6206,12 @@ namespace DOL.GS
 					}
 				}
 				//Ranged damage buff,debuff,Relic,RA
-				effectiveness += GetModified(eProperty.RangedDamage) * 0.01;
+				effectiveness += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 			}
 			else if (weapon.Item_Type == Slot.RIGHTHAND || weapon.Item_Type == Slot.LEFTHAND || weapon.Item_Type == Slot.TWOHAND)
 			{
 				//Melee damage buff,debuff,Relic,RA
-				effectiveness += GetModified(eProperty.MeleeDamage) * 0.01;
+				effectiveness += Attributes.GetProperty(eProperty.MeleeDamage) * 0.01;
 			}
 			damage *= effectiveness;
 			return damage;
@@ -6790,7 +6726,7 @@ namespace DOL.GS
                 return;
             }
 
-            double fumbleChance = GetModified(eProperty.SpellFumbleChance);
+            double fumbleChance = Attributes.GetProperty(eProperty.SpellFumbleChance);
             fumbleChance *= 0.01;
             if (fumbleChance > 0)
             {
@@ -6893,7 +6829,7 @@ namespace DOL.GS
 
 			double percent = DexterityCastTimeReduction;
 
-			percent *= 1.0 - GetModified(eProperty.CastingSpeed) * 0.01;
+			percent *= 1.0 - Attributes.GetProperty(eProperty.CastingSpeed) * 0.01;
 
 			ticks = (int)(ticks * Math.Max(CastingSpeedReductionCap, percent));
 			if (ticks < MinimumCastingSpeed)
@@ -9722,12 +9658,12 @@ namespace DOL.GS
 		{
 			get
 			{
-				double enc = (double)Strength;
+				double enc = (double)Attributes.GetProperty(eProperty.Strength);
 
 				// Apply Mythirian Bonus
-				if (GetModified(eProperty.MythicalDiscumbering) > 0)
+				if (Attributes.GetProperty(eProperty.MythicalDiscumbering) > 0)
 				{
-					enc += GetModified(eProperty.MythicalDiscumbering);
+					enc += Attributes.GetProperty(eProperty.MythicalDiscumbering);
 				}
 
 				return (int)enc;

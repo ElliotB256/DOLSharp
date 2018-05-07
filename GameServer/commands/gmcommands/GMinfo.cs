@@ -370,13 +370,13 @@ namespace DOL.GS.Commands
 					info.Add(" ");
 					info.Add("CHARACTER STATS ");
 					info.Add("  - Maximum Health : " + target.MaxHealth);
-					info.Add("  - Current AF : " + target.GetModified(eProperty.ArmorFactor));
-					info.Add("  - Current ABS : " + target.GetModified(eProperty.ArmorAbsorption));
+					info.Add("  - Current AF : " + target.Attributes.GetProperty(eProperty.ArmorFactor));
+					info.Add("  - Current ABS : " + target.Attributes.GetProperty(eProperty.ArmorAbsorption));
 
 					for (eProperty stat = eProperty.Stat_First; stat <= eProperty.Stat_Last; stat++, cnt++)
 					{
 						sTitle += GlobalConstants.PropertyToName(stat);
-                        sCurrent += target.GetModified(stat);
+                        sCurrent += target.Attributes.GetProperty(stat);
 						
 						info.Add("  - " + sTitle + " : " + sCurrent);
 						sCurrent = "";
@@ -389,7 +389,7 @@ namespace DOL.GS.Commands
 					for (eProperty res = eProperty.Resist_First; res <= eProperty.Resist_Last; res++, cnt++)
 					{
 						sTitle += GlobalConstants.PropertyToName(res);
-                        sCurrent += target.GetModified(res);
+                        sCurrent += target.Attributes.GetProperty(res);
 						info.Add("  - " + sTitle + " : " + sCurrent);
 						sCurrent = "";
 						sTitle = "";

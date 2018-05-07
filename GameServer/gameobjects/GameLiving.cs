@@ -355,7 +355,7 @@ namespace DOL.GS
 		{
 			get
 			{
-				double chanceToFumble = GetModified(eProperty.FumbleChance);
+				double chanceToFumble = Attributes.GetProperty(eProperty.FumbleChance);
 				chanceToFumble *= 0.001;
 
 				if (chanceToFumble > 0.99) chanceToFumble = 0.99;
@@ -372,7 +372,7 @@ namespace DOL.GS
 		{
 			get
 			{
-				double chanceToBeMissed = GetModified(eProperty.MissHit);
+				double chanceToBeMissed = Attributes.GetProperty(eProperty.MissHit);
 				chanceToBeMissed *= 0.001;
 
 				if (chanceToBeMissed > 0.99) chanceToBeMissed = 0.99;
@@ -798,16 +798,16 @@ namespace DOL.GS
 		/// <returns>effective speed of the attack. average if more than one weapon.</returns>
 		public virtual int AttackSpeed(params InventoryItem[] weapon)
 		{
-			double speed = 3000 * (1.0 - (GetModified(eProperty.Quickness) - 60) / 500.0);
+			double speed = 3000 * (1.0 - (Attributes.GetProperty(eProperty.Quickness) - 60) / 500.0);
 
 			if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
 			{
 				speed *= 1.5; // mob archer speed too fast
-				speed *= 1.0 - GetModified(eProperty.CastingSpeed) * 0.01;
+				speed *= 1.0 - Attributes.GetProperty(eProperty.CastingSpeed) * 0.01;
 			}
 			else
 			{
-				speed *= GetModified(eProperty.MeleeSpeed) * 0.01;
+				speed *= Attributes.GetProperty(eProperty.MeleeSpeed) * 0.01;
 			}
 
 			return (int) Math.Max(500.0, speed);
@@ -825,24 +825,24 @@ namespace DOL.GS
 			if (weapon == null || weapon.Item_Type == Slot.RIGHTHAND || weapon.Item_Type == Slot.LEFTHAND || weapon.Item_Type == Slot.TWOHAND)
 			{
 				//Melee damage buff,debuff,RA
-				effectiveness += GetModified(eProperty.MeleeDamage) * 0.01;
+				effectiveness += Attributes.GetProperty(eProperty.MeleeDamage) * 0.01;
 			}
 			else if (weapon.Item_Type == Slot.RANGED && (weapon.Object_Type == (int)eObjectType.Longbow || weapon.Object_Type == (int)eObjectType.RecurvedBow || weapon.Object_Type == (int)eObjectType.CompositeBow))
 			{
 				// RDSandersJR: Check to see if we are using old archery if so, use RangedDamge
 				if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == true)
 				{
-					effectiveness += GetModified(eProperty.RangedDamage) * 0.01;
+					effectiveness += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 				}
 				// RDSandersJR: If we are NOT using old archery it should be SpellDamage
 				else if (ServerProperties.Properties.ALLOW_OLD_ARCHERY == false)
 				{
-					effectiveness += GetModified(eProperty.SpellDamage) * 0.01;
+					effectiveness += Attributes.GetProperty(eProperty.SpellDamage) * 0.01;
 				}
 			}
 			else if (weapon.Item_Type == Slot.RANGED)
 			{
-				effectiveness += GetModified(eProperty.RangedDamage) * 0.01;
+				effectiveness += Attributes.GetProperty(eProperty.RangedDamage) * 0.01;
 			}
 			damage *= effectiveness;
 			return damage;
@@ -926,7 +926,7 @@ namespace DOL.GS
 		{
 			get
 			{
-				int dex = GetModified(eProperty.Dexterity);
+				int dex = Attributes.GetProperty(eProperty.Dexterity);
 				if (dex < 60) return 1.0;
 				else if (dex < 250) return 1.0 - (dex - 60) * 0.15 * 0.01;
 				else return 1.0 - ((dex - 60) * 0.15 + (dex - 250) * 0.05) * 0.01;
@@ -945,7 +945,7 @@ namespace DOL.GS
 				//automatically
 				if (ActiveWeaponSlot == eActiveWeaponSlot.Distance)
 				{
-					return Math.Max(32, (int)(2000.0 * GetModified(eProperty.ArcheryRange) * 0.01));
+					return Math.Max(32, (int)(2000.0 * Attributes.GetProperty(eProperty.ArcheryRange) * 0.01));
 				}
 				//Normal mob attacks have 200 ...
 				//TODO dragon, big mobs etc...
@@ -962,7 +962,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public virtual int GetWeaponStat(InventoryItem weapon)
 		{
-			return GetModified(eProperty.Strength);
+			return Attributes.GetProperty(eProperty.Strength);
 		}
 
 		/// <summary>
@@ -972,7 +972,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public virtual double GetArmorAF(eArmorSlot slot)
 		{
-			return GetModified(eProperty.ArmorFactor);
+			return Attributes.GetProperty(eProperty.ArmorFactor);
 		}
 
 		/// <summary>
@@ -982,7 +982,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public virtual double GetArmorAbsorb(eArmorSlot slot)
 		{
-			return GetModified(eProperty.ArmorAbsorption) * 0.01;
+			return Attributes.GetProperty(eProperty.ArmorAbsorption) * 0.01;
 		}
 
 		/// <summary>
@@ -1027,7 +1027,7 @@ namespace DOL.GS
 		/// </summary>
 		public virtual int SpellCriticalChance
 		{
-			get { return GetModified(eProperty.CriticalSpellHitChance); }
+			get { return Attributes.GetProperty(eProperty.CriticalSpellHitChance); }
 			set { }
 		}
 		/// <summary>
@@ -3070,7 +3070,7 @@ namespace DOL.GS
 			// target's offensive RA, debuffs, and a few others. (The type of weapon - large, 1H,
 			// etc - doesn't matter.) ...."
 
-			double evadeChance = GetModified( eProperty.EvadeChance );
+			double evadeChance = Attributes.GetProperty( eProperty.EvadeChance );
 
             if (IsIncapacitated && !IsSitting)
                 evadeChance = 0;
@@ -3097,7 +3097,7 @@ namespace DOL.GS
 			double parryChance = 0;
 
             if (IsObjectInFront(ad.Attacker, 120) && AttackWeapon != null && ad.IsMeleeAttack)
-                parryChance = GetModified(eProperty.ParryChance);
+                parryChance = Attributes.GetProperty(eProperty.ParryChance);
 
             if (IsIncapacitated)
                 parryChance = 0;
@@ -3123,7 +3123,7 @@ namespace DOL.GS
 			double blockChance = 0;
 
 			if (IsObjectInFront( ad.Attacker, 120 ) && IsEquippedToBlock())
-                blockChance = GetModified(eProperty.BlockChance) * 0.01;
+                blockChance = Attributes.GetProperty(eProperty.BlockChance) * 0.01;
 
             if (IsIncapacitated || IsSitting)
                 blockChance = 0;
@@ -3807,225 +3807,19 @@ namespace DOL.GS
 			m_visibleActiveWeaponSlots = (byte)(((leftHand & 0x0F) << 4) | (rightHand & 0x0F));
 		}
 		#endregion
-		#region Property/Bonus/Buff/PropertyCalculator fields
-		/// <summary>
-		/// Array for property boni for abilities
-		/// </summary>
-		protected IPropertyIndexer m_abilityBonus = new PropertyIndexer();
-		/// <summary>
-		/// Ability bonus property
-		/// </summary>
-		public virtual IPropertyIndexer AbilityBonus
-		{
-			get { return m_abilityBonus; }
-		}
 
-		/// <summary>
-		/// Array for property boni by items
-		/// </summary>
-		protected IPropertyIndexer m_itemBonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Item Bonus field
-		/// </summary>
-		public virtual IPropertyIndexer ItemBonus
-		{
-			get { return m_itemBonus; }
-		}
-
-
-		/// <summary>
-		/// Array for buff boni
-		/// </summary>
-		protected IPropertyIndexer m_buff1Bonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IPropertyIndexer BaseBuffBonusCategory
-		{
-			get { return m_buff1Bonus; }
-		}
-
-		/// <summary>
-		/// Array for second buff boni
-		/// </summary>
-		protected IPropertyIndexer m_buff2Bonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IPropertyIndexer SpecBuffBonusCategory
-		{
-			get { return m_buff2Bonus; }
-		}
-
-		/// <summary>
-		/// Array for third debuff boni
-		/// </summary>
-		protected IPropertyIndexer m_debuffBonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IPropertyIndexer DebuffCategory
-		{
-			get { return m_debuffBonus; }
-		}
-
-		/// <summary>
-		/// Array for forth buff boni
-		/// </summary>
-		protected IPropertyIndexer m_buff4Bonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IPropertyIndexer BuffBonusCategory4
-		{
-			get { return m_buff4Bonus; }
-		}
-
-		/// <summary>
-		/// Array for first multiplicative buff boni
-		/// </summary>
-		protected IMultiplicativeProperties m_buffMult1Bonus = new MultiplicativePropertiesHybrid();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IMultiplicativeProperties BuffBonusMultCategory1
-		{
-			get { return m_buffMult1Bonus; }
-		}
-
-		/// <summary>
-		/// Array for spec debuff boni
-		/// </summary>
-		protected IPropertyIndexer m_specDebuffBonus = new PropertyIndexer();
-		/// <summary>
-		/// Property Buff bonus category
-		/// what it means depends from the PropertyCalculator for a property element
-		/// </summary>
-		public IPropertyIndexer SpecDebuffCategory
-		{
-			get { return m_specDebuffBonus; }
-		}
-		
-		/// <summary>
-		/// property calculators for each property
-		/// look at PropertyCalculator class for more description
-		/// </summary>
-		internal static readonly IPropertyCalculator[] m_propertyCalc = new IPropertyCalculator[(int)eProperty.MaxProperty+1];
-
-		/// <summary>
-		/// retrieve a property value of that living
-		/// this value is modified/capped and ready to use
-		/// </summary>
-		/// <param name="property"></param>
-		/// <returns></returns>
-		public virtual int GetModified(eProperty property)
-		{
-			if (m_propertyCalc != null && m_propertyCalc[(int)property] != null)
-			{
-				return m_propertyCalc[(int)property].CalcValue(this, property);
-			}
-			else
-			{
-				log.ErrorFormat("{0} did not find property calculator for property ID {1}.", Name, (int)property);
-			}
-			return 0;
-		}
-
-		//Eden : secondary resists, such AoM, vampiir magic resistance etc, should not apply in CC duration, disease, debuff etc, using a new function
-		public virtual int GetModifiedBase(eProperty property)
-		{
-			if (m_propertyCalc != null && m_propertyCalc[(int)property] != null)
-			{
-				return m_propertyCalc[(int)property].CalcValueBase(this, property);
-			}
-			else
-			{
-				log.ErrorFormat("{0} did not find base property calculator for property ID {1}.", Name, (int)property);
-			}
-			return 0;
-		}
-
-		/// <summary>
-		/// Retrieve a property value of this living's buff bonuses only;
-		/// caps and cap increases apply.
-		/// </summary>
-		/// <param name="property"></param>
-		/// <returns></returns>
-		public virtual int GetModifiedFromBuffs(eProperty property)
-		{
-			if (m_propertyCalc != null && m_propertyCalc[(int)property] != null)
-			{
-				return m_propertyCalc[(int)property].CalcValueFromBuffs(this, property);
-			}
-			else
-			{
-				log.ErrorFormat("{0} did not find buff property calculator for property ID {1}.", Name, (int)property);
-			}
-			return 0;
-		}
-
-		/// <summary>
-		/// Retrieve a property value of this living's item bonuses only;
-		/// caps and cap increases apply.
-		/// </summary>
-		/// <param name="property"></param>
-		/// <returns></returns>
-		public virtual int GetModifiedFromItems(eProperty property)
-		{
-			if (m_propertyCalc != null && m_propertyCalc[(int)property] != null)
-			{
-				return m_propertyCalc[(int)property].CalcValueFromItems(this, property);
-			}
-			else
-			{
-				log.ErrorFormat("{0} did not find item property calculator for property ID {1}.", Name, (int)property);
-			}
-			return 0;
-		}
-
-		/// <summary>
-		/// has to be called after properties were changed and updates are needed
-		/// TODO: not sure about property change detection, has to be reviewed
-		/// </summary>
-		public virtual void PropertiesChanged()
-		{
-			//			// take last changes as old ones now
-			//			for (int i=0; i<m_oldTempProps.Length; i++)
-			//			{
-			//				m_oldTempProps[i] = m_newTempProps[i];
-			//			}
-			//
-			//			// recalc new array to detect changes later
-			//			for (int i=0; i<m_propertyCalc.Length; i++)
-			//			{
-			//				if (m_propertyCalc[i]!=null)
-			//				{
-			//					m_newTempProps[i] = m_propertyCalc[i].CalcValue(this, (eProperty)i);
-			//				}
-			//				else
-			//				{
-			//					m_newTempProps[i] = 0;
-			//				}
-			//			}
-		}
-
-		#endregion
+        /// <summary>
+        /// Properties of this living.
+        /// </summary>
+        public LivingProperties Attributes { get; protected set; }
+        
 		#region Stats, Resists
-		/// <summary>
-		/// The name of the states
-		/// </summary>
-		public static readonly string[] STAT_NAMES = new string[]{"Unknown Stat","Strength", "Dexterity", "Constitution", "Quickness", "Intelligence",
-			"Piety", "Empathy", "Charisma"};
 
 		/// <summary>
 		/// base values for char stats
 		/// </summary>
 		protected readonly short[] m_charStat = new short[8];
+
 		/// <summary>
 		/// get a unmodified char stat value
 		/// </summary>
@@ -4086,12 +3880,7 @@ namespace DOL.GS
 		/// <returns>the resist value</returns>
 		public virtual int GetResist(eDamageType damageType)
 		{
-			return GetModified(GetResistTypeForDamage(damageType));
-		}
-
-		public virtual int GetResistBase(eDamageType damageType)
-		{
-			return GetModifiedBase(GetResistTypeForDamage(damageType));
+			return Attributes.GetProperty(GetResistTypeForDamage(damageType));
 		}
 
 		/// <summary>
@@ -4133,7 +3922,7 @@ namespace DOL.GS
 		/// </summary>
 		public override int EffectiveLevel
 		{
-			get { return GetModified(eProperty.LivingEffectiveLevel); }
+			get { return Attributes.GetProperty(eProperty.LivingEffectiveLevel); }
 		}
 
 		/// <summary>
@@ -4329,7 +4118,7 @@ namespace DOL.GS
 		{
 			if (Health < MaxHealth)
 			{
-				ChangeHealth(this, eHealthChangeType.Regenerate, GetModified(eProperty.HealthRegenerationRate));
+				ChangeHealth(this, eHealthChangeType.Regenerate, Attributes.GetProperty(eProperty.HealthRegenerationRate));
 			}
 
 			//If we are fully healed, we stop the timer
@@ -4388,7 +4177,7 @@ namespace DOL.GS
 			{
 				if (Mana < MaxMana)
 				{
-					ChangeMana(this, eManaChangeType.Regenerate, GetModified(eProperty.PowerRegenerationRate));
+					ChangeMana(this, eManaChangeType.Regenerate, Attributes.GetProperty(eProperty.PowerRegenerationRate));
 				}
 
 				//If we are full, we stop the timer
@@ -4415,7 +4204,7 @@ namespace DOL.GS
 		{
 			if (Endurance < MaxEndurance)
 			{
-				int regen = GetModified(eProperty.EnduranceRegenerationRate);
+				int regen = Attributes.GetProperty(eProperty.EnduranceRegenerationRate);
 				if (regen > 0)
 				{
 					ChangeEndurance(this, eEnduranceChangeType.Regenerate, regen);
@@ -4484,7 +4273,7 @@ namespace DOL.GS
 
 		public override int MaxHealth
 		{
-			get {	return GetModified(eProperty.MaxHealth); }
+			get {	return Attributes.GetProperty(eProperty.MaxHealth); }
 		}
 
 		public virtual int Mana
@@ -4510,7 +4299,7 @@ namespace DOL.GS
 		{
 			get
 			{
-				return GetModified(eProperty.MaxMana);
+				return Attributes.GetProperty(eProperty.MaxMana);
 			}
 		}
 
@@ -4708,7 +4497,7 @@ namespace DOL.GS
 				if (FixedSpeed)
 					return MaxSpeedBase;
 
-				return (short)GetModified(eProperty.MaxSpeed);
+				return (short)Attributes.GetProperty(eProperty.MaxSpeed);
 			}
 		}
 
@@ -5878,49 +5667,6 @@ namespace DOL.GS
 		}
 
 		#endregion
-		#region LoadCalculators
-		/// <summary>
-		/// Load the property calculations
-		/// </summary>
-		/// <returns></returns>
-		public static bool LoadCalculators()
-		{
-			try
-			{
-				foreach (Assembly asm in ScriptMgr.GameServerScripts)
-				{
-					foreach (Type t in asm.GetTypes())
-					{
-						try
-						{
-							if (!t.IsClass || t.IsAbstract) continue;
-							if (!typeof(IPropertyCalculator).IsAssignableFrom(t)) continue;
-							IPropertyCalculator calc = (IPropertyCalculator)Activator.CreateInstance(t);
-							foreach (PropertyCalculatorAttribute attr in t.GetCustomAttributes(typeof(PropertyCalculatorAttribute), false))
-							{
-								for (int i = (int)attr.Min; i <= (int)attr.Max; i++)
-								{
-									m_propertyCalc[i] = calc;
-								}
-							}
-						}
-						catch (Exception e)
-						{
-							if (log.IsErrorEnabled)
-								log.Error("Error while working with type " + t.FullName, e);
-						}
-					}
-				}
-				return true;
-			}
-			catch (Exception e)
-			{
-				if (log.IsErrorEnabled)
-					log.Error("GameLiving.LoadCalculators()", e);
-				return false;
-			}
-		}
-		#endregion
 		#region ControlledNpc
 
 		private byte m_petCount = 0;
@@ -6069,6 +5815,7 @@ namespace DOL.GS
 			m_endurance = 1;
 			m_maxEndurance = 1;
             Talents = new TalentSet(this);
+            Attributes = new LivingProperties(this);
         }
 	}
 }
