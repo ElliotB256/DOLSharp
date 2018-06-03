@@ -17,7 +17,7 @@ namespace DOL.GS.PropertyCalc
 
             //speed bonus is percentage.
             int speedPercent = living.Attributes.GetProperty(eProperty.MaxSpeed, type);
-            speedPercent = Math.Min(speedPercent, GetCap());
+            speedPercent = Math.Min(speedPercent, GetCap(type));
 
             speed = (int)((float)speedPercent / 100f * speed);
             return speed;

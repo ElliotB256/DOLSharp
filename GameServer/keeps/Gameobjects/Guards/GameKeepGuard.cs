@@ -37,13 +37,6 @@ namespace DOL.GS.Keeps
 	{
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private Patrol m_Patrol = null;
-		public Patrol PatrolGroup
-		{
-			get { return m_Patrol; }
-			set { m_Patrol = value; }
-		}
-
 		private string m_templateID = "";
 		public string TemplateID
 		{
@@ -127,16 +120,6 @@ namespace DOL.GS.Keeps
 		public override double GetArmorAbsorb(eArmorSlot slot)
 		{
 			double abs = Attributes.GetProperty(eProperty.ArmorAbsorption);
-
-			if (this is GuardLord)
-			{
-				abs += 5;
-			}
-			else if (this is GuardCaster)
-			{
-				abs -= 5;
-			}
-
 			return Math.Max(0.0, abs * 0.01);
 		}
 
@@ -207,244 +190,6 @@ namespace DOL.GS.Keeps
 		}
 
 		/// <summary>
-		/// We need an event after an attack is finished so we know when players are unreachable by archery
-		/// </summary>
-		/// <param name="e"></param>
-		/// <param name="sender"></param>
-		/// <param name="arguments"></param>
-		public static void AttackFinished(DOLEvent e, object sender, EventArgs arguments)
-		{
-			GameKeepGuard guard = sender as GameKeepGuard;
-			if (guard.TargetObject == null)
-				return;
-			if (!guard.AttackState)
-				return;
-			if (guard is GuardArcher == false && guard is GuardLord == false && guard is GuardCaster == false)
-				return;
-
-			AttackFinishedEventArgs afargs = arguments as AttackFinishedEventArgs;
-
-			if (guard.ActiveWeaponSlot != eActiveWeaponSlot.Distance && !guard.IsMoving)
-			{
-				eAttackResult result = afargs.AttackData.AttackResult;
-				if (result == eAttackResult.OutOfRange)
-				{
-					guard.StopAttack();
-					lock (guard.Attackers)
-					{
-						foreach (GameLiving living in guard.Attackers)
-						{
-                            if ( guard.IsWithinRadius( living, guard.AttackRange ) )
-							{
-								guard.StartAttack(living);
-								return;
-							}
-						}
-					}
-
-                    if ( guard.IsWithinRadius( guard.TargetObject, guard.AttackRangeDistance ) )
-					{
-						if (guard.MaxSpeedBase == 0 || (guard is GuardArcher && !guard.BeenAttackedRecently))
-							guard.SwitchToRanged(guard.TargetObject);
-					}
-				}
-				return;
-			}
-
-			if (guard.ActiveWeaponSlot == eActiveWeaponSlot.Distance)
-			{
-				if (GameServer.ServerRules.IsAllowedToAttack(guard, guard.TargetObject as GameLiving, true) == false)
-				{
-					guard.StopAttack();
-					return;
-				}
-                if ( !guard.IsWithinRadius( guard.TargetObject, guard.AttackRange ) )
-				{
-					guard.StopAttack();
-					return;
-				}
-			}
-
-			GamePlayer player = null;
-
-			if (guard.TargetObject is GamePlayer)
-			{
-				player = guard.TargetObject as GamePlayer;
-			}
-			else if (guard.TargetObject is GameNPC)
-			{
-				GameNPC npc = (guard.TargetObject as GameNPC);
-
-				if (npc.Brain != null && ((npc is GameKeepGuard) == false) && npc.Brain is IControlledBrain)
-				{
-					player = (npc.Brain as IControlledBrain).GetPlayerOwner();
-				}
-			}
-
-			if (player != null)
-			{
-				player.Out.SendCheckLOS(guard, guard.TargetObject, new CheckLOSResponse(guard.GuardStopAttackCheckLOS));
-			}
-		}
-
-		/// <summary>
-		/// Override for StartAttack which chooses Ranged or Melee attack
-		/// </summary>
-		/// <param name="attackTarget"></param>
-		public override void StartAttack(GameObject attackTarget)
-		{
-			if (IsPortalKeepGuard)
-			{
-				base.StartAttack(attackTarget);
-				return;
-			}
-
-			if (AttackState || CurrentSpellHandler != null)
-				return;
-
-			if (attackTarget is GameLiving == false)
-				return;
-			GameLiving target = attackTarget as GameLiving;
-			if (target == null || target.IsAlive == false)
-				return;
-
-			//we dont send LOS checks for people we cant attack
-			if (!GameServer.ServerRules.IsAllowedToAttack(this, target, true))
-				return;
-
-			//Prevent spam for LOS to same target multiple times
-
-			GameObject lastTarget = (GameObject)this.TempProperties.getProperty<object>(LAST_LOS_TARGET_PROPERTY, null);
-			long lastTick = this.TempProperties.getProperty<long>(LAST_LOS_TICK_PROPERTY);
-
-			if (lastTarget != null && lastTarget == attackTarget)
-			{
-				if (lastTick != 0 && CurrentRegion.Time - lastTick < ServerProperties.Properties.KEEP_GUARD_LOS_CHECK_TIME * 1000)
-					return;
-			}
-
-			GamePlayer LOSChecker = null;
-			if (attackTarget is GamePlayer)
-			{
-				LOSChecker = attackTarget as GamePlayer;
-			}
-			else if (attackTarget is GameNPC && (attackTarget as GameNPC).Brain is IControlledBrain)
-			{
-				LOSChecker = ((attackTarget as GameNPC).Brain as IControlledBrain).GetPlayerOwner();
-			}
-			else
-			{
-				// try to find another player to use for checking line of site
-				foreach (GamePlayer player in this.GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-				{
-					LOSChecker = player;
-					break;
-				}
-			}
-
-			if (LOSChecker == null)
-			{
-				return;
-			}
-
-			lock (LOS_LOCK)
-			{
-				int count = TempProperties.getProperty<int>(NUM_LOS_CHECKS_INPROGRESS, 0);
-
-				if (count > 10)
-				{
-					log.DebugFormat("{0} LOS count check exceeds 10, aborting LOS check!", Name);
-
-					// Now do a safety check.  If it's been a while since we sent any check we should clear count
-					if (lastTick == 0 || CurrentRegion.Time - lastTick > ServerProperties.Properties.LOS_PLAYER_CHECK_FREQUENCY * 1000)
-					{
-						log.Debug("LOS count reset!");
-						TempProperties.setProperty(NUM_LOS_CHECKS_INPROGRESS, 0);
-					}
-
-					return;
-				}
-
-				count++;
-				TempProperties.setProperty(NUM_LOS_CHECKS_INPROGRESS, count);
-
-				TempProperties.setProperty(LAST_LOS_TARGET_PROPERTY, attackTarget);
-				TempProperties.setProperty(LAST_LOS_TICK_PROPERTY, CurrentRegion.Time);
-				TargetObject = attackTarget;
-			}
-
-			LOSChecker.Out.SendCheckLOS(this, attackTarget, new CheckLOSResponse(this.GuardStartAttackCheckLOS));
-		}
-
-		/// <summary>
-		/// We only attack if we have LOS
-		/// </summary>
-		/// <param name="player"></param>
-		/// <param name="response"></param>
-		/// <param name="targetOID"></param>
-		public void GuardStartAttackCheckLOS(GamePlayer player, ushort response, ushort targetOID)
-		{
-			lock (LOS_LOCK)
-			{
-				int count = TempProperties.getProperty<int>(NUM_LOS_CHECKS_INPROGRESS, 0);
-				count--;
-				TempProperties.setProperty(NUM_LOS_CHECKS_INPROGRESS, Math.Max(0, count));
-			}
-
-			if ((response & 0x100) == 0x100)
-			{
-				if (this is GuardArcher || this is GuardLord)
-				{
-					if (ActiveWeaponSlot != eActiveWeaponSlot.Distance)
-					{
-						if (CanUseRanged)
-							SwitchToRanged(TargetObject);
-					}
-				}
-
-				base.StartAttack(TargetObject);
-			}
-			else if (TargetObject != null && TargetObject is GameLiving)
-			{
-				(this.Brain as KeepGuardBrain).RemoveFromAggroList(TargetObject as GameLiving);
-			}
-		}
-
-		/// <summary>
-		/// If we don't have LOS we stop attack
-		/// </summary>
-		/// <param name="player"></param>
-		/// <param name="response"></param>
-		/// <param name="targetOID"></param>
-		public void GuardStopAttackCheckLOS(GamePlayer player, ushort response, ushort targetOID)
-		{
-			if ((response & 0x100) != 0x100)
-			{
-				StopAttack();
-
-				if (TargetObject != null && TargetPosition is GameLiving)
-				{
-					(this.Brain as KeepGuardBrain).RemoveFromAggroList(TargetObject as GameLiving);
-				}
-			}
-		}
-
-		public void GuardStartSpellHealCheckLOS(GamePlayer player, ushort response, ushort targetOID)
-		{
-			if ((response & 0x100) == 0x100)
-			{
-				SpellMgr.CastHealSpell(this, TargetObject as GameLiving);
-			}
-		}
-		public void GuardStartSpellNukeCheckLOS(GamePlayer player, ushort response, ushort targetOID)
-		{
-			if ((response & 0x100) == 0x100)
-			{
-				SpellMgr.CastNukeSpell(this, TargetObject as GameLiving);
-			}
-		}
-
-		/// <summary>
 		/// Method to see if the Guard has been left alone long enough to use Ranged attacks
 		/// </summary>
 		/// <returns></returns>
@@ -452,19 +197,7 @@ namespace DOL.GS.Keeps
 		{
 			get
 			{
-				if (this.ObjectState != GameObject.eObjectState.Active) return false;
-				if (this is GuardFighter) return false;
-				if (this is GuardArcher || this is GuardLord)
-				{
-					if (this.Inventory == null) return false;
-					if (this.Inventory.GetItem(eInventorySlot.DistanceWeapon) == null) return false;
-					if (this.ActiveWeaponSlot == GameLiving.eActiveWeaponSlot.Distance) return false;
-				}
-				if (this is GuardCaster || this is GuardHealer)
-				{
-					if (this.CurrentSpellHandler != null) return false;
-				}
-				return !this.BeenAttackedRecently;
+                return false;
 			}
 		}
 
@@ -477,35 +210,6 @@ namespace DOL.GS.Keeps
 		public override bool IsObjectInFront(GameObject target, double viewangle, bool rangeCheck = true)
 		{
 			return true;
-		}
-
-		/// <summary>
-		/// Static archers attack with melee the closest if being engaged in melee
-		/// </summary>
-		/// <param name="ad"></param>
-		public override void OnAttackedByEnemy(AttackData ad)
-		{
-			//this is for static archers only
-			if (MaxSpeedBase == 0)
-			{
-				//if we are currently fighting in melee
-				if (ActiveWeaponSlot == eActiveWeaponSlot.Standard || ActiveWeaponSlot == eActiveWeaponSlot.TwoHanded)
-				{
-					//if we are targeting something, and the distance to the target object is greater than the attack range
-                    if( TargetObject != null && !this.IsWithinRadius( TargetObject, AttackRange ) )
-					{
-						//stop the attack
-						StopAttack();
-						//if the distance to the attacker is less than the attack range
-						if ( this.IsWithinRadius( ad.Attacker, AttackRange ) )
-						{
-							//attack it
-							StartAttack(ad.Attacker);
-						}
-					}
-				}
-			}
-			base.OnAttackedByEnemy(ad);
 		}
 
 		/// <summary>
@@ -593,47 +297,8 @@ namespace DOL.GS.Keeps
 				(this.Brain as KeepGuardBrain).AggroRange=2000;
 				(this.Brain as KeepGuardBrain).AggroLevel=99;
 			}
-			
-			GameEventMgr.AddHandler(this, GameNPCEvent.AttackFinished, new DOLEventHandler(AttackFinished));
-
-			if (PatrolGroup != null && !m_changingPositions)
-			{
-				bool foundGuard = false;
-				foreach (GameKeepGuard guard in PatrolGroup.PatrolGuards)
-				{
-					if (guard.IsAlive && guard.CurrentWayPoint != null)
-					{
-						CurrentWayPoint = guard.CurrentWayPoint;
-						m_changingPositions = true;
-						MoveTo(guard.CurrentRegionID, guard.X - Util.Random(200, 350), guard.Y - Util.Random(200, 350), guard.Z, guard.Heading);
-						m_changingPositions = false;
-						foundGuard = true;
-						break;
-					}
-				}
-
-				if (!foundGuard)
-					CurrentWayPoint = PatrolGroup.PatrolPath;
-
-				MoveOnPath(Patrol.PATROL_SPEED);
-			}
 
 			return true;
-		}
-
-		/// <summary>
-		/// When we remove from world, we remove our special handler
-		/// </summary>
-		/// <returns></returns>
-		public override bool RemoveFromWorld()
-		{
-			if (base.RemoveFromWorld())
-			{
-				GameEventMgr.RemoveHandler(this, GameNPCEvent.AttackFinished, new DOLEventHandler(AttackFinished));
-				return true;
-			}
-
-			return false;
 		}
 
 		/// <summary>
@@ -875,45 +540,6 @@ namespace DOL.GS.Keeps
 				this.MoveTo(this.CurrentRegionID, this.X, this.Y, this.Z, this.Heading);
 		}
 		#endregion
-
-		/// <summary>
-		/// Change guild of guard (emblem on equipment) when keep is claimed
-		/// </summary>
-		public void ChangeGuild()
-		{
-			ClothingMgr.EquipGuard(this);
-
-			Guild guild = this.Component.AbstractKeep.Guild;
-			string guildname = "";
-			if (guild != null)
-				guildname = guild.Name;
-
-			this.GuildName = guildname;
-
-			if (this.Inventory == null)
-				return;
-
-			int emblem = 0;
-			if (guild != null)
-				emblem = guild.Emblem;
-			InventoryItem lefthand = this.Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			if (lefthand != null)
-				lefthand.Emblem = emblem;
-
-			InventoryItem cloak = this.Inventory.GetItem(eInventorySlot.Cloak);
-			if (cloak != null)
-			{
-				cloak.Emblem = emblem;
-
-				if (cloak.Emblem != 0)
-					cloak.Model = 558; // change to a model that looks ok with an emblem
-
-			}
-			if (IsAlive)
-			{
-				BroadcastLivingEquipmentUpdate();
-			}
-		}
 
 		/// <summary>
 		/// Adding special handling for walking to a point for patrol guards to be in a formation

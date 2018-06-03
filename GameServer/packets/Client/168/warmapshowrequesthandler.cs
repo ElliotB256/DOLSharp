@@ -106,21 +106,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 								// Missing: Supply line check
 							}
 
-							if (client.Player.CurrentRegionID == 163)
-							{
-								// We are in the frontiers and all keep requirements are met or we are not near a keep
-								// this may be a portal stone in the RvR village, for example
-
-								foreach (GameStaticItem item in client.Player.GetItemsInRadius(WorldMgr.INTERACT_DISTANCE))
-								{
-									if (item is FrontiersPortalStone)
-									{
-										found = true;
-										break;
-									}
-								}
-							}
-
 							if (!found)
 							{
 								client.Player.Out.SendMessage("You cannot teleport unless you are near a valid portal stone.", eChatType.CT_System, eChatLoc.CL_SystemWindow);
@@ -154,7 +139,6 @@ namespace DOL.GS.PacketHandler.Client.v168
 								{
 									if (keep != null && keep is GameKeep)
 									{
-										FrontiersPortalStone stone = keep.TeleportStone;
 										if (stone != null) 
 										{
 											heading = stone.Heading;

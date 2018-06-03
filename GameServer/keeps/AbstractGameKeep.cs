@@ -48,7 +48,6 @@ namespace DOL.GS.Keeps
 			get { return typeof(TemplateMgr); }
 		}
 
-		public FrontiersPortalStone TeleportStone;
 		public KeepArea Area;
 
 		/// <summary>
@@ -774,11 +773,6 @@ namespace DOL.GS.Keeps
 
 			PlayerMgr.BroadcastClaim(this);
 
-			foreach (GameKeepGuard guard in Guards.Values)
-			{
-				guard.ChangeGuild();
-			}
-
 			foreach (GameKeepBanner banner in Banners.Values)
 			{
 				banner.ChangeGuild();
@@ -871,11 +865,6 @@ namespace DOL.GS.Keeps
 			StopChangeLevelTimer();
 			ChangeLevel((byte)ServerProperties.Properties.STARTING_KEEP_LEVEL);
 
-			foreach (GameKeepGuard guard in Guards.Values)
-			{
-				guard.ChangeGuild();
-			}
-
 			foreach (GameKeepBanner banner in Banners.Values)
 			{
 				banner.ChangeGuild();
@@ -903,16 +892,6 @@ namespace DOL.GS.Keeps
 					cln.Out.SendKeepComponentDetailUpdate(comp);
 				}
 				comp.FillPositions();
-			}
-
-			foreach (GameKeepGuard guard in this.Guards.Values)
-			{
-				SetGuardLevel(guard);
-			}
-
-			foreach (Patrol p in this.Patrols.Values)
-			{
-				p.ChangePatrolLevel();
 			}
 
 			foreach (GameKeepDoor door in this.Doors.Values)
@@ -950,32 +929,6 @@ namespace DOL.GS.Keeps
 
 			return guard.Component.AbstractKeep.BaseLevel;
 		}
-
-
-		public virtual void SetGuardLevel(GameKeepGuard guard)
-		{
-			if (guard is FrontierHastener)
-			{
-				guard.Level = 1;
-			}
-			else
-			{
-				int bonusLevel = 0;
-				double multiplier = ServerProperties.Properties.KEEP_GUARD_LEVEL_MULTIPLIER;
-
-				if (guard.Component != null)
-				{
-					// level is usually 4 unless upgraded, BaseLevel is usually 50
-					bonusLevel = guard.Component.AbstractKeep.Level;
-
-					if (guard.Component.AbstractKeep is GameKeepTower)
-						multiplier = ServerProperties.Properties.TOWER_GUARD_LEVEL_MULTIPLIER;
-				}
-
-				guard.Level = (byte)(GetBaseLevel(guard) + (bonusLevel * multiplier));
-			}
-		}
-
 
 		/// <summary>
 		/// Start changing the keeps level to a target level
