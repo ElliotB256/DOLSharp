@@ -104,7 +104,7 @@ namespace DOL.GS.PropertyCalc
             }
             else
             {
-                log.ErrorFormat("{0} did not find property calculator for property ID {1}.", m_owner.Name, (int)property);
+                log.Error(String.Format("{0} did not find property calculator for property ID {1}.", m_owner.Name, (int)property));
             }
             return 0;
         }

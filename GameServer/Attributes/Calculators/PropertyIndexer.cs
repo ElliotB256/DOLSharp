@@ -50,8 +50,8 @@ namespace DOL.GS.PropertyCalc
             }
             set
             {
-                int old = m_propDict[(int)index];
-                m_propDict[(int)index] = value;
+                int old = this[index];
+                m_propDict.AddOrReplace((int)index, value);
 
                 if (old != value)
                 {

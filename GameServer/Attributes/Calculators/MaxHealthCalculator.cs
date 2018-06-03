@@ -15,7 +15,6 @@ namespace DOL.GS.PropertyCalc
             // base health starts at 50.
             int health = BASE_HEALTH;
             health += living.Attributes.GetProperty(eProperty.Constitution, type);
-            health += living.Attributes.GetProperty(eProperty.MaxHealth, type);
             return health;
         }
 
