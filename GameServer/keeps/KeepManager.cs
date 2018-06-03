@@ -83,8 +83,6 @@ namespace DOL.GS.Keeps
 				m_frontierRegionsList.Add(DEFAULT_FRONTIERS_REGION);
 			}
 
-			ClothingMgr.LoadTemplates();
-
             //Dinberg - moved this here, battlegrounds must be loaded before keepcomponents are.
             LoadBattlegroundCaps();
 

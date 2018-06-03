@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
+using System;
+
 namespace DOL.GS.PropertyCalc
 {
 	/// <summary>
@@ -23,7 +25,10 @@ namespace DOL.GS.PropertyCalc
 	/// </summary>
 	public interface IPropertyIndexer
 	{
-		int this[int index] { get; set; }
 		int this[eProperty index] { get; set; }
+        /// <summary>
+        /// A property in the indexer is changed
+        /// </summary>
+        event EventHandler<PropertyChangedEventArgs> PropertyChanged;
 	}
 }

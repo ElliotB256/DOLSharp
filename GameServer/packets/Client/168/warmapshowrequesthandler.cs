@@ -139,19 +139,10 @@ namespace DOL.GS.PacketHandler.Client.v168
 								{
 									if (keep != null && keep is GameKeep)
 									{
-										if (stone != null) 
-										{
-											heading = stone.Heading;
-											z = stone.Z;
-											stone.GetTeleportLocation(out x, out y);
-										}
-										else
-										{
 											x = keep.X;
 											y = keep.Y;
 											z = keep.Z+150;
 											heading = keep.Heading;
-										}
 									}
 									break;
 								}

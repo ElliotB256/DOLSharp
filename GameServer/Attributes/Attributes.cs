@@ -8,7 +8,7 @@ namespace DOL.GS.PropertyCalc
     /// </summary>
     public class LivingProperties
     {
-        //Todo: Event handling, automatically sending update packets (For PlayerProperties : LivingProperties)
+        //Todo: automatically sending update packets (For PlayerProperties : LivingProperties)
 
         public LivingProperties(GameLiving owner)
         {
@@ -18,6 +18,12 @@ namespace DOL.GS.PropertyCalc
             m_EquipmentBonus = new PropertyIndexer((int)eProperty.MaxProperty);
             m_EffectBonus = new PropertyIndexer((int)eProperty.MaxProperty);
             m_PropertyBase = new PropertyIndexer((int)eProperty.MaxProperty);
+
+            m_PropertyBase.PropertyChanged += BasePropertyChanged;
+            m_PropertyBase.PropertyChanged += PropertyChanged;
+            m_EquipmentBonus.PropertyChanged += PropertyChanged;
+            m_EffectBonus.PropertyChanged += PropertyChanged;
+            m_TalentBonus.PropertyChanged += PropertyChanged;
         }
 
         /// <summary>
@@ -38,7 +44,7 @@ namespace DOL.GS.PropertyCalc
         protected IPropertyIndexer m_EquipmentBonus;
 
         /// <summary>
-        /// Bonuses to properties based on applied skill effects.
+        /// Bonuses to properties based on effects.
         /// </summary>
         protected IPropertyIndexer m_EffectBonus;
 
@@ -74,6 +80,16 @@ namespace DOL.GS.PropertyCalc
         {
             m_PropertyBase[prop] = value;
         }
+
+        /// <summary>
+        /// The base value of a stat/property changes.
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs> BasePropertyChanged;
+
+        /// <summary>
+        /// A stat/property changes.
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs> PropertyChanged;
 
         /// <summary>
         /// Lookup table for the calculator used for each property.

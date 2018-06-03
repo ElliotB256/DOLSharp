@@ -90,8 +90,8 @@ namespace DOL.GS.PacketHandler
 							pak.WriteShort((ushort)spec.InternalID); //new 1.112
 							pak.WriteByte((byte)spec.SkillType);
 							pak.WriteShort(0);
-							pak.WriteByte((byte)(m_gameClient.Player.GetModifiedSpecLevel(spec.KeyName) - spec.Level)); // bonus
-							pak.WriteShort((ushort)spec.Icon);
+                            pak.WriteByte((byte)0); //pak.WriteByte((byte)(m_gameClient.Player.GetModifiedSpecLevel(spec.KeyName) - spec.Level)); // bonus
+                            pak.WriteShort((ushort)spec.Icon);
 							pak.WritePascalString(spec.Name);
 						}
 						else if (skill is Ability)

@@ -3163,16 +3163,6 @@ namespace DOL.GS.Spells
 			}
 
 			int speclevel = 1;
-
-			if (m_caster is GamePet)
-			{
-				IControlledBrain brain = (m_caster as GameNPC).Brain as IControlledBrain;
-				speclevel = brain.GetLivingOwner().Level;
-			}
-			else if (m_caster is GamePlayer)
-			{
-				speclevel = ((GamePlayer)m_caster).GetModifiedSpecLevel(m_spellLine.Spec);
-			}
 			min = 1.25;
 			max = 1.25;
 

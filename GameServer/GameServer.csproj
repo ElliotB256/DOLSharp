@@ -117,10 +117,7 @@
     <Compile Include="ai\brain\GuardBrain.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ai\brain\Guards\Caster.cs" />
     <Compile Include="ai\brain\Guards\KeepGuardBrain.cs" />
-    <Compile Include="ai\brain\Guards\Healer.cs" />
-    <Compile Include="ai\brain\Guards\Lord.cs" />
     <Compile Include="ai\brain\IOldAggressiveBrain.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -145,6 +142,7 @@
     </Compile>
     <Compile Include="Attributes\Attributes.cs" />
     <Compile Include="Attributes\Calculators\MaxSpeedCalculator.cs" />
+    <Compile Include="Attributes\PropertyChangedEventArgs.cs" />
     <Compile Include="behaviour\AbstractTrigger.cs" />
     <Compile Include="behaviour\AbstractRequirement.cs" />
     <Compile Include="behaviour\Actions\AnimationAction.cs" />
@@ -190,9 +188,6 @@
     <Compile Include="commands\gmcommands\Instance.cs" />
     <Compile Include="commands\gmcommands\item.cs" />
     <Compile Include="commands\gmcommands\jump.cs" />
-    <Compile Include="commands\gmcommands\keep.cs" />
-    <Compile Include="commands\gmcommands\KeepComponent.cs" />
-    <Compile Include="commands\gmcommands\keepguard.cs" />
     <Compile Include="commands\gmcommands\kick.cs" />
     <Compile Include="commands\gmcommands\merchant.cs" />
     <Compile Include="commands\gmcommands\mob.cs" />
@@ -843,30 +838,17 @@
     <Compile Include="housing\HousingConstants.cs" />
     <Compile Include="housing\IHouseHookpointItem.cs" />
     <Compile Include="ai\brain\Npcs\IAggressiveBrain.cs" />
-    <Compile Include="keeps\Gameobjects\FrontiersPortalStone.cs" />
     <Compile Include="keeps\Gameobjects\GameRelicDoor.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Archer.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Caster.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\MissionMaster.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Fighter.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Hastener.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Healer.cs" />
     <Compile Include="keeps\Gameobjects\Guards\Lord.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Patrol.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Static Archer.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Static Caster.cs" />
-    <Compile Include="keeps\Gameobjects\Guards\Stealther.cs" />
     <Compile Include="keeps\Gameobjects\IKeepItem.cs" />
     <Compile Include="keeps\KeepArea.cs" />
     <Compile Include="keeps\KeepBonusManager.cs" />
-    <Compile Include="keeps\Managers\Clothing Manager.cs" />
     <Compile Include="keeps\Managers\RelicGateMgr.cs" />
     <Compile Include="keeps\Managers\RelicMgr.cs" />
     <Compile Include="keeps\Managers\Template Manager.cs" />
     <Compile Include="keeps\Managers\Guild Manager.cs" />
     <Compile Include="keeps\Managers\Player Manager.cs" />
     <Compile Include="keeps\Managers\Position Manager.cs" />
-    <Compile Include="keeps\Managers\Spell Manager.cs" />
     <Compile Include="keeps\Relics\GameRelic.cs" />
     <Compile Include="keeps\Relics\GameRelicPad.cs" />
     <Compile Include="language\ITranslatableObject.cs" />

@@ -38,31 +38,32 @@ namespace DOL.GS.PropertyCalc
 			m_propDict = new ReaderWriterDictionary<int, int>(fixSize);
 		}
 		
-		public int this[int index]
-		{
-			get
-			{
-				int val;
-				if (m_propDict.TryGetValue(index, out val))
-					return val;
-				return 0;
-			}
-			set
-			{
-				m_propDict[index] = value;
-			}
-		}
 		
 		public int this[eProperty index]
 		{
-			get
-			{
-				return this[(int)index];
-			}
-			set
-			{
-				this[(int)index] = value;
-			}
-		}
-	}
+            get
+            {
+                int val;
+                if (m_propDict.TryGetValue((int)index, out val))
+                    return val;
+                return 0;
+            }
+            set
+            {
+                int old = m_propDict[(int)index];
+                m_propDict[(int)index] = value;
+
+                if (old != value)
+                {
+                    var eh = PropertyChanged;
+                    eh?.Invoke(this, new PropertyChangedEventArgs(index, old, value));
+                }
+            }
+        }
+
+        /// <summary>
+        /// A stat property is changed
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs> PropertyChanged;
+    }
 }

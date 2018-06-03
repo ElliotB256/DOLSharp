@@ -1797,36 +1797,6 @@ namespace DOL.GS
 
 		#region Stats
 
-		/// <summary>
-		/// Change a stat value
-		/// (delegate to PlayerCharacter)
-		/// </summary>
-		/// <param name="stat">The stat to change</param>
-		/// <param name="val">The new value</param>
-		public override void ChangeBaseStat(eStat stat, short val)
-		{
-			int oldstat = GetBaseStat(stat);
-			base.ChangeBaseStat(stat, val);
-			int newstat = GetBaseStat(stat);
-			DOLCharacters character = DBCharacter; // to call it only once, if in future there will be some special code to get the character
-			// Graveen: always positive and not null. This allows /player stats to substract values safely
-			if (newstat < 1) newstat = 1;
-			if (character != null && oldstat != newstat)
-			{
-				switch (stat)
-				{
-						case eStat.STR: character.Strength = newstat; break;
-						case eStat.DEX: character.Dexterity = newstat; break;
-						case eStat.CON: character.Constitution = newstat; break;
-						case eStat.QUI: character.Quickness = newstat; break;
-						case eStat.INT: character.Intelligence = newstat; break;
-						case eStat.PIE: character.Piety = newstat; break;
-						case eStat.EMP: character.Empathy = newstat; break;
-						case eStat.CHR: character.Charisma = newstat; break;
-				}
-			}
-		}
-
 		protected IPlayerStatistics m_statistics = null;
 
 		/// <summary>
@@ -2554,25 +2524,6 @@ namespace DOL.GS
 			Experience = 0;
 			RespecAllLines();
 
-			if (Level < originalLevel && originalLevel > 5)
-			{
-				for (int i = 6; i <= originalLevel; i++)
-				{
-					if (CharacterClass.PrimaryStat != eStat.UNDEFINED)
-					{
-						ChangeBaseStat(CharacterClass.PrimaryStat, -1);
-					}
-					if (CharacterClass.SecondaryStat != eStat.UNDEFINED && ((i - 6) % 2 == 0))
-					{
-						ChangeBaseStat(CharacterClass.SecondaryStat, -1);
-					}
-					if (CharacterClass.TertiaryStat != eStat.UNDEFINED && ((i - 6) % 3 == 0))
-					{
-						ChangeBaseStat(CharacterClass.TertiaryStat, -1);
-					}
-				}
-			}
-
 			CharacterClass.OnLevelUp(this, originalLevel);
 		}
 
@@ -2879,44 +2830,6 @@ namespace DOL.GS
 		/// </summary>
 		public override int CalculateLeftHandSwingCount()
 		{
-			if (CanUseLefthandedWeapon == false)
-				return 0;
-
-			if (GetBaseSpecLevel(Specs.Left_Axe) > 0)
-				return 1; // always use left axe
-
-			int specLevel = Math.Max(GetModifiedSpecLevel(Specs.Celtic_Dual), GetModifiedSpecLevel(Specs.Dual_Wield));
-			specLevel = Math.Max(specLevel, GetModifiedSpecLevel(Specs.Fist_Wraps));
-			if (specLevel > 0)
-			{
-				return Util.Chance(25 + (specLevel - 1) * 68 / 100) ? 1 : 0;
-			}
-
-			// HtH chance
-			specLevel = GetModifiedSpecLevel(Specs.HandToHand);
-			InventoryItem attackWeapon = AttackWeapon;
-			InventoryItem leftWeapon = (Inventory == null) ? null : Inventory.GetItem(eInventorySlot.LeftHandWeapon);
-			if (specLevel > 0 && ActiveWeaponSlot == eActiveWeaponSlot.Standard
-			    && attackWeapon != null && attackWeapon.Object_Type == (int)eObjectType.HandToHand &&
-			    leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.HandToHand)
-			{
-				specLevel--;
-				int randomChance = Util.Random(99);
-				int hitChance = specLevel >> 1;
-				if (randomChance < hitChance)
-					return 1; // 1 hit = spec/2
-
-				hitChance += specLevel >> 2;
-				if (randomChance < hitChance)
-					return 2; // 2 hits = spec/4
-
-				hitChance += specLevel >> 4;
-				if (randomChance < hitChance)
-					return 3; // 3 hits = spec/16
-
-				return 0;
-			}
-
 			return 0;
 		}
 
@@ -2926,19 +2839,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public override double CalculateLeftHandEffectiveness(InventoryItem mainWeapon, InventoryItem leftWeapon)
 		{
-			double effectiveness = 1.0;
-
-			if (CanUseLefthandedWeapon && leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.LeftAxe && mainWeapon != null &&
-			    (mainWeapon.Item_Type == Slot.RIGHTHAND || mainWeapon.Item_Type == Slot.LEFTHAND))
-			{
-				int LASpec = GetModifiedSpecLevel(Specs.Left_Axe);
-				if (LASpec > 0)
-				{
-					effectiveness = 0.625 + 0.0034 * LASpec;
-				}
-			}
-
-			return effectiveness;
+            return 1.0f;
 		}
 
 		/// <summary>
@@ -2948,85 +2849,7 @@ namespace DOL.GS
 		/// <returns></returns>
 		public override double CalculateMainHandEffectiveness(InventoryItem mainWeapon, InventoryItem leftWeapon)
 		{
-			double effectiveness = 1.0;
-
-			if (CanUseLefthandedWeapon && leftWeapon != null && leftWeapon.Object_Type == (int)eObjectType.LeftAxe && mainWeapon != null &&
-			    (mainWeapon.Item_Type == Slot.RIGHTHAND || mainWeapon.Item_Type == Slot.LEFTHAND))
-			{
-				int LASpec = GetModifiedSpecLevel(Specs.Left_Axe);
-				if (LASpec > 0)
-				{
-					effectiveness = 0.625 + 0.0034 * LASpec;
-				}
-			}
-
-			return effectiveness;
-		}
-
-
-		/// <summary>
-		/// returns the level of a specialization
-		/// if 0 is returned, the spec is non existent on player
-		/// </summary>
-		/// <param name="keyName"></param>
-		/// <returns></returns>
-		public override int GetBaseSpecLevel(string keyName)
-		{
-			Specialization spec = null;
-			int level = 0;
-			
-			lock (((ICollection)m_specialization).SyncRoot)
-			{
-				if (m_specialization.TryGetValue(keyName, out spec))
-					level = m_specialization[keyName].Level;
-			}
-			
-			return level;
-		}
-
-		/// <summary>
-		/// returns the level of a specialization + bonuses from RR and Items
-		/// if 0 is returned, the spec is non existent on the player
-		/// </summary>
-		/// <param name="keyName"></param>
-		/// <returns></returns>
-		public override int GetModifiedSpecLevel(string keyName)
-		{
-			if (keyName.StartsWith(GlobalSpellsLines.Champion_Lines_StartWith))
-				return 50;
-
-			Specialization spec = null;
-			int level = 0;
-			lock (((ICollection)m_specialization).SyncRoot)
-			{
-				if (!m_specialization.TryGetValue(keyName, out spec))
-				{
-					if (keyName == GlobalSpellsLines.Combat_Styles_Effect)
-					{
-						if (CharacterClass.ID == (int)eCharacterClass.Reaver || CharacterClass.ID == (int)eCharacterClass.Heretic)
-							level = GetModifiedSpecLevel(Specs.Flexible);
-						if (CharacterClass.ID == (int)eCharacterClass.Valewalker)
-							level = GetModifiedSpecLevel(Specs.Scythe);
-						if (CharacterClass.ID == (int)eCharacterClass.Savage)
-							level = GetModifiedSpecLevel(Specs.Savagery);
-					}
-	
-					level = 0;
-				}
-			}
-			
-			if (spec != null)
-			{
-				level = spec.Level;
-				// TODO: should be all in calculator later, right now
-				// needs specKey -> eProperty conversion to find calculator and then
-				// needs eProperty -> specKey conversion to find how much points player has spent
-				eProperty skillProp = SkillBase.SpecToSkill(keyName);
-				if (skillProp != eProperty.Undefined)
-					level += Attributes.GetProperty(skillProp);
-			}
-				
-			return level;
+            return 1.0f;
 		}
 
 		/// <summary>
@@ -4468,36 +4291,6 @@ namespace DOL.GS
 			//level 20 changes realm title and gives 1 realm skill point
 			if (Level == 20)
 				GainRealmPoints(0);
-			
-			// Adjust stats
-			bool statsChanged = false;
-			// stat increases start at level 6
-			if (Level > 5)
-			{
-				for (int i = Level; i > Math.Max(previouslevel, 5); i--)
-				{
-					if (CharacterClass.PrimaryStat != eStat.UNDEFINED)
-					{
-						ChangeBaseStat(CharacterClass.PrimaryStat, 1);
-						statsChanged = true;
-					}
-					if (CharacterClass.SecondaryStat != eStat.UNDEFINED && ((i - 6) % 2 == 0))
-					{ // base level to start adding stats is 6
-						ChangeBaseStat(CharacterClass.SecondaryStat, 1);
-						statsChanged = true;
-					}
-					if (CharacterClass.TertiaryStat != eStat.UNDEFINED && ((i - 6) % 3 == 0))
-					{ // base level to start adding stats is 6
-						ChangeBaseStat(CharacterClass.TertiaryStat, 1);
-						statsChanged = true;
-					}
-				}
-			}
-
-			if (statsChanged)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.StatRaise"), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-			}
 
 			CharacterClass.OnLevelUp(this, previouslevel);
 			GameServer.ServerRules.OnPlayerLevelUp(this, previouslevel);
@@ -4524,33 +4317,6 @@ namespace DOL.GS
 			if (specpoints > 0)
 			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.YouGetSpec", specpoints), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-			}
-
-			// old hp
-			int oldhp = CalculateMaxHealth(previouslevel, GetBaseStat(eStat.CON));
-
-			// old power
-			int oldpow = 0;
-			if (CharacterClass.ManaStat != eStat.UNDEFINED)
-			{
-				oldpow = CalculateMaxMana(previouslevel, GetBaseStat(CharacterClass.ManaStat));
-			}
-
-			// hp upgrade
-			int newhp = CalculateMaxHealth(Level, GetBaseStat(eStat.CON));
-			if (oldhp > 0 && oldhp < newhp)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.HitsRaise", (newhp - oldhp)), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-			}
-
-			// power upgrade
-			if (CharacterClass.ManaStat != eStat.UNDEFINED)
-			{
-				int newpow = CalculateMaxMana(Level, GetBaseStat(CharacterClass.ManaStat));
-				if (newpow > 0 && oldpow < newpow)
-				{
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.OnLevelUp.PowerRaise", (newpow - oldpow)), eChatType.CT_Important, eChatLoc.CL_SystemWindow);
-				}
 			}
 
 			if (IsAlive)
@@ -5644,18 +5410,7 @@ namespace DOL.GS
 		/// </summary>
 		public int WeaponBaseSpecLevel(InventoryItem weapon)
 		{
-			if (weapon == null)
-				return 0;
-			// use axe spec if left hand axe is not in the left hand slot
-			if (weapon.Object_Type == (int)eObjectType.LeftAxe && weapon.SlotPosition != Slot.LEFTHAND)
-				return GameServer.ServerRules.GetBaseObjectSpecLevel(this, eObjectType.Axe);
-			// use left axe spec if axe is in the left hand slot
-			if (weapon.SlotPosition == Slot.LEFTHAND
-			    && (weapon.Object_Type == (int)eObjectType.Axe
-			        || weapon.Object_Type == (int)eObjectType.Sword
-			        || weapon.Object_Type == (int)eObjectType.Hammer))
-				return GameServer.ServerRules.GetBaseObjectSpecLevel(this, eObjectType.LeftAxe);
-			return GameServer.ServerRules.GetBaseObjectSpecLevel(this, (eObjectType)weapon.Object_Type);
+			return 1;
 		}
 
 		/// <summary>
@@ -5725,7 +5480,7 @@ namespace DOL.GS
 			if (slot == eArmorSlot.NOTSET) return 0;
 			InventoryItem item = Inventory.GetItem((eInventorySlot)slot);
 			if (item == null) return 0;
-			double eaf = item.DPS_AF + BaseBuffBonusCategory[(int)eProperty.ArmorFactor]; // base AF buff
+            double eaf = 0;
 
 			int itemAFcap = Level;
 			if (RealmLevel > 39)
@@ -5773,10 +5528,7 @@ namespace DOL.GS
 		{
 			get
 			{
-				int itemBonus = WeaponSpecLevel(AttackWeapon) - WeaponBaseSpecLevel(AttackWeapon) - RealmLevel / 10;
-				double m = 0.56 + itemBonus / 70.0;
-				double weaponSpec = WeaponSpecLevel(AttackWeapon) + itemBonus * m;
-				return (int)(GetWeaponSkill(AttackWeapon) * (1.00 + weaponSpec * 0.01));
+                return 1337;
 			}
 		}
 
@@ -6405,21 +6157,6 @@ namespace DOL.GS
 					return true;
 				return base.InCombat;
 			}
-		}
-
-		/// <summary>
-		/// Easy method to get the resist of a certain damage type
-		/// Good for when we add RAs
-		/// </summary>
-		/// <param name="property"></param>
-		/// <returns></returns>
-		public override int GetDamageResist(eProperty property)
-		{
-			int res = 0;
-			int classResist = 0;
-			int secondResist = 0;
-
-			return (int)((res + classResist) - 0.01 * secondResist * (res + classResist) + secondResist);
 		}
 
 		#endregion
@@ -7756,74 +7493,8 @@ namespace DOL.GS
 		/// <returns>true if applied</returns>
 		public bool ApplyPoison(InventoryItem poisonPotion, InventoryItem toItem)
 		{
-			if (poisonPotion == null || toItem == null) return false;
-			int envenomSpec = GetModifiedSpecLevel(Specs.Envenom);
-			if (envenomSpec < 1)
-			{
 				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.ApplyPoison.CantUsePoisons"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return false;
-			}
-			if (!GlobalConstants.IsWeapon(toItem.Object_Type))
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.ApplyPoison.PoisonsAppliedWeapons"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return false;
-			}
-			if (!HasAbilityToUseItem(toItem.Template))
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.ApplyPoison.CantPoisonWeapon"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return false;
-			}
-			if (envenomSpec < poisonPotion.Level)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.ApplyPoison.CantUsePoison"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return false;
-			}
-			if (InCombat)
-			{
-				Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.ApplyPoison.CantApplyRecentCombat"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return false;
-			}
-
-			if (toItem.PoisonSpellID != 0)
-			{
-				bool canApply = false;
-				SpellLine poisonLine = SkillBase.GetSpellLine(GlobalSpellsLines.Mundane_Poisons);
-				if (poisonLine != null)
-				{
-					List<Spell> spells = SkillBase.GetSpellList(poisonLine.KeyName);
-					foreach (Spell spl in spells)
-					{
-						if (spl.ID == toItem.PoisonSpellID)
-						{
-							canApply = true;
-							break;
-						}
-					}
-				}
-				if (canApply == false)
-				{
-					Out.SendMessage(string.Format("You can't poison your {0}!", toItem.GetName(0, false)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-					return false;
-				}
-			}
-
-			// Apply poison effect to weapon
-			if (poisonPotion.PoisonSpellID != 0)
-			{
-				toItem.PoisonCharges = poisonPotion.PoisonCharges;
-				toItem.PoisonMaxCharges = poisonPotion.PoisonMaxCharges;
-				toItem.PoisonSpellID = poisonPotion.PoisonSpellID;
-			}
-			else
-			{
-				toItem.PoisonCharges = poisonPotion.Template.PoisonCharges;
-				toItem.PoisonMaxCharges = poisonPotion.Template.PoisonMaxCharges;
-				toItem.PoisonSpellID = poisonPotion.Template.PoisonSpellID;
-			}
-			Inventory.RemoveCountFromStack(poisonPotion, 1);
-			InventoryLogging.LogInventoryAction(this, "(poison)", eInventoryActionType.Other, poisonPotion.Template);
-			Out.SendMessage(string.Format("You apply {0} to {1}.", poisonPotion.GetName(0, false), toItem.GetName(0, false)), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-			return true;
+            return false;
 		}
 
 		#endregion
@@ -10999,207 +10670,17 @@ namespace DOL.GS
 
 			player.Stealth(false);
 		}
-		/// <summary>
-		/// Set player's stealth state
-		/// </summary>
-		/// <param name="goStealth">true is stealthing, false if unstealthing</param>
-		public virtual void Stealth(bool goStealth)
-		{
-			if (IsStealthed == goStealth)
-				return;
-
-			if (goStealth && CraftTimer != null && CraftTimer.IsAlive)
-			{
-				Out.SendMessage("You can't stealth while crafting!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				return;
-			}
-
-			if (IsOnHorse || IsSummoningMount)
-				IsOnHorse = false;
-
-			UncoverStealthAction action = (UncoverStealthAction)TempProperties.getProperty<object>(UNCOVER_STEALTH_ACTION_PROP, null);
-			if (goStealth)
-			{
-				//start the uncover timer
-				if (action == null)
-					action = new UncoverStealthAction(this);
-				action.Interval = 2000;
-				action.Start(2000);
-				TempProperties.setProperty(UNCOVER_STEALTH_ACTION_PROP, action);
-
-				if (ObjectState == eObjectState.Active)
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Stealth.NowHidden"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				Out.SendPlayerModelTypeChange(this, 3);
-				m_stealthEffect = new StealthEffect();
-				m_stealthEffect.Start(this);
-				Sprint(false);
-				GameEventMgr.AddHandler(this, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(Unstealth));
-				foreach (GamePlayer player in GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-				{
-					if (player == null) continue;
-					if (player == this) continue;
-					if (!player.CanDetect(this))
-						player.Out.SendObjectDelete(this);
-				}
-			}
-			else
-			{
-				//stop the uncover timer
-				if (action != null)
-				{
-					action.Stop();
-					TempProperties.removeProperty(UNCOVER_STEALTH_ACTION_PROP);
-				}
-
-				if (ObjectState == eObjectState.Active)
-					Out.SendMessage(LanguageMgr.GetTranslation(Client.Account.Language, "GamePlayer.Stealth.NoLongerHidden"), eChatType.CT_System, eChatLoc.CL_SystemWindow);
-
-				Out.SendPlayerModelTypeChange(this, 2);
-				if (m_stealthEffect != null) m_stealthEffect.Stop();
-				m_stealthEffect = null;
-				GameEventMgr.RemoveHandler(this, GameLivingEvent.AttackedByEnemy, new DOLEventHandler(Unstealth));
-				foreach (GamePlayer player in GetPlayersInRadius(WorldMgr.VISIBILITY_DISTANCE))
-				{
-					if (player == null) continue;
-					//TODO: more correct way to do it
-					if (player == this) continue;
-					//if a player could see us stealthed, we just update our model to avoid untargetting.
-					if (player.CanDetect(this))
-						player.Out.SendPlayerModelTypeChange(this, 2);
-					else
-						player.Out.SendPlayerCreate(this);
-					player.Out.SendLivingEquipmentUpdate(this);
-				}
-			}
-			Notify(GamePlayerEvent.StealthStateChanged, this, null);
-			Out.SendUpdateMaxSpeed();
-		}
-
-		/// <summary>
-		/// The temp property that stores the uncover stealth action
-		/// </summary>
-		protected const string UNCOVER_STEALTH_ACTION_PROP = "UncoverStealthAction";
-
-		/// <summary>
-		/// Uncovers the player if a mob is too close
-		/// </summary>
-		protected class UncoverStealthAction : RegionAction
-		{
-			/// <summary>
-			/// Constructs a new uncover stealth action
-			/// </summary>
-			/// <param name="actionSource">The action source</param>
-			public UncoverStealthAction(GamePlayer actionSource)
-				: base(actionSource)
-			{
-			}
-
-			/// <summary>
-			/// Called on every timer tick
-			/// </summary>
-			protected override void OnTick()
-			{
-				GamePlayer player = (GamePlayer)m_actionSource;
-				if (player.Client.Account.PrivLevel > 1) return;
-
-				bool checklos = false;
-				foreach (AbstractArea area in player.CurrentAreas)
-				{
-					if (area.CheckLOS)
-					{
-						checklos = true;
-						break;
-					}
-				}
-
-				foreach (GameNPC npc in player.GetNPCsInRadius(1024))
-				{
-					// Friendly mobs do not uncover stealthed players
-					if (!GameServer.ServerRules.IsAllowedToAttack(npc, player, true)) continue;
-
-					// Npc with player owner don't uncover
-					if (npc.Brain != null
-					    && (npc.Brain as IControlledBrain) != null
-					    && (npc.Brain as IControlledBrain).GetPlayerOwner() != null) continue;
-
-					double npcLevel = Math.Max(npc.Level, 1.0);
-					double stealthLevel = player.GetModifiedSpecLevel(Specs.Stealth);
-					double detectRadius = 125.0 + ((npcLevel - stealthLevel) * 20.0);
-
-					if (detectRadius < 126) detectRadius = 126;
-
-					double distanceToPlayer = npc.GetDistanceTo( player );
-
-					if ( distanceToPlayer > detectRadius )
-						continue;
-
-					double fieldOfView = 90.0;  //90 degrees  = standard FOV
-					double fieldOfListen = 120.0; //120 degrees = standard field of listening
-					if (npc.Level > 50)
-					{
-						fieldOfListen += (npc.Level - player.Level) * 3;
-					}
-
-					double angle = npc.GetAngle( player );
-
-					//player in front
-					fieldOfView /= 2.0;
-					bool canSeePlayer = (angle >= 360 - fieldOfView || angle < fieldOfView);
-
-					//If npc can not see nor hear the player, continue the loop
-					fieldOfListen /= 2.0;
-					if (canSeePlayer == false &&
-					    !(angle >= (45 + 60) - fieldOfListen && angle < (45 + 60) + fieldOfListen) &&
-					    !(angle >= (360 - 45 - 60) - fieldOfListen && angle < (360 - 45 - 60) + fieldOfListen))
-						continue;
-
-					double chanceMod = 1.0;
-
-					//Chance to detect player decreases after 125 coordinates!
-					if (distanceToPlayer > 125)
-						chanceMod = 1f - (distanceToPlayer - 125.0) / (detectRadius - 125.0);
-
-					double chanceToUncover = 0.1 + (npc.Level - stealthLevel) * 0.01 * chanceMod;
-					if (chanceToUncover < 0.01) chanceToUncover = 0.01;
-
-					if (Util.ChanceDouble(chanceToUncover))
-					{
-						if (canSeePlayer)
-						{
-							if (checklos)
-							{
-								player.Out.SendCheckLOS(player, npc, new CheckLOSResponse(player.UncoverLOSHandler));
-							}
-							else
-							{
-								player.Out.SendMessage(npc.GetName(0, true) + " uncovers you!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-								player.Stealth(false);
-								break;
-							}
-						}
-						else
-						{
-							npc.TurnTo(player, 10000);
-						}
-					}
-				}
-			}
-		}
-		/// <summary>
-		/// This handler is called by the unstealth check of mobs
-		/// </summary>
-		public void UncoverLOSHandler(GamePlayer player, ushort response, ushort targetOID)
-		{
-			GameObject target = CurrentRegion.GetObject(targetOID);
-
-			if ((target == null) || (player.IsStealthed == false)) return;
-
-			if ((response & 0x100) == 0x100)
-			{
-				player.Out.SendMessage(target.GetName(0, true) + " uncovers you!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
-				player.Stealth(false);
-			}
-		}
+        /// <summary>
+        /// Set player's stealth state
+        /// </summary>
+        /// <param name="goStealth">true is stealthing, false if unstealthing</param>
+        public virtual void Stealth(bool goStealth)
+        {
+            if (IsStealthed == goStealth)
+                return;
+            Out.SendMessage("Stealth not implemented!", eChatType.CT_System, eChatLoc.CL_SystemWindow);
+            return;
+        }
 
 		/// <summary>
 		/// Checks whether this player can detect stealthed enemy
@@ -11217,7 +10698,7 @@ namespace DOL.GS
 			if (enemy.Client.Account.PrivLevel > 1)
 				return false;
 
-			/*
+            /*
 			 * http://www.critshot.com/forums/showthread.php?threadid=3142
 			 * The person doing the looking has a chance to find them based on their level, minus the stealthed person's stealth spec.
 			 *
@@ -11226,14 +10707,13 @@ namespace DOL.GS
 			 * -See Hidden range = 2700 - (38 * your stealth spec)
 			 */
 
-			int EnemyStealthLevel = enemy.GetModifiedSpecLevel(Specs.Stealth);
+            int EnemyStealthLevel = 50;
 			if (EnemyStealthLevel > 50)
 				EnemyStealthLevel = 50;
 			int levelDiff = this.Level - EnemyStealthLevel;
 			if (levelDiff < 0) levelDiff = 0;
 
 			int range = levelDiff * 20 + 125; // Normal detection range			
-			range += BaseBuffBonusCategory[(int)eProperty.Skill_Stealth];
 
 			//Hard cap is 1900
 			if (range > 1900)

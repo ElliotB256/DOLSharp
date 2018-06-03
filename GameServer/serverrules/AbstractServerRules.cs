@@ -909,15 +909,7 @@ namespace DOL.GS.ServerRules
 		/// <returns>specialization in object or 0</returns>
 		public virtual int GetObjectSpecLevel(GamePlayer player, eObjectType objectType)
 		{
-			int res = 0;
-
-			foreach (eObjectType obj in GetCompatibleObjectTypes(objectType))
-			{
-				int spec = player.GetModifiedSpecLevel(SkillBase.ObjectTypeToSpec(obj));
-				if (res < spec)
-					res = spec;
-			}
-			return res;
+            return 1;
 		}
 
 		/// <summary>
@@ -929,13 +921,6 @@ namespace DOL.GS.ServerRules
 		public virtual int GetBaseObjectSpecLevel(GamePlayer player, eObjectType objectType)
 		{
 			int res = 0;
-
-			foreach (eObjectType obj in GetCompatibleObjectTypes(objectType))
-			{
-				int spec = player.GetBaseSpecLevel(SkillBase.ObjectTypeToSpec(obj));
-				if (res < spec)
-					res = spec;
-			}
 			return res;
 		}
 

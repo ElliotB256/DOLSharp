@@ -541,44 +541,5 @@ namespace DOL.GS.Keeps
 		}
 		#endregion
 
-		/// <summary>
-		/// Adding special handling for walking to a point for patrol guards to be in a formation
-		/// </summary>
-		/// <param name="tx"></param>
-		/// <param name="ty"></param>
-		/// <param name="tz"></param>
-		/// <param name="speed"></param>
-		public override void WalkTo(int tx, int ty, int tz, short speed)
-		{
-			int offX = 0; int offY = 0;
-			if (IsMovingOnPath && PatrolGroup != null)
-				PatrolGroup.GetMovementOffset(this, out offX, out offY);
-			base.WalkTo(tx - offX, ty - offY, tz, speed);
-		}
-
-		/// <summary>
-		/// Walk to the spawn point, always max speed for keep guards, or continue patrol.
-		/// </summary>
-		public override void WalkToSpawn()
-		{
-			if (PatrolGroup != null)
-			{
-				StopAttack();
-				StopFollowing();
-
-				StandardMobBrain brain = Brain as StandardMobBrain;
-				if (brain != null && brain.HasAggro)
-				{
-					brain.ClearAggroList();
-				}
-
-				PatrolGroup.StartPatrol();
-			}
-			else
-			{
-				WalkToSpawn(MaxSpeed);
-			}
-		}
-
 	}
 }

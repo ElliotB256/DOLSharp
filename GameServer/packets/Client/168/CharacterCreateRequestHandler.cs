@@ -492,7 +492,7 @@ namespace DOL.GS.PacketHandler.Client.v168
 								if (client.Player != null)
 								{
 									foreach(var stat in stats.Keys)
-										client.Player.ChangeBaseStat(stat, (short)(stats[stat] - client.Player.GetBaseStat(stat)));
+										client.Player.Attributes.SetPropertyBase((eProperty)stat, stats[stat]);
 									
 									if (log.IsInfoEnabled)
 										log.InfoFormat("Character {0} Player Stats updated in cache!", character.Name);
